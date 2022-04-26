@@ -26,6 +26,8 @@
         <assertj.version>3.22.0</assertj.version>
         <junit.version>5.8.2</junit.version>
         <mockito.version>4.0.0</mockito.version>
+        <antlr.version>4.10.1</antlr.version>
+        <mojo.version>3.3.0</mojo.version>
     </properties>
 
 </project>
