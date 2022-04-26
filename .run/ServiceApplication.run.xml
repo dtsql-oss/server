@@ -2,7 +2,7 @@
   <configuration default="false" name="ServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" />
     <module name="service" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.tsdl.service.ServiceApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.tsdl.service.ServiceApplication" />
     <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndTriggerFile" />
     <method v="2">
       <option name="Make" enabled="true" />

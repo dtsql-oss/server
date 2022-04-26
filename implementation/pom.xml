@@ -6,7 +6,7 @@
 
     <parent>
         <artifactId>root</artifactId>
-        <groupId>com.tsdl</groupId>
+        <groupId>org.tsdl</groupId>
         <version>${revision}</version>
     </parent>
 
@@ -21,7 +21,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.tsdl</groupId>
+            <groupId>org.tsdl</groupId>
             <artifactId>infrastructure</artifactId>
             <version>${revision}</version>
         </dependency>

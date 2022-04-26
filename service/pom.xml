@@ -5,7 +5,7 @@
 
     <parent>
         <artifactId>root</artifactId>
-        <groupId>com.tsdl</groupId>
+        <groupId>org.tsdl</groupId>
         <version>${revision}</version>
     </parent>
 
@@ -64,12 +64,12 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.tsdl</groupId>
+            <groupId>org.tsdl</groupId>
             <artifactId>infrastructure</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.tsdl</groupId>
+            <groupId>org.tsdl</groupId>
             <artifactId>implementation</artifactId>
             <version>${revision}</version>
         </dependency>
