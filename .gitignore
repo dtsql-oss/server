@@ -1,3 +1,9 @@
+# These files are created by ApiGenerationTest.downloadApiSpecification() and also available as CI build artifacts
+# on GitLab. The filename (without extension) has to be kept in sync with the value of the LOCAL_FILE_NAME constant in
+# the "service/src/test/java/com/tsdl/service/ApiGenerationTest.java" file.
+service_api.json
+service_api.yaml
+
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

@@ -74,9 +74,10 @@ jobs:
         with:
           name: test-artifacts
           # Filename of service_api.(json|yaml) of API artifacts has to be kept in sync with the value of the LOCAL_FILE_NAME
-          # constant in the XXX/.../ApiGenerationTest.java file. TODO: add ApiGenerationTest
+          # constant in the "service/src/test/java/com/tsdl/service/ApiGenerationTest.java" file.
+          # TODO generate surefire XML reports
           path: |
             '**/logs/**'
-            '**/surefire-reports/**'
-          #  ./service_api.json
-          #  ./service_api.yaml
+            '**/surefire-reports/**' 
+            ./service/service_api.json
+            ./service/service_api.yaml
