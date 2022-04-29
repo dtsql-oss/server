@@ -1,6 +1,5 @@
 package org.tsdl.service.web;
 
-import org.tsdl.infrastructure.DataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/hello")
 @Tag(name = "\"Hello, World\" Endpoint", description = "Sample endpoint")
 public class HelloController {
-    private final DataService dataService;
+    /*private final StorageService storageService;*/
 
     @Autowired
-    public HelloController(DataService dataService) {
-        this.dataService = dataService;
+    public HelloController(/*StorageService storageService*/) {
+        /*this.storageService = storageService;*/
     }
 
     @GetMapping
@@ -36,7 +35,7 @@ public class HelloController {
       @ApiResponse(responseCode = "500", description = "Endpoint invocation caused internal server error.")
     })
     public String fail() {
-        dataService.get();
+        //storageService.get("", 0, "");
         return "unreachable";
     }
 }
