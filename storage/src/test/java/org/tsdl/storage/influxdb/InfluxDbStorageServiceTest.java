@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class InfluxDbStorageServiceTest {
 
-    // todo include mockito with ability to add static mocks, mock InfluxDBClient and return stub data
+    // TODO include mockito with ability to add static mocks, mock InfluxDBClient and return stub data
 
     @Test
     void load() {
