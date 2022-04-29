@@ -1,5 +1,5 @@
 package org.tsdl.storage.influxdb;
 
-enum InfluxDbStorageProperty {
-    TOKEN, ORGANIZATION, BUCKET, ENDPOINT
+public enum InfluxDbStorageProperty {
+    TOKEN, ORGANIZATION, BUCKET, URL, QUERY
 }

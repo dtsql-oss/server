@@ -5,6 +5,13 @@ import org.tsdl.storage.AbstractStorageConfiguration;
 import java.util.Map;
 
 public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<InfluxDbStorageProperty> {
+    private static final Map<InfluxDbStorageProperty, Class<?>> PROPERTY_TYPES = Map.of(
+      InfluxDbStorageProperty.TOKEN, char[].class,
+      InfluxDbStorageProperty.ORGANIZATION, String.class,
+      InfluxDbStorageProperty.BUCKET, String.class,
+      InfluxDbStorageProperty.URL, String.class,
+      InfluxDbStorageProperty.QUERY, String.class
+    );
 
     public InfluxDbStorageConfiguration(Map<InfluxDbStorageProperty, Object> properties) {
         super(properties);
@@ -16,12 +23,7 @@ public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<I
 
     @Override
     public Map<InfluxDbStorageProperty, Class<?>> getPropertyTypes() {
-        return Map.of(
-          InfluxDbStorageProperty.TOKEN, String.class,
-          InfluxDbStorageProperty.ORGANIZATION, String.class,
-          InfluxDbStorageProperty.BUCKET, String.class,
-          InfluxDbStorageProperty.ENDPOINT, String.class
-        );
+        return PROPERTY_TYPES;
     }
 
     @Override
