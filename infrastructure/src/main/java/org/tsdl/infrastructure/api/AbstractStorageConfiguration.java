@@ -16,11 +16,12 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
 
     protected AbstractStorageConfiguration() {
         this(new HashMap<>());
-        ensurePropertyTypesComplete();
     }
 
     protected AbstractStorageConfiguration(Map<T, Object> properties) {
         propertyEnumElements = EnumSet.allOf(getPropertiesEnumClass());
+        ensurePropertyTypesComplete();
+
         this.properties = new HashMap<>();
         properties.forEach(this::setProperty);
     }
@@ -92,7 +93,7 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
 
     private void ensurePropertyTypesComplete() {
         Conditions.checkEquals(Condition.STATE,
-          properties.size(),
+          getSupportedProperties().size(),
           propertyEnumElements.size(),
           "Not all configuration properties are included in the map to return. Update getSupportedProperties() implementation.");
     }

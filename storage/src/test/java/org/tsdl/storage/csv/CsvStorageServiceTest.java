@@ -17,7 +17,7 @@ public class CsvStorageServiceTest {
         ));
         var transformationConfig = new CsvStorageConfiguration(Map.of(
           CsvStorageProperty.VALUE_COLUMN, 1,
-          CsvStorageProperty.SKIP_HEADERS, 1,
+          CsvStorageProperty.SKIP_HEADERS, 4,
           CsvStorageProperty.TIME_COLUMN, 0,
           CsvStorageProperty.TIME_FORMAT, "MM/dd/yyyy HH:mm:ss"
         ));

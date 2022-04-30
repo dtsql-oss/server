@@ -20,6 +20,7 @@
         <spring.version>2.6.7</spring.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <lombok.version>1.18.24</lombok.version>
+        <kotlin.version>1.6.21</kotlin.version>
     </properties>
 
     <dependencyManagement>
@@ -72,6 +73,16 @@
             <groupId>org.tsdl</groupId>
             <artifactId>implementation</artifactId>
             <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <!--
+            TODO Should already be included by dependency chain "implementation -> storage -> influxdb-client-java ->
+               -> influxdb-client-core -> okhttp3 -> kotlin-stdlib", but does not work without explicit entry here.
+            -->
+            <groupId>org.jetbrains.kotlin</groupId>
+            <!--suppress KotlinMavenPluginPhase -->
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
 
         <dependency>

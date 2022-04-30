@@ -9,7 +9,7 @@ public enum TsdlOperator {
         } else if ("lt".equals(op)) {
             return LT;
         } else {
-            throw new IllegalArgumentException("There is no known query operator for the string '%s'".formatted(op));
+            throw new IllegalArgumentException("There is no known query operator for the string '%s'.".formatted(op));
         }
     }
 }
