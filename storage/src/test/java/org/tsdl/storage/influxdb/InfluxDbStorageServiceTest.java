@@ -25,15 +25,15 @@ public class InfluxDbStorageServiceTest {
                         |> yield(name: "measuredValue")
             """
         ));
+        var transformationConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.TABLE_INDEX, 4
+        ));
 
         try (var service = new InfluxDbStorageService()) {
             service.initialize(serviceConfig);
             var tables = service.load(lookupConfig);
-            for (var table : tables) {
-                for (var record : table.getRecords()) {
-                    System.out.println(record.getTime() + ": " + record.getValue());
-                }
-            }
+            var dataPoints = service.transform(tables, transformationConfig);
+            dataPoints.forEach(pt -> System.out.println(pt.toString()));
         }
     }
 }

@@ -67,6 +67,30 @@ public final class Conditions {
         checkContains(conditionType, collection, value, "Value must be item of given collection.");
     }
 
+    public static void checkValidIndex(Condition conditionType, Collection<?> collection, int index, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, index >= 0 && collection.size() > index, messageTemplate, messageArguments);
+    }
+
+    public static void checkValidIndex(Condition conditionType, Collection<?> collection, int index) {
+        checkIsTrue(conditionType, index >= 0 && collection.size() > index, "Index must be within collection range.");
+    }
+
+    public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, i1 > i2, messageTemplate, messageArguments);
+    }
+
+    public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2) {
+        checkIsTrue(conditionType, i1 > i2, "First integer must be greater than second.");
+    }
+
+    public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, i1 >= i2, messageTemplate, messageArguments);
+    }
+
+    public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2) {
+        checkIsTrue(conditionType, i1 >= i2, "First integer must be greater than second.");
+    }
+
     private static RuntimeException exception(Condition condition, String message) {
         return switch (condition) {
             case STATE -> new IllegalStateException(message);

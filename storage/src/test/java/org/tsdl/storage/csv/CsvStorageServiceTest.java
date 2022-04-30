@@ -1,6 +1,5 @@
 package org.tsdl.storage.csv;
 
-import de.siegmar.fastcsv.reader.CsvRow;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,13 +15,18 @@ public class CsvStorageServiceTest {
           CsvStorageProperty.FILE_PATH, "D:\\Universitaet\\Diplomarbeit\\data\\clean\\annotated\\Analysis 1\\ABS_1_KEEA.csv",
           CsvStorageProperty.FIELD_SEPARATOR, ','
         ));
+        var transformationConfig = new CsvStorageConfiguration(Map.of(
+          CsvStorageProperty.VALUE_COLUMN, 1,
+          CsvStorageProperty.SKIP_HEADERS, 1,
+          CsvStorageProperty.TIME_COLUMN, 0,
+          CsvStorageProperty.TIME_FORMAT, "MM/dd/yyyy HH:mm:ss"
+        ));
 
         try (var service = new CsvStorageService()) {
             service.initialize(serviceConfig);
             var csvRows = service.load(lookupConfig);
-            for (CsvRow csvRow : csvRows) {
-                System.out.println(csvRow.toString());
-            }
+            var dataPoints = service.transform(csvRows,transformationConfig);
+            dataPoints.forEach(pt -> System.out.println(pt.toString()));
         }
     }
 }

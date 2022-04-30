@@ -10,7 +10,8 @@ public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<I
       InfluxDbStorageProperty.ORGANIZATION, String.class,
       InfluxDbStorageProperty.BUCKET, String.class,
       InfluxDbStorageProperty.URL, String.class,
-      InfluxDbStorageProperty.QUERY, String.class
+      InfluxDbStorageProperty.QUERY, String.class,
+      InfluxDbStorageProperty.TABLE_INDEX, Integer.class
     );
 
     public InfluxDbStorageConfiguration(Map<InfluxDbStorageProperty, Object> properties) {

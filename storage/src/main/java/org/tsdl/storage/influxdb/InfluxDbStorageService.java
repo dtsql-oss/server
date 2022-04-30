@@ -7,6 +7,11 @@ import com.influxdb.query.FluxTable;
 import org.tsdl.infrastructure.api.StorageService;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.model.DataPoint;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration, InfluxDbStorageProperty> {
     private InfluxDBClient dbClient;
@@ -16,16 +21,16 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
     public void initialize(InfluxDbStorageConfiguration serviceConfiguration) {
         Conditions.checkIsTrue(Condition.ARGUMENT,
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.URL),
-          "URL property is required to initialize InfluxDB storage service.");
+          "'URL' property is required to initialize InfluxDB storage service.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.TOKEN),
-          "Token property is required to initialize InfluxDB storage service.");
+          "'TOKEN' property is required to initialize InfluxDB storage service.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.ORGANIZATION),
-          "Organization property is required to initialize InfluxDB storage service.");
+          "'ORGANIZATION' property is required to initialize InfluxDB storage service.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET),
-          "Bucket property is required to initialize InfluxDB storage service.");
+          "'BUCKET' property is required to initialize InfluxDB storage service.");
 
         dbClient = InfluxDBClientFactory.create(
           serviceConfiguration.getProperty(InfluxDbStorageProperty.URL, String.class),
@@ -51,15 +56,45 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
     }
 
     @Override
-    public Iterable<FluxTable> load(InfluxDbStorageConfiguration lookupConfiguration) {
+    public List<FluxTable> load(InfluxDbStorageConfiguration lookupConfiguration) {
         Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
         Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY),
-          "Query property is required to execute a query with the InfluxDB storage service.");
+          "'QUERY' property is required to execute a query with the InfluxDB storage service.");
 
         return queryApi.query(lookupConfiguration.getProperty(InfluxDbStorageProperty.QUERY, String.class));
+    }
 
+    @Override
+    public List<DataPoint> transform(List<FluxTable> loadedData, InfluxDbStorageConfiguration transformationConfiguration) {
+        Conditions.checkNotNull(Condition.ARGUMENT, transformationConfiguration, "The transformation configuration must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, loadedData, "Data to transform must not be null.");
+        Conditions.checkIsTrue(Condition.ARGUMENT,
+          transformationConfiguration.isPropertySet(InfluxDbStorageProperty.TABLE_INDEX),
+          "'TABLE_INDEX' property is required to transform data loaded by the InfluxDB storage service into data points.");
+
+        var tableIndex = transformationConfiguration.getProperty(InfluxDbStorageProperty.TABLE_INDEX, Integer.class);
+        if (tableIndex == -1) {
+            return loadedData.stream()
+              .flatMap(this::transformInfluxDbRecords)
+              .toList();
+        } else {
+            Conditions.checkValidIndex(Condition.ARGUMENT,
+              loadedData,
+              tableIndex,
+              "Index of table to transform into data points must be within range (0..%s).",
+              loadedData.size() - 1);
+            return transformInfluxDbRecords(loadedData.get(tableIndex))
+              .toList();
+        }
+    }
+
+    private Stream<DataPoint> transformInfluxDbRecords(FluxTable recordStream) {
+        return recordStream.getRecords().stream()
+          .map(record -> new DataPoint(record.getTime(),
+            Double.valueOf(Objects.requireNonNull(record.getValue()).toString()))
+          );
     }
 
     @Override
