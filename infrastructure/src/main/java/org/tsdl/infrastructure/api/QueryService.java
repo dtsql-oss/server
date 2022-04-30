@@ -1,4 +1,4 @@
 package org.tsdl.infrastructure.api;
 
-public interface TsdlQueryService {
+public interface QueryService {
 }

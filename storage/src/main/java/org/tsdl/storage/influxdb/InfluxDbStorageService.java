@@ -92,8 +92,10 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
 
     private Stream<DataPoint> transformInfluxDbRecords(FluxTable recordStream) {
         return recordStream.getRecords().stream()
-          .map(record -> new DataPoint(record.getTime(),
-            Double.valueOf(Objects.requireNonNull(record.getValue()).toString()))
+          .map(record -> DataPoint.of(
+              record.getTime(),
+              Double.valueOf(Objects.requireNonNull(record.getValue()).toString())
+            )
           );
     }
 

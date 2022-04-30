@@ -1,25 +1,21 @@
 package org.tsdl.infrastructure.model;
 
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
 
 import java.time.Instant;
 
-public record DataPoint(Instant timestamp, Object value) {
-    public DataPoint {
-        Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");
-        Conditions.checkNotNull(Condition.ARGUMENT, value, "Value must not be null.");
-    }
+public interface DataPoint {
+    Instant getTimestamp();
 
-    public Long asInteger() {
-        return Long.valueOf(value.toString());
-    }
+    Object getValue();
 
-    public Double asDecimal() {
-        return Double.valueOf(value.toString());
-    }
+    Long asInteger();
 
-    public String asText() {
-        return value.toString();
+    Double asDecimal();
+
+    String asText();
+
+    static DataPoint of(Instant timestamp, Object value) {
+        return new TsdlDataPoint(timestamp, value);
     }
 }

@@ -88,7 +88,7 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
               var dateTime = row.getField(timeIndex);
               var value = row.getField(valueIndex);
 
-              return new DataPoint(Instant.from(formatter.parse(dateTime)), value);
+              return DataPoint.of(Instant.from(formatter.parse(dateTime)), value);
           })
           .toList();
     }
