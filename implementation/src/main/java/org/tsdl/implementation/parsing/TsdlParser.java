@@ -8,10 +8,10 @@ import org.tsdl.grammar.TsdlLexer;
 import org.tsdl.implementation.model.TsdlQuery;
 
 public class TsdlParser {
-    public static final TsdlParser INSTANCE = new TsdlParser();
-
     private TsdlParser() {
     }
+
+    public static final TsdlParser INSTANCE = new TsdlParser();
 
     public TsdlQuery parseQuery(String query) {
         var lexer = new TsdlLexer(CharStreams.fromString(query));

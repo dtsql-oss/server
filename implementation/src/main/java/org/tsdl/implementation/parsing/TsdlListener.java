@@ -15,7 +15,7 @@ import java.text.ParsePosition;
 public class TsdlListener extends TsdlBaseListener {
     private TsdlQuery query;
     private TsdlOperator operator;
-    private Number threshold;
+    private Double threshold;
 
     @Override
     public void exitTsdl(TsdlParser.TsdlContext ctx) {
@@ -46,7 +46,7 @@ public class TsdlListener extends TsdlBaseListener {
         }
     }
 
-    private Number parseNumber(String number) throws ParseException {
+    private Double parseNumber(String number) throws ParseException {
         var decimalFormat = new DecimalFormat();
 
         var symbols = new DecimalFormatSymbols();
@@ -59,7 +59,7 @@ public class TsdlListener extends TsdlBaseListener {
         if (parsePosition.getIndex() != number.length()) {
             throw new ParseException("Failed to parse entire string: '%s'", parsePosition.getIndex());
         }
-        return parsedNumber;
+        return parsedNumber.doubleValue();
     }
 
     public TsdlQuery getQuery() {

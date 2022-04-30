@@ -15,11 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration, CsvStorageProperty> {
-
-
     @Override
     public void initialize(CsvStorageConfiguration serviceConfiguration) {
-
     }
 
     @Override
@@ -29,6 +26,10 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
 
     @Override
     public void store(CsvStorageConfiguration storageConfiguration) {
+        Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
+        Conditions.checkNotNull(Condition.ARGUMENT, storageConfiguration, "The storage configuration must not be null.");
+
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -89,8 +90,7 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
               var value = row.getField(valueIndex);
 
               return DataPoint.of(Instant.from(formatter.parse(dateTime)), value);
-          })
-          .toList();
+          }).toList();
     }
 
     @Override

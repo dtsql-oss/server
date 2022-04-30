@@ -11,4 +11,9 @@ public record TsdlQueryResult(List<DataPoint> items) implements QueryResult {
     public TsdlQueryResult {
         Conditions.checkNotNull(Condition.ARGUMENT, items, "Items must not be null.");
     }
+
+    @Override
+    public List<DataPoint> getItems() {
+        return items();
+    }
 }
