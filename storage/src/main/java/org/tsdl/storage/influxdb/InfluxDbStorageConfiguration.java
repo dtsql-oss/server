@@ -1,7 +1,8 @@
 package org.tsdl.storage.influxdb;
 
-import org.tsdl.storage.AbstractStorageConfiguration;
+import org.tsdl.infrastructure.api.AbstractStorageConfiguration;
 
+import java.time.Instant;
 import java.util.Map;
 
 public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<InfluxDbStorageProperty> {
@@ -11,6 +12,8 @@ public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<I
       InfluxDbStorageProperty.BUCKET, String.class,
       InfluxDbStorageProperty.URL, String.class,
       InfluxDbStorageProperty.QUERY, String.class,
+      InfluxDbStorageProperty.LOAD_FROM, Instant.class,
+      InfluxDbStorageProperty.LOAD_UNTIL, Instant.class,
       InfluxDbStorageProperty.TABLE_INDEX, Integer.class
     );
 
@@ -23,12 +26,12 @@ public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<I
     }
 
     @Override
-    public Map<InfluxDbStorageProperty, Class<?>> getPropertyTypes() {
+    public Map<InfluxDbStorageProperty, Class<?>> getSupportedProperties() {
         return PROPERTY_TYPES;
     }
 
     @Override
-    public Class<InfluxDbStorageProperty> getPropertiesEnumClass() {
+    protected Class<InfluxDbStorageProperty> getPropertiesEnumClass() {
         return InfluxDbStorageProperty.class;
     }
 }

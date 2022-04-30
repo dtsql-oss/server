@@ -11,7 +11,7 @@ public interface StorageService<T, U extends StorageServiceConfiguration<V>, V e
 
     boolean isInitialized();
 
-    void store(U storageConfiguration) throws IOException;
+    void store(U persistConfiguration) throws IOException;
 
     List<T> load(U lookupConfiguration) throws IOException;
 

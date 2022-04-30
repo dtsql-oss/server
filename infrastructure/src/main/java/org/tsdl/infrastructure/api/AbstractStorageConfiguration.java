@@ -1,6 +1,5 @@
-package org.tsdl.storage;
+package org.tsdl.infrastructure.api;
 
-import org.tsdl.infrastructure.api.StorageServiceConfiguration;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
@@ -17,6 +16,7 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
 
     protected AbstractStorageConfiguration() {
         this(new HashMap<>());
+        ensurePropertyTypesComplete();
     }
 
     protected AbstractStorageConfiguration(Map<T, Object> properties) {
@@ -24,8 +24,6 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
         this.properties = new HashMap<>();
         properties.forEach(this::setProperty);
     }
-
-    protected abstract Map<T, Class<?>> getPropertyTypes();
 
     protected abstract Class<T> getPropertiesEnumClass();
 
@@ -84,18 +82,6 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
     }
 
     @Override
-    public Map<T, Class<?>> getSupportedProperties() {
-        var properties = getPropertyTypes();
-
-        Conditions.checkEquals(Condition.STATE,
-          properties.size(),
-          propertyEnumElements.size(),
-          "Not all configuration properties are included in the map to return. Update getSupportedProperties() implementation.");
-
-        return properties;
-    }
-
-    @Override
     public Map<T, Object> getSetProperties() {
         return getSupportedProperties().keySet().stream()
           .filter(this::isPropertySet)
@@ -104,9 +90,16 @@ public abstract class AbstractStorageConfiguration<T extends Enum<T>> implements
           );
     }
 
+    private void ensurePropertyTypesComplete() {
+        Conditions.checkEquals(Condition.STATE,
+          properties.size(),
+          propertyEnumElements.size(),
+          "Not all configuration properties are included in the map to return. Update getSupportedProperties() implementation.");
+    }
+
     private Class<?> getPropertyType(T property) {
         Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
 
-        return getPropertyTypes().get(property);
+        return getSupportedProperties().get(property);
     }
 }

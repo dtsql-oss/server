@@ -25,9 +25,9 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
     }
 
     @Override
-    public void store(CsvStorageConfiguration storageConfiguration) {
+    public void store(CsvStorageConfiguration persistConfiguration) {
         Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
-        Conditions.checkNotNull(Condition.ARGUMENT, storageConfiguration, "The storage configuration must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, persistConfiguration, "The persist configuration must not be null.");
 
         throw new UnsupportedOperationException("Not implemented yet");
     }

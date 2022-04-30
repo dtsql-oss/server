@@ -12,7 +12,7 @@ public enum InfluxDbStorageProperty {
     ORGANIZATION,
 
     /**
-     * initialize
+     * store, load
      */
     BUCKET,
 
@@ -25,6 +25,16 @@ public enum InfluxDbStorageProperty {
      * load
      */
     QUERY,
+
+    /**
+     * load
+     */
+    LOAD_FROM,
+
+    /*
+     * load
+     */
+    LOAD_UNTIL,
 
     /**
      * transform

@@ -1,6 +1,7 @@
 package org.tsdl.storage;
 
 import org.junit.jupiter.api.Test;
+import org.tsdl.infrastructure.api.AbstractStorageConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -163,7 +164,7 @@ class SimpleStorageConfiguration extends AbstractStorageConfiguration<SimpleStor
     }
 
     @Override
-    protected Map<SimpleStorageConfigurationProperty, Class<?>> getPropertyTypes() {
+    public Map<SimpleStorageConfigurationProperty, Class<?>> getSupportedProperties() {
         return PROPERTY_TYPES;
     }
 

@@ -1,6 +1,6 @@
 package org.tsdl.storage.csv;
 
-import org.tsdl.storage.AbstractStorageConfiguration;
+import org.tsdl.infrastructure.api.AbstractStorageConfiguration;
 
 import java.util.Map;
 
@@ -23,12 +23,12 @@ public class CsvStorageConfiguration extends AbstractStorageConfiguration<CsvSto
     }
 
     @Override
-    public Map<CsvStorageProperty, Class<?>> getPropertyTypes() {
+    public Map<CsvStorageProperty, Class<?>> getSupportedProperties() {
         return PROPERTY_TYPES;
     }
 
     @Override
-    public Class<CsvStorageProperty> getPropertiesEnumClass() {
+    protected Class<CsvStorageProperty> getPropertiesEnumClass() {
         return CsvStorageProperty.class;
     }
 }

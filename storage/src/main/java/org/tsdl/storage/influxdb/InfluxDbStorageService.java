@@ -9,12 +9,24 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration, InfluxDbStorageProperty> {
+
+    // influx uses rfc3339 timestamps (https://docs.influxdata.com/flux/v0.x/data-types/basic/time/#time-syntax)
+    private static final DateTimeFormatter INFLUX_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT; // DateTimeFormatter.ofPattern("yyyy-MM-dd'T'h:m:ssZ").withZone(ZoneId.systemDefault());
+
+    private static final String LOAD_RANGE_QUERY_TEMPLATE = """
+      from(bucket: "%s")
+        |> range(start: time(v: "%s"), stop: time(v: "%s"))
+      """;
+
     private InfluxDBClient dbClient;
+
     private QueryApi queryApi;
 
     @Override
@@ -28,9 +40,6 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
         Conditions.checkIsTrue(Condition.ARGUMENT,
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.ORGANIZATION),
           "'ORGANIZATION' property is required to initialize InfluxDB storage service.");
-        Conditions.checkIsTrue(Condition.ARGUMENT,
-          serviceConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET),
-          "'BUCKET' property is required to initialize InfluxDB storage service.");
 
         dbClient = InfluxDBClientFactory.create(
           serviceConfiguration.getProperty(InfluxDbStorageProperty.URL, String.class),
@@ -48,9 +57,12 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
     }
 
     @Override
-    public void store(InfluxDbStorageConfiguration storageConfiguration) {
+    public void store(InfluxDbStorageConfiguration persistConfiguration) {
         Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
-        Conditions.checkNotNull(Condition.ARGUMENT, storageConfiguration, "The storage configuration must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, persistConfiguration, "The persist configuration must not be null.");
+        Conditions.checkIsTrue(Condition.ARGUMENT,
+          persistConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET),
+          "'BUCKET' property is required to store data with the InfluxDB storage service.");
 
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -60,10 +72,23 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
         Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
         Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
-          lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY),
-          "'QUERY' property is required to execute a query with the InfluxDB storage service.");
+          lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY) ^
+            (lookupConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET) &&
+              lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_FROM) &&
+              lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_UNTIL)),
+          "Either 'QUERY' property or (exclusively) 'BUCKET', 'LOAD_FROM' and 'LOAD_UNTIL' properties are required to load data with the InfluxDB storage service.");
 
-        return queryApi.query(lookupConfiguration.getProperty(InfluxDbStorageProperty.QUERY, String.class));
+        String query;
+        if (lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY)) {
+            query = lookupConfiguration.getProperty(InfluxDbStorageProperty.QUERY, String.class);
+        } else {
+            var bucket = lookupConfiguration.getProperty(InfluxDbStorageProperty.BUCKET, String.class);
+            var from = INFLUX_TIME_FORMATTER.format(lookupConfiguration.getProperty(InfluxDbStorageProperty.LOAD_FROM, Instant.class));
+            var to = INFLUX_TIME_FORMATTER.format(lookupConfiguration.getProperty(InfluxDbStorageProperty.LOAD_UNTIL, Instant.class));
+            query = LOAD_RANGE_QUERY_TEMPLATE.formatted(bucket, from, to);
+        }
+
+        return queryApi.query(query);
     }
 
     @Override
