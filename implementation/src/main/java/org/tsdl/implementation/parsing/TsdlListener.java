@@ -11,7 +11,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.ParsePosition;
 
-// TODO use visitor instead of listener?
+// TODO: use visitor instead of listener?
 public class TsdlListener extends TsdlBaseListener {
     private TsdlQuery query;
     private TsdlOperator operator;

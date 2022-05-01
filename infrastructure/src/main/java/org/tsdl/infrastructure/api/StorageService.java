@@ -5,7 +5,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 import java.io.IOException;
 import java.util.List;
 
-public interface StorageService<T, U extends StorageServiceConfiguration<V>, V extends Enum<V>> extends AutoCloseable {
+public interface StorageService<T, U extends StorageServiceConfiguration> extends AutoCloseable {
     // can be  general setup specific to the storage (e.g. connect to database, check I/O availability, ...)
     void initialize(U serviceConfiguration);
 

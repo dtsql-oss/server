@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration, CsvStorageProperty> {
+public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
     @Override
     public void initialize(CsvStorageConfiguration serviceConfiguration) {
     }

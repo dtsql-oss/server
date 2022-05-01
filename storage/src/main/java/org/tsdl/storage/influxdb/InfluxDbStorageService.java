@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration, InfluxDbStorageProperty> {
+public class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration> {
 
     // influx uses rfc3339 timestamps (https://docs.influxdata.com/flux/v0.x/data-types/basic/time/#time-syntax)
     private static final DateTimeFormatter INFLUX_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT; // DateTimeFormatter.ofPattern("yyyy-MM-dd'T'h:m:ssZ").withZone(ZoneId.systemDefault());

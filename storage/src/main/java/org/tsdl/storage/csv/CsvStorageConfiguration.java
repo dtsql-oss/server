@@ -1,20 +1,13 @@
 package org.tsdl.storage.csv;
 
-import org.tsdl.infrastructure.api.AbstractStorageConfiguration;
+import org.tsdl.infrastructure.api.EnumStorageConfiguration;
+import org.tsdl.infrastructure.api.StorageProperty;
 
+import java.util.List;
 import java.util.Map;
 
-public class CsvStorageConfiguration extends AbstractStorageConfiguration<CsvStorageProperty> {
-    private static final Map<CsvStorageProperty, Class<?>> PROPERTY_TYPES = Map.of(
-      CsvStorageProperty.FILE_PATH, String.class,
-      CsvStorageProperty.FIELD_SEPARATOR, Character.class,
-      CsvStorageProperty.VALUE_COLUMN, Integer.class,
-      CsvStorageProperty.TIME_COLUMN, Integer.class,
-      CsvStorageProperty.TIME_FORMAT, String.class,
-      CsvStorageProperty.SKIP_HEADERS, Integer.class
-    );
-
-    public CsvStorageConfiguration(Map<CsvStorageProperty, Object> properties) {
+public class CsvStorageConfiguration extends EnumStorageConfiguration {
+    public CsvStorageConfiguration(Map<StorageProperty, Object> properties) {
         super(properties);
     }
 
@@ -23,12 +16,7 @@ public class CsvStorageConfiguration extends AbstractStorageConfiguration<CsvSto
     }
 
     @Override
-    public Map<CsvStorageProperty, Class<?>> getSupportedProperties() {
-        return PROPERTY_TYPES;
-    }
-
-    @Override
-    protected Class<CsvStorageProperty> getPropertiesEnumClass() {
-        return CsvStorageProperty.class;
+    public List<StorageProperty> getSupportedProperties() {
+        return List.of(CsvStorageProperty.values());
     }
 }

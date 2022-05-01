@@ -1,58 +1,55 @@
 package org.tsdl.storage.csv;
 
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.api.StorageProperty;
 
-import java.util.EnumSet;
-import java.util.NoSuchElementException;
-
-public enum CsvStorageProperty {
+public enum CsvStorageProperty implements StorageProperty {
     /**
      * load
      */
-    FILE_PATH("filePath"),
+    FILE_PATH("filePath", String.class),
 
     /**
      * load
      */
-    FIELD_SEPARATOR("fieldSeparator"),
+    FIELD_SEPARATOR("fieldSeparator", Character.class),
 
     /**
      * transform
      */
-    TIME_COLUMN("timeColumn"),
+    TIME_COLUMN("timeColumn", Integer.class),
 
     /**
      * transform
      */
-    TIME_FORMAT("timeFormat"),
+    TIME_FORMAT("timeFormat", String.class),
 
     /**
      * transform
      */
-    VALUE_COLUMN("valueColumn"),
+    VALUE_COLUMN("valueColumn", Integer.class),
 
     /**
      * transform
      * number of rows to skip at beginning
      */
-    SKIP_HEADERS("skipHeaders");
+    SKIP_HEADERS("skipHeaders", Integer.class);
 
     private final String identifier;
 
-    CsvStorageProperty(String identifier) {
+    private final Class<?> type;
+
+    CsvStorageProperty(String identifier, Class<?> type) {
         this.identifier = identifier;
+        this.type = type;
     }
 
+    @Override
     public String identifier() {
         return identifier;
     }
 
-    public static CsvStorageProperty fromIdentifier(String identifier) {
-        Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier must not be null.");
-        return EnumSet.allOf(CsvStorageProperty.class).stream()
-          .filter(element -> identifier.equals(element.identifier))
-          .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("There is no CsvStorageProperty member with identifier '%s'.".formatted(identifier)));
+    @Override
+    public Class<?> type() {
+        return type;
     }
 }

@@ -1,23 +1,13 @@
 package org.tsdl.storage.influxdb;
 
-import org.tsdl.infrastructure.api.AbstractStorageConfiguration;
+import org.tsdl.infrastructure.api.EnumStorageConfiguration;
+import org.tsdl.infrastructure.api.StorageProperty;
 
-import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
-public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<InfluxDbStorageProperty> {
-    private static final Map<InfluxDbStorageProperty, Class<?>> PROPERTY_TYPES = Map.of(
-      InfluxDbStorageProperty.TOKEN, char[].class,
-      InfluxDbStorageProperty.ORGANIZATION, String.class,
-      InfluxDbStorageProperty.BUCKET, String.class,
-      InfluxDbStorageProperty.URL, String.class,
-      InfluxDbStorageProperty.QUERY, String.class,
-      InfluxDbStorageProperty.LOAD_FROM, Instant.class,
-      InfluxDbStorageProperty.LOAD_UNTIL, Instant.class,
-      InfluxDbStorageProperty.TABLE_INDEX, Integer.class
-    );
-
-    public InfluxDbStorageConfiguration(Map<InfluxDbStorageProperty, Object> properties) {
+public class InfluxDbStorageConfiguration extends EnumStorageConfiguration {
+    public InfluxDbStorageConfiguration(Map<StorageProperty, Object> properties) {
         super(properties);
     }
 
@@ -26,12 +16,7 @@ public class InfluxDbStorageConfiguration extends AbstractStorageConfiguration<I
     }
 
     @Override
-    public Map<InfluxDbStorageProperty, Class<?>> getSupportedProperties() {
-        return PROPERTY_TYPES;
-    }
-
-    @Override
-    protected Class<InfluxDbStorageProperty> getPropertiesEnumClass() {
-        return InfluxDbStorageProperty.class;
+    public List<StorageProperty> getSupportedProperties() {
+        return List.of(InfluxDbStorageProperty.values());
     }
 }

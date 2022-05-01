@@ -1,20 +1,21 @@
 package org.tsdl.infrastructure.api;
 
+import java.util.List;
 import java.util.Map;
 
-public interface StorageServiceConfiguration<T extends Enum<T>> {
+public interface StorageServiceConfiguration {
 
-    boolean isPropertySet(T property);
+    boolean isPropertySet(StorageProperty property);
 
-    Object getProperty(T property);
+    Object getProperty(StorageProperty property);
 
-    <V> V getProperty(T property, Class<V> targetType);
+    <V> V getProperty(StorageProperty property, Class<V> targetType);
 
-    Object setProperty(T property, Object value);
+    Object setProperty(StorageProperty property, Object value);
 
-    Object unsetProperty(T property);
+    Object unsetProperty(StorageProperty property);
 
-    Map<T, Class<?>> getSupportedProperties();
+    List<StorageProperty> getSupportedProperties();
 
-    Map<T, Object> getSetProperties();
+    Map<StorageProperty, Object> getSetProperties();
 }

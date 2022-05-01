@@ -1,69 +1,68 @@
 package org.tsdl.storage.influxdb;
 
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.api.StorageProperty;
 
-import java.util.EnumSet;
-import java.util.NoSuchElementException;
+import java.time.Instant;
 
-public enum InfluxDbStorageProperty {
+public enum InfluxDbStorageProperty implements StorageProperty {
     /**
      * initialize
      */
-    TOKEN("token"),
+    TOKEN("token", char[].class),
 
     /**
      * initialize
      */
-    ORGANIZATION("organization"),
+    ORGANIZATION("organization", String.class),
 
     /**
      * store, load
      */
-    BUCKET("bucket"),
+    BUCKET("bucket", String.class),
 
     /**
      * initialize
      */
-    URL("url"),
+    URL("url", String.class),
 
     /**
      * load
      */
-    QUERY("query"),
+    QUERY("query", String.class),
 
     /**
      * load
      */
-    LOAD_FROM("loadFrom"),
+    LOAD_FROM("loadFrom", Instant.class),
 
     /*
      * load
      */
-    LOAD_UNTIL("loadUntil"),
+    LOAD_UNTIL("loadUntil", Instant.class),
 
     /**
      * transform
      * -1: take values from all tables
      * >= 0: index of table to take values from
      */
-    TABLE_INDEX("tableIndex");
+    TABLE_INDEX("tableIndex", Integer.class);
 
     private final String identifier;
 
-    InfluxDbStorageProperty(String identifier) {
+    private final Class<?> type;
+
+    InfluxDbStorageProperty(String identifier, Class<?> type) {
         this.identifier = identifier;
+        this.type = type;
     }
 
+    @Override
     public String identifier() {
         return identifier;
     }
 
-    public static InfluxDbStorageProperty fromIdentifier(String identifier) {
-        Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier must not be null.");
-        return EnumSet.allOf(InfluxDbStorageProperty.class).stream()
-          .filter(element -> identifier.equals(element.identifier))
-          .findFirst()
-          .orElseThrow(() -> new NoSuchElementException("There is no InfluxDbStorageProperty member with identifier '%s'.".formatted(identifier)));
+    @Override
+    public Class<?> type() {
+        return type;
     }
 }
