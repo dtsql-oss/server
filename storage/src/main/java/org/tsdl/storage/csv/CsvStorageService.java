@@ -2,6 +2,7 @@ package org.tsdl.storage.csv;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import org.jetbrains.annotations.NotNull;
 import org.tsdl.infrastructure.api.StorageService;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -14,7 +15,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
+public final class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
     @Override
     public void initialize(CsvStorageConfiguration serviceConfiguration) {
     }
@@ -45,7 +46,7 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
 
         var filePath = lookupConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
         var fieldSeparator = lookupConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
-        try (var csvReader = CsvReader.builder().fieldSeparator(fieldSeparator).build(Path.of(filePath))) {
+        try (var csvReader = createReader(filePath, fieldSeparator)) {
             return csvReader.stream().toList();
         }
     }
@@ -95,6 +96,12 @@ public class CsvStorageService implements StorageService<CsvRow, CsvStorageConfi
 
     @Override
     public void close() {
+    }
 
+    @NotNull
+    CsvReader createReader(String filePath, Character fieldSeparator) throws IOException {
+        return CsvReader.builder()
+          .fieldSeparator(fieldSeparator)
+          .build(Path.of(filePath));
     }
 }

@@ -1,82 +1,222 @@
 package org.tsdl.storage.influxdb;
 
-import org.junit.jupiter.api.Test;
+import com.influxdb.client.InfluxDBClient;
+import com.influxdb.client.QueryApi;
+import com.influxdb.query.FluxRecord;
+import com.influxdb.query.FluxTable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.tsdl.infrastructure.model.DataPoint;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class InfluxDbStorageServiceTest {
 
-    // TODO include mockito with ability to add static mocks, mock InfluxDBClient and return stub data
-
-    @Test
-    void load_viaQuery() {
+    @ParameterizedTest
+    @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")
+    void loadAndTransform_nonNegativeTableIndex_returnsCorrespondingTable(List<List<List<Object>>> persistedData) {
         var serviceConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.URL, "http://localhost:8086",
-          InfluxDbStorageProperty.ORGANIZATION, "tuwien-corec",
-          InfluxDbStorageProperty.TOKEN, "Bawfa5LFDhUM5yjlmErFbZPtAT4jeOxtTvgdXbCxCjy5rPG-SR5IRdR_aTYKqr3xvoN49VroZn9YfuwVQCp34A==".toCharArray(),
-          InfluxDbStorageProperty.BUCKET, "bucket0"
+          InfluxDbStorageProperty.URL, "<url>",
+          InfluxDbStorageProperty.ORGANIZATION, "<org>",
+          InfluxDbStorageProperty.TOKEN, "<token>".toCharArray()
         ));
         var lookupConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.QUERY, """
-            from(bucket: "bucket0")
-                        |> range(start: time(v: "2016-01-01T00:00:00Z"), stop: time(v: "2019-12-31T23:59:59Z"))
-                        |> filter(fn: (r) => r["_measurement"] == "productionOutputs")
-                        |> filter(fn: (r) => r["_field"] == "output")
-                        |> yield(name: "measuredValue")
-            """
+          InfluxDbStorageProperty.QUERY, "query is irrelevant because data is mocked"
         ));
         var transformationConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.TABLE_INDEX, 4
+          InfluxDbStorageProperty.TABLE_INDEX, 1
         ));
 
-        try (var service = new InfluxDbStorageService()) {
-            service.initialize(serviceConfig);
-            var tables = service.load(lookupConfig);
-            var dataPoints = service.transform(tables, transformationConfig);
-            dataPoints.forEach(pt -> System.out.println(pt.toString()));
-        }
+        testLoadAndTransformSuccess(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          List.of(
+            DataPoint.of(Instant.now(), 24.0)
+          ),
+          true);
     }
 
-    @Test
-    void load_viaBucketAndRange() {
+    @ParameterizedTest
+    @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")
+    void loadAndTransform_minusOneTableIndex_returnsAllTables(List<List<List<Object>>> persistedData) {
         var serviceConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.URL, "http://localhost:8086",
-          InfluxDbStorageProperty.ORGANIZATION, "tuwien-corec",
-          InfluxDbStorageProperty.TOKEN, "Bawfa5LFDhUM5yjlmErFbZPtAT4jeOxtTvgdXbCxCjy5rPG-SR5IRdR_aTYKqr3xvoN49VroZn9YfuwVQCp34A==".toCharArray(),
-          InfluxDbStorageProperty.BUCKET, "bucket0"
+          InfluxDbStorageProperty.URL, "<url>",
+          InfluxDbStorageProperty.ORGANIZATION, "<org>",
+          InfluxDbStorageProperty.TOKEN, "<token>".toCharArray()
         ));
         var lookupConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.BUCKET, "bucket0",
-          InfluxDbStorageProperty.LOAD_FROM, Instant.parse("2016-01-01T00:00:00Z"),
-          InfluxDbStorageProperty.LOAD_UNTIL, Instant.parse("2019-12-31T23:59:59Z")
-        ));
-        var lookupConfig2 = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.QUERY, """
-            from(bucket: "bucket0")
-                        |> range(start: time(v: "2016-01-01T00:00:00Z"), stop: time(v: "2019-12-31T23:59:59Z"))
-                        |> filter(fn: (r) => r["_measurement"] == "productionOutputs")
-                        |> filter(fn: (r) => r["_field"] == "output")
-                        |> yield(name: "measuredValue")
-            """
+          InfluxDbStorageProperty.QUERY, "query is irrelevant because data is mocked"
         ));
         var transformationConfig = new InfluxDbStorageConfiguration(Map.of(
-          InfluxDbStorageProperty.TABLE_INDEX, 4
+          InfluxDbStorageProperty.TABLE_INDEX, -1
         ));
 
-        try (var service = new InfluxDbStorageService()) {
-            service.initialize(serviceConfig);
-            var tables = service.load(lookupConfig);
-            var dataPoints = service.transform(tables, transformationConfig);
-            dataPoints.forEach(pt -> System.out.println(pt.toString()));
+        testLoadAndTransformSuccess(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          List.of(
+            DataPoint.of(Instant.now(), 23.0),
+            DataPoint.of(Instant.now(), 24.0),
+            DataPoint.of(Instant.now(), 25.0)
+          ),
+          true);
+    }
 
-            var tables2 = service.load(lookupConfig2);
-            var dataPoints2 = service.transform(tables2, transformationConfig);
-            assertThat(dataPoints)
-              .hasSize(dataPoints2.size())
-              .hasSameElementsAs(dataPoints2);
+    @ParameterizedTest
+    @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")
+    void loadAndTransform_tableIndexOutOfRange_throws(List<List<List<Object>>> persistedData) {
+        var serviceConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.URL, "<url>",
+          InfluxDbStorageProperty.ORGANIZATION, "<org>",
+          InfluxDbStorageProperty.TOKEN, "<token>".toCharArray()
+        ));
+        var lookupConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.QUERY, "query is irrelevant because data is mocked"
+        ));
+        var transformationConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.TABLE_INDEX, 24
+        ));
+
+        testLoadAndTransformFailure(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")
+    void loadAndTransform_bothQueryAndBucketDatePropertiesGiven_throws(List<List<List<Object>>> persistedData) {
+        var serviceConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.URL, "<url>",
+          InfluxDbStorageProperty.ORGANIZATION, "<org>",
+          InfluxDbStorageProperty.TOKEN, "<token>".toCharArray()
+        ));
+        var lookupConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.QUERY, "query is irrelevant because data is mocked",
+          InfluxDbStorageProperty.LOAD_FROM, Instant.now(),
+          InfluxDbStorageProperty.LOAD_UNTIL, Instant.now(),
+          InfluxDbStorageProperty.BUCKET, "bucket3"
+        ));
+        var transformationConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.TABLE_INDEX, 24
+        ));
+
+        testLoadAndTransformFailure(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")
+    void loadAndTransform_missingTableIndex_throws(List<List<List<Object>>> persistedData) {
+        var serviceConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.URL, "<url>",
+          InfluxDbStorageProperty.ORGANIZATION, "<org>",
+          InfluxDbStorageProperty.TOKEN, "<token>".toCharArray()
+        ));
+        var lookupConfig = new InfluxDbStorageConfiguration(Map.of(
+          InfluxDbStorageProperty.LOAD_FROM, Instant.now(),
+          InfluxDbStorageProperty.LOAD_UNTIL, Instant.now(),
+          InfluxDbStorageProperty.BUCKET, "bucket3"
+        ));
+        var transformationConfig = new InfluxDbStorageConfiguration(Map.of());
+
+        testLoadAndTransformFailure(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          IllegalArgumentException.class);
+    }
+
+    private void testLoadAndTransformSuccess(List<List<List<Object>>> persistedData, InfluxDbStorageConfiguration serviceConfig,
+                                             InfluxDbStorageConfiguration lookupConfig, InfluxDbStorageConfiguration transformationConfig,
+                                             List<DataPoint> expectedDataPoints, boolean ignoreTimestamp) {
+        var dataPoints = executeLoadAndTransformTest(persistedData, serviceConfig, lookupConfig, transformationConfig, ignoreTimestamp);
+        assertResults(dataPoints, expectedDataPoints, ignoreTimestamp);
+    }
+
+    private void testLoadAndTransformFailure(List<List<List<Object>>> persistedData, InfluxDbStorageConfiguration serviceConfig,
+                                             InfluxDbStorageConfiguration lookupConfig, InfluxDbStorageConfiguration transformationConfig,
+                                             Class<? extends Throwable> expectedException) {
+        assertThatThrownBy(() -> executeLoadAndTransformTest(persistedData,
+          serviceConfig,
+          lookupConfig,
+          transformationConfig,
+          false)
+        ).isInstanceOf(expectedException);
+    }
+
+    private List<DataPoint> executeLoadAndTransformTest(List<List<List<Object>>> persistedData, InfluxDbStorageConfiguration serviceConfig,
+                                                        InfluxDbStorageConfiguration lookupConfig, InfluxDbStorageConfiguration transformationConfig,
+                                                        boolean ignoreTimestamp) {
+        var service = getInfluxDbStorageServiceSpy(persistedData);
+        service.initialize(serviceConfig);
+
+        var tables = service.load(lookupConfig);
+        return service.transform(tables, transformationConfig);
+    }
+
+    private void assertResults(List<DataPoint> actual, List<DataPoint> expected, boolean ignoreTimestamp) {
+        var fieldsToIgnore = ignoreTimestamp ? new String[]{"timestamp"} : new String[0];
+        assertThat(actual)
+          .usingRecursiveFieldByFieldElementComparatorIgnoringFields(fieldsToIgnore)
+          .hasSize(expected.size())
+          .hasSameElementsAs(expected);
+    }
+
+    private static InfluxDbStorageService getInfluxDbStorageServiceSpy(List<List<List<Object>>> persistedData) {
+        var service = spy(InfluxDbStorageService.class);
+
+        doAnswer(invocationOnMock -> {
+            var serviceMock = (InfluxDbStorageService) invocationOnMock.getMock();
+
+            var clientMock = mock(InfluxDBClient.class);
+            var queryMock = mock(QueryApi.class);
+            var mockedData = fluxTableMocksFromData(persistedData);
+            when(clientMock.getQueryApi()).thenReturn(queryMock);
+            when(queryMock.query(anyString())).thenReturn(mockedData);
+
+            service.dbClient = clientMock;
+            serviceMock.queryApi = queryMock;
+            return null;
+        }).when(service)
+          .initializeInternal(any(InfluxDbStorageConfiguration.class));
+
+        return service;
+    }
+
+    private static List<FluxTable> fluxTableMocksFromData(List<List<List<Object>>> persistedData) {
+        var mockTables = new ArrayList<FluxTable>();
+
+        for (var table : persistedData) {
+            var newTable = mock(FluxTable.class);
+
+            var records = new ArrayList<FluxRecord>();
+            for (var record : table) {
+                var newRecord = mock(FluxRecord.class);
+                when(newRecord.getTime()).thenReturn(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(record.get(0).toString())));
+                when(newRecord.getValue()).thenReturn(record.get(1));
+                records.add(newRecord);
+            }
+
+            when(newTable.getRecords()).thenReturn(records);
+            mockTables.add(newTable);
         }
+
+        return mockTables;
     }
 }

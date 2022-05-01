@@ -15,19 +15,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration> {
+public final class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration> {
 
     // influx uses rfc3339 timestamps (https://docs.influxdata.com/flux/v0.x/data-types/basic/time/#time-syntax)
-    private static final DateTimeFormatter INFLUX_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT; // DateTimeFormatter.ofPattern("yyyy-MM-dd'T'h:m:ssZ").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter INFLUX_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     private static final String LOAD_RANGE_QUERY_TEMPLATE = """
       from(bucket: "%s")
         |> range(start: time(v: "%s"), stop: time(v: "%s"))
       """;
 
-    private InfluxDBClient dbClient;
+    InfluxDBClient dbClient;
 
-    private QueryApi queryApi;
+    QueryApi queryApi;
 
     @Override
     public void initialize(InfluxDbStorageConfiguration serviceConfiguration) {
@@ -41,14 +41,7 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
           serviceConfiguration.isPropertySet(InfluxDbStorageProperty.ORGANIZATION),
           "'ORGANIZATION' property is required to initialize InfluxDB storage service.");
 
-        dbClient = InfluxDBClientFactory.create(
-          serviceConfiguration.getProperty(InfluxDbStorageProperty.URL, String.class),
-          serviceConfiguration.getProperty(InfluxDbStorageProperty.TOKEN, char[].class),
-          serviceConfiguration.getProperty(InfluxDbStorageProperty.ORGANIZATION, String.class),
-          serviceConfiguration.getProperty(InfluxDbStorageProperty.BUCKET, String.class)
-        );
-
-        queryApi = dbClient.getQueryApi();
+        initializeInternal(serviceConfiguration);
     }
 
     @Override
@@ -115,6 +108,24 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
         }
     }
 
+    @Override
+    public void close() {
+        if (dbClient != null) {
+            dbClient.close();
+        }
+    }
+
+    void initializeInternal(InfluxDbStorageConfiguration serviceConfiguration) {
+        dbClient = InfluxDBClientFactory.create(
+          serviceConfiguration.getProperty(InfluxDbStorageProperty.URL, String.class),
+          serviceConfiguration.getProperty(InfluxDbStorageProperty.TOKEN, char[].class),
+          serviceConfiguration.getProperty(InfluxDbStorageProperty.ORGANIZATION, String.class),
+          serviceConfiguration.getProperty(InfluxDbStorageProperty.BUCKET, String.class)
+        );
+
+        queryApi = dbClient.getQueryApi();
+    }
+
     private Stream<DataPoint> transformInfluxDbRecords(FluxTable recordStream) {
         return recordStream.getRecords().stream()
           .map(record -> DataPoint.of(
@@ -122,12 +133,5 @@ public class InfluxDbStorageService implements StorageService<FluxTable, InfluxD
               Double.valueOf(Objects.requireNonNull(record.getValue()).toString())
             )
           );
-    }
-
-    @Override
-    public void close() {
-        if (dbClient != null) {
-            dbClient.close();
-        }
     }
 }

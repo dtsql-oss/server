@@ -6,7 +6,7 @@ import org.tsdl.infrastructure.api.StorageProperty;
 import java.util.List;
 import java.util.Map;
 
-public class CsvStorageConfiguration extends EnumStorageConfiguration {
+public final class CsvStorageConfiguration extends EnumStorageConfiguration {
     public CsvStorageConfiguration(Map<StorageProperty, Object> properties) {
         super(properties);
     }

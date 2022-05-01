@@ -6,7 +6,7 @@ import org.tsdl.infrastructure.api.StorageProperty;
 import java.util.List;
 import java.util.Map;
 
-public class InfluxDbStorageConfiguration extends EnumStorageConfiguration {
+public final class InfluxDbStorageConfiguration extends EnumStorageConfiguration {
     public InfluxDbStorageConfiguration(Map<StorageProperty, Object> properties) {
         super(properties);
     }
