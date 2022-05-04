@@ -1,0 +1,1 @@
+[![CI (Ubuntu)](https://github.com/tsdl-oss/java/actions/workflows/main.yml/badge.svg)](https://github.com/tsdl-oss/java/actions/workflows/main.yml)

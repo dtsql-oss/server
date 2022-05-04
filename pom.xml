@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.tsdl</groupId>
+    <artifactId>root</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+    <name>root</name>
+    <description>Parent module of all TSDL-related modules.</description>
+
+    <modules>
+        <module>infrastructure</module>
+        <module>service</module>
+        <module>implementation</module>
+        <module>storage</module>
+    </modules>
+
+    <properties>
+        <revision>0.1-SNAPSHOT</revision> <!-- MUST be called "revision" -->
+        <java.version>17</java.version>
+        <project.fileEncoding>UTF-8</project.fileEncoding>
+        <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
+        <assertj.version>3.22.0</assertj.version>
+        <junit.version>5.8.2</junit.version>
+        <mockito.version>4.5.1</mockito.version>
+        <antlr.version>4.10.1</antlr.version>
+        <mojo.version>3.3.0</mojo.version>
+    </properties>
+
+</project>
