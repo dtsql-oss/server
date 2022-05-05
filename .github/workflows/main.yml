@@ -22,6 +22,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  docker:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Run Build
+        run: |
+          make all-build
+      
   check:
     runs-on: ubuntu-latest
     steps:
@@ -33,13 +45,12 @@ jobs:
           java-version: 17
           distribution: 'adopt'
           cache: 'maven' # see also https://github.com/actions/setup-java#caching-packages-dependencies
-
+      
       # Even though setup-java already offers the ability to run maven builds, using the included
       # Maven wrapper with fixed version ensures a uniform build process across multiple tools
       - name: Make Maven Wrapper Executable
         run: |
           chmod +x mvnw
-
       # - name: Execute Maven checkstyle Plugin TODO: add checkstyle to project and CI
       #  run: |
       #    ./mvnw $MAVEN_CLI_OPTS checkstyle:check
