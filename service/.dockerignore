@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/out/
+**/.git
+**/.mvn
+**/.run
+**/.github
+**/node_modules/
+**/Dockerfile
+**/Makefile
+**/.dockerfile
+**/telepresence.log
+**/generated
+.vscode
+**/docker-compose.yml
