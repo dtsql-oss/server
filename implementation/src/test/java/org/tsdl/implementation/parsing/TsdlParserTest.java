@@ -1,21 +1,31 @@
 package org.tsdl.implementation.parsing;
 
 import org.junit.jupiter.api.Test;
-import org.tsdl.implementation.model.TsdlOperator;
+import org.tsdl.implementation.factory.ObjectFactory;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+public class TsdlParserTest {
+    private final TsdlParser parser = ObjectFactory.INSTANCE.getParser();
 
-public class TsdlListenerTest {
+
     @Test
-    void tsdlListener_operatorGtAndThresholdDouble_parsesBothCorrectly() {
-        String queryString = """
-          operator=gt
-          threshold=23.9
+    void tsdlListener() {
+        var queryString  = """
+          FILTER:
+            AND(gt(23.4), NOT(lt(-23.1)))
+          YIELD *
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.GT);
+        System.out.println(parser.parseQuery(queryString));
+    }
+
+    /*@Test
+    void tsdlListener_operatorGtAndThresholdDouble_parsesBothCorrectly() {
+        String queryString = """
+          OR(lt,gt,gt,lt)
+          """;
+
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.GT);
         assertThat(query.threshold()).isEqualTo(23.9d);
     }
 
@@ -26,8 +36,8 @@ public class TsdlListenerTest {
           operator=lt
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.LT);
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.LT);
         assertThat(query.threshold()).isEqualTo(32582L);
     }
 
@@ -39,8 +49,8 @@ public class TsdlListenerTest {
           threshold=2
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.LT);
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.LT);
         assertThat(query.threshold()).isEqualTo(2L);
     }
 
@@ -52,8 +62,8 @@ public class TsdlListenerTest {
           operator=gt
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.GT);
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.GT);
         assertThat(query.threshold()).isEqualTo(32582L);
     }
 
@@ -64,8 +74,8 @@ public class TsdlListenerTest {
           operator=lt
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.LT);
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.LT);
         assertThat(query.threshold()).isEqualTo(-3L);
     }
 
@@ -76,8 +86,8 @@ public class TsdlListenerTest {
           operator=lt
           """;
 
-        var query = TsdlParser.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(TsdlOperator.LT);
+        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
+        assertThat(query.operator()).isEqualTo(FilterType.LT);
         assertThat(query.threshold()).isEqualTo(-3.25d);
     }
 
@@ -88,7 +98,7 @@ public class TsdlListenerTest {
           operator=lt
           """;
 
-        assertThatThrownBy(() -> TsdlParser.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test
@@ -98,7 +108,7 @@ public class TsdlListenerTest {
           operator=lt
           """;
 
-        assertThatThrownBy(() -> TsdlParser.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test
@@ -107,7 +117,7 @@ public class TsdlListenerTest {
           threshold=-3.25
           """;
 
-        assertThatThrownBy(() -> TsdlParser.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test
@@ -116,7 +126,7 @@ public class TsdlListenerTest {
           operator=gt
           """;
 
-        assertThatThrownBy(() -> TsdlParser.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test
@@ -126,6 +136,6 @@ public class TsdlListenerTest {
           threshold=2,47
           """;
 
-        assertThatThrownBy(() -> TsdlParser.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
+        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+    }*/
 }
