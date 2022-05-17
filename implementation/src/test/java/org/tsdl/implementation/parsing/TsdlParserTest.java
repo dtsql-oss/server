@@ -1,141 +1,130 @@
 package org.tsdl.implementation.parsing;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
+import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.filter.GtFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.LtFilterImpl;
 import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
+import org.tsdl.implementation.model.filter.SinglePointFilter;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TsdlParserTest {
     private final TsdlParser parser = ObjectFactory.INSTANCE.getParser();
 
-
     @Test
-    void tsdlListener() {
-        var queryString  = """
+    void tsdlParser_conjunctiveFilterWithOneArgument() {
+        var queryString = """
           FILTER:
-            AND(gt(23.4), NOT(lt(-23.1)))
+            AND(gt(23.4))
           YIELD *
           """;
 
-        System.out.println(parser.parseQuery(queryString));
-    }
+        var query = parser.parseQuery(queryString);
 
-    /*@Test
-    void tsdlListener_operatorGtAndThresholdDouble_parsesBothCorrectly() {
-        String queryString = """
-          OR(lt,gt,gt,lt)
-          """;
+        assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.type(AndConnectiveImpl.class))
+          .extracting(AndConnectiveImpl::filters)
+          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1);
 
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.GT);
-        assertThat(query.threshold()).isEqualTo(23.9d);
-    }
-
-    @Test
-    void tsdlListener_integerThresholdAndOperatorLt_parsesBothCorrectly() {
-        String queryString = """
-          threshold=32582
-          operator=lt
-          """;
-
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.LT);
-        assertThat(query.threshold()).isEqualTo(32582L);
+        assertThat(query.filter().filters().get(0))
+          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
+          .extracting(GtFilterImpl::threshold)
+          .isEqualTo(23.4);
     }
 
     @Test
-    void tsdlListener_thresholdLineTwice_acceptsSecondOccurrence() {
-        String queryString = """
-          threshold=32582
-          operator=lt
-          threshold=2
+    void tsdlParser_disjunctiveFilterWithOneArgument() {
+        var queryString = """
+          FILTER:
+            OR(lt(-2.3))
+          YIELD *
           """;
 
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.LT);
-        assertThat(query.threshold()).isEqualTo(2L);
+        var query = parser.parseQuery(queryString);
+
+        assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
+          .extracting(OrConnectiveImpl::filters)
+          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1);
+
+        assertThat(query.filter().filters().get(0))
+          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
+          .extracting(LtFilterImpl::threshold)
+          .isEqualTo(-2.3);
     }
 
     @Test
-    void tsdlListener_operatorLineTwice_acceptsSecondOccurrence() {
-        String queryString = """
-          threshold=32582
-          operator=lt
-          operator=gt
+    void tsdlParser_negatedFilter() {
+        var queryString = """
+          FILTER:
+            OR(NOT(lt(25)))
+          YIELD *
           """;
 
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.GT);
-        assertThat(query.threshold()).isEqualTo(32582L);
+        var query = parser.parseQuery(queryString);
+
+        assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
+          .extracting(OrConnectiveImpl::filters)
+          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1);
+
+        assertThat(query.filter().filters().get(0))
+          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+          .extracting(NegatedSinglePointFilter::filter)
+          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
+          .extracting(LtFilterImpl::threshold)
+          .isEqualTo(25d);
     }
 
     @Test
-    void tsdlListener_negativeLongThreshold_parsesCorrectly() {
-        String queryString = """
-          threshold=-3
-          operator=lt
+    void tsdlParser_multipleArguments() {
+        var queryString = """
+          FILTER:
+            OR(
+                NOT(lt(25.1)),       gt(3.4),
+                NOT(gt(1000)),
+                lt(-3.4447)
+              )
+          YIELD *
           """;
 
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.LT);
-        assertThat(query.threshold()).isEqualTo(-3L);
+        var query = parser.parseQuery(queryString);
+
+        assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
+          .extracting(OrConnectiveImpl::filters)
+          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(4);
+
+        assertThat(query.filter().filters().get(0))
+          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+          .extracting(NegatedSinglePointFilter::filter)
+          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
+          .extracting(LtFilterImpl::threshold)
+          .isEqualTo(25.1);
+
+        assertThat(query.filter().filters().get(1))
+          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
+          .extracting(GtFilterImpl::threshold)
+          .isEqualTo(3.4);
+
+        assertThat(query.filter().filters().get(2))
+          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+          .extracting(NegatedSinglePointFilter::filter)
+          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
+          .extracting(GtFilterImpl::threshold)
+          .isEqualTo(1000d);
+
+        assertThat(query.filter().filters().get(3))
+          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
+          .extracting(LtFilterImpl::threshold)
+          .isEqualTo(-3.4447);
     }
-
-    @Test
-    void tsdlListener_negativeDoubleThreshold_parsesCorrectly() {
-        String queryString = """
-          threshold=-3.25
-          operator=lt
-          """;
-
-        var query = TsdlParserImpl.INSTANCE.parseQuery(queryString);
-        assertThat(query.operator()).isEqualTo(FilterType.LT);
-        assertThat(query.threshold()).isEqualTo(-3.25d);
-    }
-
-    @Test
-    void tsdlListener_explicitPlusSignLongThreshold_throws() {
-        String queryString = """
-          threshold=+3
-          operator=lt
-          """;
-
-        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
-
-    @Test
-    void tsdlListener_explicitPlusSignDoubleThreshold_throws() {
-        String queryString = """
-          threshold=+3.25
-          operator=lt
-          """;
-
-        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
-
-    @Test
-    void tsdlListener_missingThreshold_throws() {
-        String queryString = """
-          threshold=-3.25
-          """;
-
-        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
-
-    @Test
-    void tsdlListener_missingOperator_throws() {
-        String queryString = """
-          operator=gt
-          """;
-
-        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
-
-    @Test
-    void tsdlListener_incorrectThresholdCommaSeparator_throws() {
-        String queryString = """
-          operator=gt
-          threshold=2,47
-          """;
-
-        assertThatThrownBy(() -> TsdlParserImpl.INSTANCE.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }*/
 }
