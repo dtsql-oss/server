@@ -1,4 +1,7 @@
 package org.tsdl.implementation.model;
 
-public record TsdlQuery(TsdlOperator operator, Double threshold) {
+import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
+
+public interface TsdlQuery {
+    SinglePointFilterConnective filter();
 }

@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("unused") // only referenced by string literals, therefore usage unrecognized
 public final class CsvRowDataFactory {
     private CsvRowDataFactory() {
     }

@@ -1,13 +1,24 @@
 # build stage
-FROM openjdk:17-jdk-alpine AS build
+FROM maven:3-openjdk-18 AS dependencies
+
+WORKDIR /src
+
+COPY pom.xml pom.xml
+COPY service/pom.xml service/
+COPY storage/pom.xml storage/
+COPY infrastructure/pom.xml infrastructure/
+COPY implementation/pom.xml implementation/
+
+RUN mvn -B dependency:go-offline
+
+FROM dependencies as build
 
 COPY . /src
 
-WORKDIR /src
-RUN ./mvnw -Dcheckstyle.skip -DskipTests -DcreateChecksum=true clean package
+RUN mvn -Dcheckstyle.skip -DskipTests -DcreateChecksum=true clean package
 
 # production stage
-FROM openjdk:17-jdk-alpine
+FROM openjdk:18 as release
 
 COPY --from=build /src/service/target/service-*.jar /service-app.jar
 
