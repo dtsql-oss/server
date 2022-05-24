@@ -11,6 +11,8 @@ updates:
       day: "thursday"
     assignees:
       - "raffaelfoidl"
+    reviewers:
+      - "raffaelfoidl"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
     target-branch: "main"
