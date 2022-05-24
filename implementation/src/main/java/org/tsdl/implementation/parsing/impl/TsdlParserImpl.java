@@ -28,7 +28,7 @@ public class TsdlParserImpl implements TsdlParser {
 
             var walker = new ParseTreeWalker();
             var tsdlListener = new TsdlListenerImpl();
-            walker.walk(tsdlListener, parser.tsdl());
+            walker.walk(tsdlListener, parser.tsdlQuery());
 
             return tsdlListener.getQuery();
         } catch (TsdlParserException e) {

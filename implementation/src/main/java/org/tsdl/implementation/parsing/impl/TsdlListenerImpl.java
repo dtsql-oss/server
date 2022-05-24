@@ -1,8 +1,8 @@
 package org.tsdl.implementation.parsing.impl;
 
 
-import org.tsdl.grammar.TsdlBaseListener;
 import org.tsdl.grammar.TsdlParser;
+import org.tsdl.grammar.TsdlParserBaseListener;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.factory.TsdlElementFactory;
 import org.tsdl.implementation.model.TsdlQuery;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO: use visitor instead of listener?
-public class TsdlListenerImpl extends TsdlBaseListener {
+public class TsdlListenerImpl extends TsdlParserBaseListener {
     private final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
     private final TsdlElementFactory elementFactory = ObjectFactory.INSTANCE.elementFactory();
 
@@ -59,7 +59,7 @@ public class TsdlListenerImpl extends TsdlBaseListener {
     }
 
     @Override
-    public void exitTsdl(TsdlParser.TsdlContext ctx) {
+    public void exitTsdlQuery(TsdlParser.TsdlQueryContext ctx) {
         Conditions.checkNotNull(Condition.STATE, connective, "Connective to make up query must not be null.");
         query = elementFactory.getQuery(connective);
     }
