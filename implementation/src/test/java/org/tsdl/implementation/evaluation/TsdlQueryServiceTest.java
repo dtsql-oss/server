@@ -1,7 +1,10 @@
 package org.tsdl.implementation.evaluation;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.tsdl.infrastructure.extension.TsdlTestVisualization;
+import org.tsdl.infrastructure.extension.TsdlTestVisualizer;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
 
@@ -9,11 +12,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(TsdlTestVisualizer.class)
 public class TsdlQueryServiceTest {
     private static final QueryService queryService = new TsdlQueryService();
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @TsdlTestVisualization()
     void query_lt(List<DataPoint> dataPoints) {
         var query = """
           FILTER:
@@ -32,6 +37,7 @@ public class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT, renderPointShape = false)
     void query_gt(List<DataPoint> dataPoints) {
         var query = """
           FILTER:
@@ -50,6 +56,7 @@ public class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @TsdlTestVisualization(skipVisualization = true)
     void query_gtAndLt(List<DataPoint> dataPoints) {
         var query = """
           FILTER:

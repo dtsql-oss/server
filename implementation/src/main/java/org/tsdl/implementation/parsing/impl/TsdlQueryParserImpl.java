@@ -8,10 +8,10 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.tsdl.grammar.TsdlLexer;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
-import org.tsdl.implementation.parsing.TsdlParser;
+import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.TsdlParserException;
 
-public class TsdlParserImpl implements TsdlParser {
+public class TsdlQueryParserImpl implements TsdlQueryParser {
     private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.getErrorListener();
 
     @Override

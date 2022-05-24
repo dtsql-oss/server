@@ -2,6 +2,6 @@ package org.tsdl.implementation.parsing;
 
 import org.tsdl.implementation.model.TsdlQuery;
 
-public interface TsdlParser {
+public interface TsdlQueryParser {
     TsdlQuery parseQuery(String query) throws TsdlParserException;
 }

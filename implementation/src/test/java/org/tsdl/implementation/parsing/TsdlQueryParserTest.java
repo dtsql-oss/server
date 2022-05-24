@@ -12,8 +12,8 @@ import org.tsdl.implementation.model.filter.SinglePointFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TsdlParserTest {
-    private final TsdlParser parser = ObjectFactory.INSTANCE.getParser();
+public class TsdlQueryParserTest {
+    private final TsdlQueryParser parser = ObjectFactory.INSTANCE.getParser();
 
     @Test
     void tsdlParser_conjunctiveFilterWithOneArgument() {
