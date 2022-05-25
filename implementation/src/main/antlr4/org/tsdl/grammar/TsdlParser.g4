@@ -6,11 +6,64 @@ options
 }
 
 tsdlQuery
-  :  filtersDeclaration mandatoryWhitespace yieldDeclaration
+  :  (filtersDeclaration mandatoryWhitespace)?
+       (samplesDeclaration mandatoryWhitespace)?
+       (eventsDeclaration mandatoryWhitespace)?
+       (chooseDeclaration mandatoryWhitespace)?
+       yieldDeclaration
+  ;
+
+samplesDeclaration
+  :  SAMPLES_CLAUSE COLON mandatoryWhitespace aggregatorsDeclarationStatement
+  ;
+
+eventsDeclaration
+  :  EVENTS_CLAUSE COLON mandatoryWhitespace eventsDeclarationStatement
+  ;
+
+eventsDeclarationStatement
+  :  eventList
+  ;
+
+eventList
+  :  events eventSeparator eventDeclaration     // either two or more events
+  |  eventDeclaration                           // or exactly one
+  ;
+
+events
+  :  eventDeclaration (eventSeparator eventDeclaration)*   // one event plus [0..n] additional events
+  ;
+
+eventDeclaration
+  :  filterConnective whitespace AS whitespace identifier
+  ;
+
+eventSeparator
+  :  COMMA whitespace
+  ;
+
+chooseDeclaration
+  :  CHOOSE_CLAUSE COLON mandatoryWhitespace choiceStatement
+  ;
+
+choiceStatement
+  :  identifier mandatoryWhitespace temporalRelation mandatoryWhitespace identifier
+  ;
+
+temporalRelation
+  :  TEMPORAL_PRECEDES
+  |  TEMPORAL_FOLLOWS
   ;
 
 yieldDeclaration
-  : YIELD
+  : YIELD COLON mandatoryWhitespace yieldType
+  ;
+
+yieldType
+  :  YIELD_ALL_PERIODS
+  |  YIELD_LONGEST_PERIOD
+  |  YIELD_SHORTEST_PERIOD
+  |  YIELD_DATA_POINTS
   ;
 
 filtersDeclaration
@@ -18,12 +71,51 @@ filtersDeclaration
   ;
 
 filterConnective
-  : connectiveIdentifier PARENTHESIS_OPEN whitespace singlePointFilterList whitespace PARENTHESIS_CLOSE
+  :  connectiveIdentifier PARENTHESIS_OPEN whitespace singlePointFilterList whitespace PARENTHESIS_CLOSE
+  ;
+
+aggregatorsDeclarationStatement
+  :  aggregatorList
+  ;
+
+aggregatorList
+  :  aggregators aggregatorSeparator aggregatorDeclaration      // either two or more aggregators
+  |  aggregatorDeclaration                                      // or exactly one
+  ;
+
+aggregators
+  :  aggregatorDeclaration (aggregatorSeparator aggregatorDeclaration)*    // one aggregator plus [0..n] additional aggregators
+  ;
+
+aggregatorDeclaration
+  :  aggregatorFunctionDeclaration whitespace AS whitespace identifier
+  ;
+
+aggregatorFunctionDeclaration
+  :  aggregatorFunction PARENTHESIS_OPEN whitespace aggregatorInput whitespace PARENTHESIS_CLOSE
+  ;
+
+aggregatorSeparator
+  :  COMMA whitespace
+  ;
+
+aggregatorFunction
+  :  AGGREGATOR_AVG
+  |  AGGREGATOR_MAX
+  |  AGGREGATOR_MIN
+  ;
+
+aggregatorInput
+  :  INPUT_VARIABLE
+  ;
+
+identifier
+  : IDENTIFIER
   ;
 
 connectiveIdentifier
-  : CONNECTIVE_AND
-  | CONNECTIVE_OR
+  :  CONNECTIVE_AND
+  |  CONNECTIVE_OR
   ;
 
 singlePointFilterList
@@ -45,24 +137,24 @@ singlePointFilter
   ;
 
 negatedSinglePointFilter
-  : CONNECTIVE_NOT PARENTHESIS_OPEN singlePointFilter PARENTHESIS_CLOSE
-  | singlePointFilter
+  :  CONNECTIVE_NOT PARENTHESIS_OPEN singlePointFilter PARENTHESIS_CLOSE
+  |  singlePointFilter
   ;
 
 filterType
-  : OPERATOR_GT
-  | OPERATOR_LT
+  :  OPERATOR_GT
+  |  OPERATOR_LT
   ;
 
 whitespace
-  : WHITESPACE*
+  :  WHITESPACE*
   ;
 
 mandatoryWhitespace
-  : WHITESPACE+
+  :  WHITESPACE+
   ;
 
 filterSeparator
-  : COMMA whitespace
+  :  COMMA whitespace
   ;
 
