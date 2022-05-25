@@ -27,6 +27,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
     private TestVisualizationWindow visualizer;
     private final SingleActionAwait singleActionAwait = new SingleActionAwait();
+    private Point lastLocation;
 
     private String errorMessage;
 
@@ -40,7 +41,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
         var dataSet = createDataset(testInformation.timeSeries());
         SwingUtilities.invokeLater(() -> {
             try {
-                visualizer = new TestVisualizationWindow(testInformation, visualizationConfiguration, dataSet, singleActionAwait);
+                visualizer = new TestVisualizationWindow(testInformation, visualizationConfiguration, dataSet, singleActionAwait, lastLocation);
             } catch (Exception e) {
                 errorMessage = e.getMessage();
                 singleActionAwait.actionPerformed();
@@ -49,6 +50,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
         // block until UI interaction is done, i.e. CountDownLatch has reached zero
         singleActionAwait.waitFor();
+        lastLocation = visualizer.locationOnClose;
 
         if (errorMessage != null) {
             LOGGER.warning("Encountered problem while visualizing test: %s".formatted(errorMessage));
@@ -78,15 +80,28 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
     private static class TestVisualizationWindow extends JFrame {
         private Boolean shouldExecuteTest;
+        private Point locationOnClose;
 
-        public TestVisualizationWindow(TsdlTestInfo testInfo, TsdlTestVisualization visualizationConfig, XYDataset data, SingleActionAwait clickAwaiter) {
+        public TestVisualizationWindow(TsdlTestInfo testInfo,
+                                       TsdlTestVisualization visualizationConfig,
+                                       XYDataset data,
+                                       SingleActionAwait clickAwaiter,
+                                       Point startUpLocation) {
             super(testInfo.longName());
 
             getContentPane().add(createChartPanel(testInfo.shortName(), visualizationConfig, data), BorderLayout.CENTER);
             getContentPane().add(createButtonPanel(clickAwaiter), BorderLayout.SOUTH);
-            setVisible(true);
+
+            setAlwaysOnTop(true);
             setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
             pack();
+            if (startUpLocation != null) {
+                setLocation(startUpLocation);
+            } else {
+                setLocationRelativeTo(null); // centers frame
+            }
+            setVisible(true);
         }
 
         private JPanel createChartPanel(String title, TsdlTestVisualization visualizationInfo, XYDataset data) {
@@ -114,7 +129,10 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
             var btnNo = new JButton("Skip Test");
 
             // both buttons should close the window
-            ActionListener frameCloser = e -> TestVisualizationWindow.this.dispose();
+            ActionListener frameCloser = e -> {
+                locationOnClose = getLocation();
+                TestVisualizationWindow.this.dispose();
+            };
             btnGet.addActionListener(frameCloser);
             btnNo.addActionListener(frameCloser);
 

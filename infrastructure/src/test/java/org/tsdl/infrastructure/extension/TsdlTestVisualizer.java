@@ -14,7 +14,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
     // TODO remove .getName() as soon as SLF4J logging is introduced
     private static final Logger LOGGER = Logger.getLogger(TsdlTestVisualizer.class.getName());
 
-    private static final String TRIGGERING_ENVIRONMENT_VARIABLE = "TSDL_SKIP_TEST_VISUALIZATION";
+    private static final String DISABLING_ENVIRONMENT_VARIABLE = "TSDL_SKIP_TEST_VISUALIZATION";
 
     private final TimeSeriesTestVisualizer testVisualizer = TimeSeriesTestVisualizer.INSTANCE();
 
@@ -35,10 +35,13 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
     private void visualizeTestData(Invocation<Void> invocation,
                                    ReflectiveInvocationContext<Method> invocationContext,
                                    ExtensionContext extensionContext) throws Throwable {
-        var shouldSkipVisualization = Boolean.parseBoolean(System.getenv(TRIGGERING_ENVIRONMENT_VARIABLE));
+        var envVariablePresent = Boolean.parseBoolean(System.getenv(DISABLING_ENVIRONMENT_VARIABLE));
+        var annotationPresent = extensionContext.getRequiredTestClass().isAnnotationPresent(DisableTsdlTestVisualization.class);
+        var shouldSkipVisualization = envVariablePresent || annotationPresent;
         if (shouldSkipVisualization) {
             // TODO .debug
-            LOGGER.info("Skipping test visualization because environment variable '%s' is set to 'true'.".formatted(TRIGGERING_ENVIRONMENT_VARIABLE));
+            LOGGER.info("Skipping test visualization because environment variable '%s' is set to 'true' or '@%s' annotation is present."
+              .formatted(DISABLING_ENVIRONMENT_VARIABLE, DisableTsdlTestVisualization.class.getName()));
             invocation.proceed();
             return;
         }

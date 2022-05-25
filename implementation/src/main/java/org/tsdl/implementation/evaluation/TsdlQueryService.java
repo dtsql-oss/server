@@ -11,7 +11,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 import java.util.List;
 
 public class TsdlQueryService implements QueryService {
-    private final TsdlQueryParser parser = ObjectFactory.INSTANCE.getParser();
+    private final TsdlQueryParser parser = ObjectFactory.INSTANCE.queryParser();
 
     @Override
     public QueryResult query(List<DataPoint> data, String query) {

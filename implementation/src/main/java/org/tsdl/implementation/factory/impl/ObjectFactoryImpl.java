@@ -10,10 +10,8 @@ import org.tsdl.implementation.parsing.impl.TsdlElementParserImpl;
 import org.tsdl.implementation.parsing.impl.TsdlQueryParserImpl;
 
 public class ObjectFactoryImpl implements ObjectFactory {
-    static ObjectFactory INSTANCE = new ObjectFactoryImpl();
-
     @Override
-    public TsdlQueryParser getParser() {
+    public TsdlQueryParser queryParser() {
         return new TsdlQueryParserImpl();
     }
 
@@ -28,7 +26,7 @@ public class ObjectFactoryImpl implements ObjectFactory {
     }
 
     @Override
-    public ANTLRErrorListener getErrorListener() {
+    public ANTLRErrorListener errorListener() {
         return new TsdlErrorListener();
     }
 }

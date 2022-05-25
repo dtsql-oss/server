@@ -3,6 +3,7 @@ package org.tsdl.implementation.evaluation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.tsdl.infrastructure.extension.DisableTsdlTestVisualization;
 import org.tsdl.infrastructure.extension.TsdlTestVisualization;
 import org.tsdl.infrastructure.extension.TsdlTestVisualizer;
 import org.tsdl.infrastructure.api.QueryService;
@@ -23,7 +24,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             AND(lt(27.25))
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(0));
@@ -42,7 +43,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             AND(gt(27.24))
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(1), dataPoints.get(2));
@@ -61,7 +62,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             AND( gt(25.75), lt(75) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(1));
@@ -79,7 +80,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             OR( gt(75), lt(26) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(0), dataPoints.get(2));
@@ -97,7 +98,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             AND( gt(25.75), NOT(lt(28)) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(2));
@@ -115,7 +116,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             OR( NOT(gt(27.25)), lt(26) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
@@ -133,7 +134,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             AND( gt(100), lt(100) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of();
@@ -151,7 +152,7 @@ public class TsdlQueryServiceTest {
         var query = """
           FILTER:
             OR( gt(100), lt(100) )
-          YIELD *
+          YIELD: data points
           """;
 
         var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));

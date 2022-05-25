@@ -12,7 +12,7 @@ import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.TsdlParserException;
 
 public class TsdlQueryParserImpl implements TsdlQueryParser {
-    private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.getErrorListener();
+    private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
 
     @Override
     public TsdlQuery parseQuery(String query) {

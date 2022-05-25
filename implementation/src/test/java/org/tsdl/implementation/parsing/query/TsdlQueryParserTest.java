@@ -1,4 +1,4 @@
-package org.tsdl.implementation.parsing;
+package org.tsdl.implementation.parsing.query;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -6,21 +6,18 @@ import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.filter.GtFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.LtFilterImpl;
-import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TsdlQueryParserTest {
-    private final TsdlQueryParser parser = ObjectFactory.INSTANCE.getParser();
-
+public class TsdlQueryParserTest extends BaseQueryParserTest {
     @Test
     void tsdlParser_conjunctiveFilterWithOneArgument() {
         var queryString = """
           FILTER:
             AND(gt(23.4))
-          YIELD *
+          YIELD: data points
           """;
 
         var query = parser.parseQuery(queryString);
@@ -42,7 +39,7 @@ public class TsdlQueryParserTest {
         var queryString = """
           FILTER:
             OR(lt(-2.3))
-          YIELD *
+          YIELD: data points
           """;
 
         var query = parser.parseQuery(queryString);
@@ -64,7 +61,7 @@ public class TsdlQueryParserTest {
         var queryString = """
           FILTER:
             OR(NOT(lt(25)))
-          YIELD *
+          YIELD: data points
           """;
 
         var query = parser.parseQuery(queryString);
@@ -92,7 +89,7 @@ public class TsdlQueryParserTest {
                 NOT(gt(1000)),
                 lt(-3.4447)
               )
-          YIELD *
+          YIELD: data points
           """;
 
         var query = parser.parseQuery(queryString);

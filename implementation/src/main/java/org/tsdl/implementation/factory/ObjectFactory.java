@@ -8,11 +8,11 @@ import org.tsdl.implementation.parsing.TsdlQueryParser;
 public interface ObjectFactory {
     ObjectFactory INSTANCE = new ObjectFactoryImpl();
 
-    TsdlQueryParser getParser();
+    TsdlQueryParser queryParser();
 
     TsdlElementParser elementParser();
 
     TsdlElementFactory elementFactory();
 
-    ANTLRErrorListener getErrorListener();
+    ANTLRErrorListener errorListener();
 }
