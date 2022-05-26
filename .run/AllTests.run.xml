@@ -7,6 +7,9 @@
     <option name="TEST_SEARCH_SCOPE">
       <value defaultName="wholeProject" />
     </option>
+    <envs>
+      <env name="TSDL_SKIP_TEST_VISUALIZATION" value="true" />
+    </envs>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

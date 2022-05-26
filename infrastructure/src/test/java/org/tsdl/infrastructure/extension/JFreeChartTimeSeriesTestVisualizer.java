@@ -9,6 +9,8 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tsdl.infrastructure.model.DataPoint;
 
 import javax.swing.*;
@@ -19,11 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisualizer {
-    // TODO remove .getName() as soon as SLF4J logging is introduced
-    private static final Logger LOGGER = Logger.getLogger(JFreeChartTimeSeriesTestVisualizer.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JFreeChartTimeSeriesTestVisualizer.class);
 
     private TestVisualizationWindow visualizer;
     private final SingleActionAwait singleActionAwait = new SingleActionAwait();
@@ -34,6 +34,8 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
     @Override
     public boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration) {
         if (visualizationConfiguration != null && visualizationConfiguration.skipVisualization()) {
+            LOGGER.debug("Skipping visualization of test '%s' because the 'skipVisualization' parameter of the @%s' annotation is true."
+              .formatted(testInformation.longName(), DisableTsdlTestVisualization.class.getSimpleName()));
             return true;
         }
 
@@ -53,8 +55,8 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
         lastLocation = visualizer.locationOnClose;
 
         if (errorMessage != null) {
-            LOGGER.warning("Encountered problem while visualizing test: %s".formatted(errorMessage));
-            LOGGER.warning("Executing test anyway, without prior visualization.");
+            LOGGER.warn("Encountered problem while visualizing test: %s".formatted(errorMessage));
+            LOGGER.warn("Executing test anyway, without prior visualization.");
             return true;
         }
 

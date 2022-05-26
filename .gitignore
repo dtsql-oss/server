@@ -8,6 +8,8 @@
 service_api.json
 service_api.yaml
 
+**/logs/
+
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

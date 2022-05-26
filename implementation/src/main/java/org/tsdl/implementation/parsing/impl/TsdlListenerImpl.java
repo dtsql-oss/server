@@ -66,7 +66,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
     private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
         var filterType = elementParser.parseFilterType(ctx.filterType().getText());
-        var filterArgument = elementParser.parseNumber(ctx.NUMBER().getText());
+        var filterArgument = elementParser.parseNumber(ctx.singlePointFilterArgument().getText());
         return elementFactory.getFilter(filterType, filterArgument);
     }
 

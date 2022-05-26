@@ -3,10 +3,9 @@ package org.tsdl.implementation.evaluation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.tsdl.infrastructure.extension.DisableTsdlTestVisualization;
+import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.extension.TsdlTestVisualization;
 import org.tsdl.infrastructure.extension.TsdlTestVisualizer;
-import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
-    @TsdlTestVisualization()
+    @TsdlTestVisualization(skipVisualization = true)
     void query_lt(List<DataPoint> dataPoints) {
         var query = """
           FILTER:

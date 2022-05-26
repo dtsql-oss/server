@@ -47,7 +47,7 @@
     </dependencyManagement>
 
     <properties>
-        <revision>0.1-SNAPSHOT</revision>        <!-- MUST be called "revision" -->
+        <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
         <java.version>17</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
@@ -58,6 +58,7 @@
         <antlr.version>4.10.1</antlr.version>
         <mojo.version>3.3.0</mojo.version>
         <jfreechart.version>1.5.3</jfreechart.version>
+        <logback.version>1.2.11</logback.version>
     </properties>
 
 </project>

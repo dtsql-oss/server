@@ -6,7 +6,8 @@ options
 }
 
 tsdlQuery
-  :  (filtersDeclaration mandatoryWhitespace)?
+  :  whitespace
+       (filtersDeclaration mandatoryWhitespace)?
        (samplesDeclaration mandatoryWhitespace)?
        (eventsDeclaration mandatoryWhitespace)?
        (chooseDeclaration mandatoryWhitespace)?
@@ -133,12 +134,17 @@ singlePointFilterDeclaration
   ;
 
 singlePointFilter
-  :  filterType PARENTHESIS_OPEN whitespace NUMBER whitespace PARENTHESIS_CLOSE
+  :  filterType PARENTHESIS_OPEN whitespace singlePointFilterArgument whitespace PARENTHESIS_CLOSE
   ;
 
 negatedSinglePointFilter
-  :  CONNECTIVE_NOT PARENTHESIS_OPEN singlePointFilter PARENTHESIS_CLOSE
+  :  CONNECTIVE_NOT PARENTHESIS_OPEN whitespace singlePointFilter whitespace PARENTHESIS_CLOSE
   |  singlePointFilter
+  ;
+
+singlePointFilterArgument
+  :  NUMBER
+  |  identifier
   ;
 
 filterType
