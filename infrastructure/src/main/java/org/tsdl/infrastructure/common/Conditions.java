@@ -91,6 +91,22 @@ public final class Conditions {
         checkIsTrue(conditionType, i1 >= i2, "First integer must be greater than second.");
     }
 
+    public static void checkSizeExactly(Condition conditionType, Object[] array, int requiredSize, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, Objects.equals(array.length, requiredSize), messageTemplate, messageArguments);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Object[] array, int requiredSize) {
+        checkIsTrue(conditionType, Objects.equals(array.length, requiredSize), "Collection size must be equactly %s", requiredSize);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Collection<?> collection, int requiredSize, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, Objects.equals(collection.size(), requiredSize), messageTemplate, messageArguments);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Collection<?> collection, int requiredSize) {
+        checkIsTrue(conditionType, Objects.equals(collection.size(), requiredSize), "Collection size must be equactly %s", requiredSize);
+    }
+
     private static RuntimeException exception(Condition condition, String message) {
         return switch (condition) {
             case STATE -> new IllegalStateException(message);

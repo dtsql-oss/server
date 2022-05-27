@@ -1,4 +1,4 @@
-package org.tsdl.implementation.parsing;
+package org.tsdl.implementation.parsing.exception;
 
 public class TsdlParserException extends RuntimeException {
     public TsdlParserException() {

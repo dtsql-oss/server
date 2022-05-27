@@ -11,9 +11,9 @@ import org.tsdl.implementation.model.filter.SinglePointFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TsdlQueryParserTest extends BaseQueryParserTest {
+public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
     @Test
-    void tsdlParser_conjunctiveFilterWithOneArgument() {
+    void filterDeclaration_conjunctiveFilterWithOneArgument() {
         var queryString = """
           FILTER:
             AND(gt(23.4))
@@ -35,7 +35,7 @@ public class TsdlQueryParserTest extends BaseQueryParserTest {
     }
 
     @Test
-    void tsdlParser_disjunctiveFilterWithOneArgument() {
+    void filterDeclaration_disjunctiveFilterWithOneArgument() {
         var queryString = """
           FILTER:
             OR(lt(-2.3))
@@ -57,7 +57,7 @@ public class TsdlQueryParserTest extends BaseQueryParserTest {
     }
 
     @Test
-    void tsdlParser_negatedFilter() {
+    void filterDeclaration_negatedFilter() {
         var queryString = """
           FILTER:
             OR(NOT(lt(25)))
@@ -81,7 +81,7 @@ public class TsdlQueryParserTest extends BaseQueryParserTest {
     }
 
     @Test
-    void tsdlParser_multipleArguments() {
+    void filterDeclaration_multipleArguments() {
         var queryString = """
           FILTER:
             OR(

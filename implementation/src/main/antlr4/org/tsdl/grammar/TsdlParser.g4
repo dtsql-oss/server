@@ -36,7 +36,7 @@ events
   ;
 
 eventDeclaration
-  :  filterConnective whitespace AS whitespace identifier
+  :  filterConnective whitespace identifierDeclaration
   ;
 
 eventSeparator
@@ -89,7 +89,7 @@ aggregators
   ;
 
 aggregatorDeclaration
-  :  aggregatorFunctionDeclaration whitespace AS whitespace identifier
+  :  aggregatorFunctionDeclaration whitespace identifierDeclaration
   ;
 
 aggregatorFunctionDeclaration
@@ -104,10 +104,15 @@ aggregatorFunction
   :  AGGREGATOR_AVG
   |  AGGREGATOR_MAX
   |  AGGREGATOR_MIN
+  |  AGGREGATOR_SUM
   ;
 
 aggregatorInput
   :  INPUT_VARIABLE
+  ;
+
+identifierDeclaration
+  : AS whitespace identifier
   ;
 
 identifier

@@ -55,6 +55,7 @@ TEMPORAL_FOLLOWS  :  'follows'  ;
 AGGREGATOR_AVG  :  'avg'  ;
 AGGREGATOR_MAX  :  'max'  ;
 AGGREGATOR_MIN  :  'min'  ;
+AGGREGATOR_SUM  :  'sum'  ;
 INPUT_VARIABLE  :  '_input'  ;
 
 IDENTIFIER

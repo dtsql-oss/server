@@ -59,6 +59,7 @@
         <mojo.version>3.3.0</mojo.version>
         <jfreechart.version>1.5.3</jfreechart.version>
         <logback.version>1.2.11</logback.version>
+        <lombok.version>1.18.24</lombok.version>
     </properties>
 
 </project>

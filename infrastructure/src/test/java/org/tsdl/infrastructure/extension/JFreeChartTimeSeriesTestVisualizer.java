@@ -35,7 +35,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
     public boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration) {
         if (visualizationConfiguration != null && visualizationConfiguration.skipVisualization()) {
             LOGGER.debug("Skipping visualization of test '%s' because the 'skipVisualization' parameter of the @%s' annotation is true."
-              .formatted(testInformation.longName(), DisableTsdlTestVisualization.class.getSimpleName()));
+              .formatted(testInformation.longName(), TsdlTestVisualization.class.getSimpleName()));
             return true;
         }
 

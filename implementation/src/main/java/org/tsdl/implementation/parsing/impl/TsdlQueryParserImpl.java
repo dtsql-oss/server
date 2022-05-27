@@ -9,7 +9,7 @@ import org.tsdl.grammar.TsdlLexer;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
-import org.tsdl.implementation.parsing.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParserException;
 
 public class TsdlQueryParserImpl implements TsdlQueryParser {
     private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();

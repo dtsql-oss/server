@@ -3,6 +3,7 @@ package org.tsdl.implementation.parsing;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.tsdl.implementation.parsing.exception.TsdlParserException;
 
 public class TsdlErrorListener extends BaseErrorListener {
     public static final TsdlErrorListener INSTANCE = new TsdlErrorListener();
