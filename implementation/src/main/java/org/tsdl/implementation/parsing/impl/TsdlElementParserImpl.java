@@ -16,6 +16,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 public class TsdlElementParserImpl implements TsdlElementParser {
@@ -58,9 +59,10 @@ public class TsdlElementParserImpl implements TsdlElementParser {
 
         var decimalFormat = new DecimalFormat();
 
-        var symbols = new DecimalFormatSymbols();
+        var symbols = new DecimalFormatSymbols(Locale.US);
         symbols.setDecimalSeparator('.');
         decimalFormat.setDecimalFormatSymbols(symbols);
+        decimalFormat.setGroupingUsed(false);
 
         var parsePosition = new ParsePosition(0);
         var parsedNumber = decimalFormat.parse(str, parsePosition);

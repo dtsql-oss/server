@@ -1,4 +1,4 @@
-package org.tsdl.implementation.parsing.element;
+package org.tsdl.implementation.parsing;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.result.ResultFormat;
-import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -26,7 +25,7 @@ class TsdlElementParserTest {
     // region parseConnectiveIdentifier
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validConnectiveIdentifierInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validConnectiveIdentifierInputs")
     void parseConnectiveIdentifier_validRepresentations_ok(String representation, ConnectiveIdentifier member) {
         assertThat(PARSER.parseConnectiveIdentifier(representation)).isEqualTo(member);
     }
@@ -54,7 +53,7 @@ class TsdlElementParserTest {
     // region parseFilterType
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validFilterTypeInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validFilterTypeInputs")
     void parseFilterType_validRepresentations_ok(String representation, FilterType member) {
         assertThat(PARSER.parseFilterType(representation)).isEqualTo(member);
     }
@@ -82,7 +81,7 @@ class TsdlElementParserTest {
     // region parseResultFormat
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validResultFormatInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validResultFormatInputs")
     void parseResultFormat_validRepresentations_ok(String representation, ResultFormat member) {
         assertThat(PARSER.parseResultFormat(representation)).isEqualTo(member);
     }
@@ -112,7 +111,7 @@ class TsdlElementParserTest {
     // region parseAggregatorType
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validAggregatorTypeInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validAggregatorTypeInputs")
     void parseAggregatorType_validRepresentations_ok(String representation, AggregatorType member) {
         assertThat(PARSER.parseAggregatorType(representation)).isEqualTo(member);
     }
@@ -142,7 +141,7 @@ class TsdlElementParserTest {
     // region parseTemporalRelationType
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validTemporalRelationTypeInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validTemporalRelationTypeInputs")
     void parseTemporalRelationType_validRepresentations_ok(String representation, TemporalRelationType member) {
         assertThat(PARSER.parseTemporalRelationType(representation)).isEqualTo(member);
     }
@@ -170,14 +169,19 @@ class TsdlElementParserTest {
     // region parseNumber
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#validParseNumberInputs")
+    @MethodSource("org.tsdl.implementation.parsing.TsdlElementParserTest#validParseNumberInputs")
     void parseNumber_validNumber_parsesCorrectly(String str, Double expected) {
         assertThat(PARSER.parseNumber(str)).isEqualTo(expected);
     }
 
 
+    @ValueSource(strings = {
+      "2,9", "2,9 ", "2.9 ", "29 ",
+      "293.222,9", "19.283.932", "28,292,833", "2,233.3", "16 325,62", "16 325.62",
+      "1,6326E+004", "1.6326E+004", "13%", "13 %", "13€", "13 €", "13 $", "13$", "$13",
+      "NaN", "nan", "-NaN", "-nan", "Inf", "inf", "-Inf", "-inf", "Infinity", "infinity", "-Infinity", "-infinity"
+    })
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#invalidParseNumberInputs")
     void parseNumber_invalidNumber_throws(String str) {
         assertThatThrownBy(() -> {
             var num = PARSER.parseNumber(str);
@@ -202,42 +206,6 @@ class TsdlElementParserTest {
           Arguments.of("128395", 128395.0),
           Arguments.of("-100.0", -100.0),
           Arguments.of("-123.45", -123.45)
-        );
-    }
-
-    private static Stream<Arguments> invalidParseNumberInputs() {
-        return Stream.of(
-          Arguments.of("2,9"),
-          Arguments.of("2,9 "),
-          Arguments.of("2.9 "),
-          Arguments.of("29 "),
-          Arguments.of("293.222,9"),
-          Arguments.of("19.283.932"),
-          Arguments.of("28,292,833"),
-          Arguments.of("2,233.3"),
-          Arguments.of("16 325,62"),
-          Arguments.of("16 325.62"),
-          Arguments.of("1,6326E+004"),
-          Arguments.of("1.6326E+004"),
-          Arguments.of("13%"),
-          Arguments.of("13 %"),
-          Arguments.of("13€"),
-          Arguments.of("13 €"),
-          Arguments.of("13 $"),
-          Arguments.of("13$"),
-          Arguments.of("$13"),
-          Arguments.of("NaN"),
-          Arguments.of("nan"),
-          Arguments.of("-NaN"),
-          Arguments.of("-nan"),
-          Arguments.of("Inf"),
-          Arguments.of("inf"),
-          Arguments.of("-Inf"),
-          Arguments.of("-inf"),
-          Arguments.of("Infinity"),
-          Arguments.of("infinity"),
-          Arguments.of("-Infinity"),
-          Arguments.of("-infinity")
         );
     }
 
