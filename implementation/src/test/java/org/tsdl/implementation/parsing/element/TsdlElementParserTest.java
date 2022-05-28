@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class TsdlElementParserTest extends BaseElementParserTest {
+class TsdlElementParserTest extends BaseElementParserTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.parsing.element.TsdlElementParserTest#provideValidTestInputs")
     void parseResultFormat_validRepresentations_ok(String representation, ResultFormat member) {

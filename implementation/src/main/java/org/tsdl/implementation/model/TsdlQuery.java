@@ -21,5 +21,5 @@ public interface TsdlQuery {
 
     TemporalOperator choice();
 
-    ResultFormat yield();
+    ResultFormat result();
 }

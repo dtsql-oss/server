@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(TsdlTestVisualizer.class)
-public class TsdlQueryServiceTest {
+class TsdlQueryServiceTest {
     private static final QueryService queryService = new TsdlQueryService();
 
     @ParameterizedTest

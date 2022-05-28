@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class TsdlQueryParserYieldDeclarationTest extends BaseQueryParserTest {
+class TsdlQueryParserYieldDeclarationTest extends BaseQueryParserTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.parsing.query.TsdlQueryParserYieldDeclarationTest#provideValidTestInputs")
@@ -20,7 +20,7 @@ public class TsdlQueryParserYieldDeclarationTest extends BaseQueryParserTest {
         var queryString = "YIELD: %s".formatted(representation);
         var query = parser.parseQuery(queryString);
 
-        assertThat(query.yield()).isEqualTo(member);
+        assertThat(query.result()).isEqualTo(member);
     }
 
     @ParameterizedTest

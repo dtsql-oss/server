@@ -18,6 +18,7 @@ import java.util.List;
 public final class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
     @Override
     public void initialize(CsvStorageConfiguration serviceConfiguration) {
+        // no initialization needed
     }
 
     @Override
@@ -96,6 +97,7 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
 
     @Override
     public void close() {
+        // nothing to do, all closable resources are closed upon usage
     }
 
     @NotNull

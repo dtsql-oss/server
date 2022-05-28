@@ -2,16 +2,17 @@ package org.tsdl.implementation.parsing.query;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
-import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
-import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
-import org.tsdl.implementation.evaluation.impl.filter.GtFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.LtFilterImpl;
-import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
-import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.implementation.model.connective.AndConnective;
+import org.tsdl.implementation.model.connective.OrConnective;
+import org.tsdl.implementation.model.filter.*;
+
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
+class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
+    private static final Function<? super ThresholdFilter, Double> VALUE_EXTRACTOR = filter -> filter.threshold().value();
+
     @Test
     void filterDeclaration_conjunctiveFilterWithOneArgument() {
         var queryString = """
@@ -23,14 +24,13 @@ public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
         var query = parser.parseQuery(queryString);
 
         assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(AndConnectiveImpl.class))
-          .extracting(AndConnectiveImpl::filters)
-          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .asInstanceOf(InstanceOfAssertFactories.type(AndConnective.class))
+          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1);
 
         assertThat(query.filter().filters().get(0))
-          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
-          .extracting(GtFilterImpl::threshold)
+          .asInstanceOf(InstanceOfAssertFactories.type(GtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(23.4);
     }
 
@@ -45,14 +45,11 @@ public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
         var query = parser.parseQuery(queryString);
 
         assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
-          .extracting(OrConnectiveImpl::filters)
-          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
-          .hasSize(1);
-
-        assertThat(query.filter().filters().get(0))
-          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
-          .extracting(LtFilterImpl::threshold)
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(LtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-2.3);
     }
 
@@ -67,16 +64,12 @@ public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
         var query = parser.parseQuery(queryString);
 
         assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
-          .extracting(OrConnectiveImpl::filters)
-          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
-          .hasSize(1);
-
-        assertThat(query.filter().filters().get(0))
-          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
-          .extracting(NegatedSinglePointFilter::filter)
-          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
-          .extracting(LtFilterImpl::threshold)
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(25d);
     }
 
@@ -95,33 +88,30 @@ public class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
         var query = parser.parseQuery(queryString);
 
         assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnectiveImpl.class))
-          .extracting(OrConnectiveImpl::filters)
-          .asInstanceOf(InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(4);
 
         assertThat(query.filter().filters().get(0))
           .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
-          .extracting(NegatedSinglePointFilter::filter)
-          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
-          .extracting(LtFilterImpl::threshold)
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(25.1);
 
         assertThat(query.filter().filters().get(1))
-          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
-          .extracting(GtFilterImpl::threshold)
+          .asInstanceOf(InstanceOfAssertFactories.type(GtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(3.4);
 
         assertThat(query.filter().filters().get(2))
           .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
-          .extracting(NegatedSinglePointFilter::filter)
-          .asInstanceOf(InstanceOfAssertFactories.type(GtFilterImpl.class))
-          .extracting(GtFilterImpl::threshold)
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(GtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(1000d);
 
         assertThat(query.filter().filters().get(3))
-          .asInstanceOf(InstanceOfAssertFactories.type(LtFilterImpl.class))
-          .extracting(LtFilterImpl::threshold)
+          .asInstanceOf(InstanceOfAssertFactories.type(LtFilter.class))
+          .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-3.4447);
     }
 }

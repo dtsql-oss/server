@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class StoragePropertyTest {
+class StoragePropertyTest {
     @Test
     void fromIdentifier_nullIdentifier_throws() {
         assertThatThrownBy(() -> StorageProperty.fromIdentifier(null, TestConfigurationProperty.class))

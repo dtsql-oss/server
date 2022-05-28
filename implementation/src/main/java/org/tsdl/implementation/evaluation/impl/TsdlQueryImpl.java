@@ -19,6 +19,6 @@ public record TsdlQueryImpl(
   List<TsdlSample> samples,
   List<TsdlEvent> events,
   TemporalOperator choice,
-  ResultFormat yield
+  ResultFormat result
 ) implements TsdlQuery {
 }

@@ -3,7 +3,6 @@ package org.tsdl.service.web;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +47,10 @@ public class QueryController {
 
     @PostMapping
     @Operation(summary = "Execute query over configurable storage provider.")
-    @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
-    })
+    @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
     public List<DataPoint> query(@Valid @RequestBody
-                                   @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                                   QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+                                 @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
+                                 QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
         LOGGER.info("Executing query...");
 
         var storageSpec = querySpecification.getStorage();

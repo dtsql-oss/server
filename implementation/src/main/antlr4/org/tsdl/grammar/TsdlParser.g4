@@ -7,8 +7,8 @@ options
 
 tsdlQuery
   :  whitespace
-       (filtersDeclaration mandatoryWhitespace)?
        (samplesDeclaration mandatoryWhitespace)?
+       (filtersDeclaration mandatoryWhitespace)?
        (eventsDeclaration mandatoryWhitespace)?
        (chooseDeclaration mandatoryWhitespace)?
        yieldDeclaration

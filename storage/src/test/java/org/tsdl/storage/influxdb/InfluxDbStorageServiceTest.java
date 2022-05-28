@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class InfluxDbStorageServiceTest {
+class InfluxDbStorageServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.storage.influxdb.stub.FluxTableDataFactory#threeSingletonTables")

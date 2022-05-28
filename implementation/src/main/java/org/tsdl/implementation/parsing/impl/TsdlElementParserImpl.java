@@ -19,39 +19,42 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class TsdlElementParserImpl implements TsdlElementParser {
+
+    public static final String STRING_TO_PARSE_MUST_NOT_BE_NULL = "String to parse must not be null";
+
     @Override
     public ConnectiveIdentifier parseConnectiveIdentifier(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
         return parseEnumMember(ConnectiveIdentifier.class, str);
     }
 
     @Override
     public FilterType parseFilterType(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
         return parseEnumMember(FilterType.class, str);
     }
 
     @Override
     public ResultFormat parseResultFormat(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
         return parseEnumMember(ResultFormat.class, str);
     }
 
     @Override
     public AggregatorType parseAggregatorType(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
         return parseEnumMember(AggregatorType.class, str);
     }
 
     @Override
     public TemporalRelationType parseTemporalRelationType(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
         return parseEnumMember(TemporalRelationType.class, str);
     }
 
     @Override
     public Double parseNumber(String str) {
-        Conditions.checkNotNull(Condition.ARGUMENT, str, "String to parse must not be null");
+        Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
         var decimalFormat = new DecimalFormat();
 

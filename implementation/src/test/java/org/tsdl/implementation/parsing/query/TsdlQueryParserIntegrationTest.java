@@ -28,16 +28,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class TsdlQueryParserIntegrationTest extends BaseQueryParserTest {
+class TsdlQueryParserIntegrationTest extends BaseQueryParserTest {
     private static final String FULL_FEATURE_QUERY = """
-      FILTER:
-        AND(gt(2), NOT(lt(3.5)))
-
       WITH SAMPLES:
         avg(_input) AS s1,
         max(_input) AS s2,
         min(_input) AS s3,
         sum(_input) AS s4
+
+      FILTER:
+        AND(gt(2), NOT(lt(3.5)))
 
       WITH EVENTS:
         AND(lt(3.5)) AS low,
@@ -237,7 +237,7 @@ public class TsdlQueryParserIntegrationTest extends BaseQueryParserTest {
           YIELD: all periods
           """;
 
-        // depending on whether identifier 'low' is parsed before filter argument 'lt(3.5)',
+        // depending on whether identifier 'low' is parsed before filter argument 'lt(3.5)' or after,
         // an InvalidReferenceException or UnknownIdentifierException is thrown
         assertThatThrownBy(() -> parser.parseQuery(queryString))
           .isInstanceOfAny(UnknownIdentifierException.class, InvalidReferenceException.class);

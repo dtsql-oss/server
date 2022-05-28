@@ -41,7 +41,6 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         var identifier = parseIdentifier(ctx.identifier());
 
         if (!declaredIdentifiers.contains(identifier)) {
-            System.out.println("declared: " + identifier.name());
             declaredIdentifiers.add(identifier);
         } else {
             throw new DuplicateIdentifierException(identifier.name());
@@ -118,7 +117,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     @Override
     public void enterYieldDeclaration(TsdlParser.YieldDeclarationContext ctx) {
         var resultFormat = elementParser.parseResultFormat(ctx.yieldType().getText());
-        queryBuilder.yield(resultFormat);
+        queryBuilder.result(resultFormat);
     }
 
     private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {

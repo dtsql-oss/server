@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
-public class CsvStorageServiceTest {
+class CsvStorageServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.storage.csv.stub.CsvRowDataFactory#threeEntries")
