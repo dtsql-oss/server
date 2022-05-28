@@ -9,6 +9,8 @@ import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
 import org.tsdl.implementation.evaluation.impl.filter.GtFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.LtFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
@@ -21,6 +23,7 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -39,7 +42,7 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
     }
 
     @Override
-    public SinglePointFilter getFilter(FilterType type, Double argument) {
+    public SinglePointFilter getFilter(FilterType type, TsdlFilterArgument argument) {
         Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of filter must not be null.");
         Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of filter must not be null.");
         return switch (type) {
@@ -62,6 +65,18 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
             case AND -> new AndConnectiveImpl(filters);
             case OR -> new OrConnectiveImpl(filters);
         };
+    }
+
+    @Override
+    public TsdlFilterArgument getFilterArgument(Double value) {
+        Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
+        return new TsdlLiteralFilterArgumentImpl(value);
+    }
+
+    @Override
+    public TsdlFilterArgument getFilterArgument(TsdlSample sample) {
+        Conditions.checkNotNull(Condition.ARGUMENT, sample, "Filter argument sample must not be null.");
+        return new TsdlSampleFilterArgumentImpl(sample);
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
@@ -21,10 +22,13 @@ import java.util.*;
 
 // TODO: use visitor instead of listener?
 public class TsdlListenerImpl extends TsdlParserBaseListener {
+    private enum IdentifierType {EVENT, SAMPLE}
+
     private final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
+
     private final TsdlElementFactory elementFactory = ObjectFactory.INSTANCE.elementFactory();
 
-    final private Set<TsdlIdentifier> declaredIdentifiers = new HashSet<>();
+    private final Set<TsdlIdentifier> declaredIdentifiers = new HashSet<>();
 
     private final Map<TsdlIdentifier, TsdlEvent> declaredEvents = new HashMap<>();
 
@@ -37,6 +41,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         var identifier = parseIdentifier(ctx.identifier());
 
         if (!declaredIdentifiers.contains(identifier)) {
+            System.out.println("declared: " + identifier.name());
             declaredIdentifiers.add(identifier);
         } else {
             throw new DuplicateIdentifierException(identifier.name());
@@ -99,16 +104,10 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
         var chosenEvents = new ArrayList<TsdlEvent>();
         for (var identifierDeclaration : choiceStatement.identifier()) {
-            var identifier = parseIdentifier(identifierDeclaration);
-            if (declaredIdentifiers.contains(identifier) && declaredEvents.containsKey(identifier)) {
-                chosenEvents.add(declaredEvents.get(identifier));
-            } else if (!declaredIdentifiers.contains(identifier)) {
-                throw new UnknownIdentifierException(identifier.name());
-            } else {
-                throw new InvalidReferenceException(identifier.name(), "event");
-            }
+            var identifier = requireIdentifier(identifierDeclaration, IdentifierType.EVENT);
+            var referencedEvent = declaredEvents.get(identifier);
+            chosenEvents.add(referencedEvent);
         }
-
 
         var relationType = elementParser.parseTemporalRelationType(choiceStatement.temporalRelation().getText());
         var operator = elementFactory.getChoice(relationType, chosenEvents);
@@ -167,8 +166,36 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
     private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
         var filterType = elementParser.parseFilterType(ctx.filterType().getText());
-        var filterArgument = elementParser.parseNumber(ctx.singlePointFilterArgument().getText()); // TODO also support reference to sample - check if identifier in sample Map
+        TsdlFilterArgument filterArgument;
+
+        if (ctx.singlePointFilterArgument().identifier() != null) {
+            var identifier = requireIdentifier(ctx.singlePointFilterArgument().identifier(), IdentifierType.SAMPLE);
+            var referencedSample = declaredSamples.get(identifier);
+            filterArgument = elementFactory.getFilterArgument(referencedSample);
+        } else if (ctx.singlePointFilterArgument().NUMBER() != null) {
+            var literalValue = elementParser.parseNumber(ctx.singlePointFilterArgument().NUMBER().getText());
+            filterArgument = elementFactory.getFilterArgument(literalValue);
+        } else {
+            throw new IllegalStateException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'");
+        }
+
         return elementFactory.getFilter(filterType, filterArgument);
+    }
+
+    private TsdlIdentifier requireIdentifier(TsdlParser.IdentifierContext ctx, IdentifierType type) {
+        var identifier = parseIdentifier(ctx);
+        var identifierMap = switch (type) {
+            case EVENT -> declaredEvents;
+            case SAMPLE -> declaredSamples;
+        };
+
+        if (declaredIdentifiers.contains(identifier) && identifierMap.containsKey(identifier)) {
+            return identifier;
+        } else if (!declaredIdentifiers.contains(identifier)) {
+            throw new UnknownIdentifierException(identifier.name());
+        } else {
+            throw new InvalidReferenceException(identifier.name(), type.name().toLowerCase());
+        }
     }
 
     private TsdlIdentifier parseIdentifier(TsdlParser.IdentifierContext ctx) {

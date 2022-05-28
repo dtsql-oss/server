@@ -70,7 +70,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
         return parsedNumber.doubleValue();
     }
 
-    public <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
+    private  <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
         return Arrays.stream(clazz.getEnumConstants())
           .filter(element -> element.representation().equals(str))
           .findFirst()
