@@ -6,8 +6,8 @@ import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
 import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
-import org.tsdl.implementation.evaluation.impl.filter.GtFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.LtFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.GreaterThanFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.LowerThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
@@ -46,8 +46,8 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
         Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of filter must not be null.");
         Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of filter must not be null.");
         return switch (type) {
-            case GT -> new GtFilterImpl(argument);
-            case LT -> new LtFilterImpl(argument);
+            case GT -> new GreaterThanFilterImpl(argument);
+            case LT -> new LowerThanFilterImpl(argument);
         };
     }
 

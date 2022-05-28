@@ -1,12 +1,12 @@
 package org.tsdl.implementation.evaluation.impl.filter;
 
-import org.tsdl.implementation.model.filter.LtFilter;
+import org.tsdl.implementation.model.filter.LowerThanFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
-public record LtFilterImpl(TsdlFilterArgument threshold) implements LtFilter {
+public record LowerThanFilterImpl(TsdlFilterArgument threshold) implements LowerThanFilter {
     @Override
     public boolean evaluate(DataPoint dataPoint) {
         Conditions.checkNotNull(Condition.STATE, dataPoint, "Data point must not be null.");
