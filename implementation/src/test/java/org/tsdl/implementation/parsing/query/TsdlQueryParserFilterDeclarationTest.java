@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.tsdl.implementation.model.connective.AndConnective;
 import org.tsdl.implementation.model.connective.OrConnective;
 import org.tsdl.implementation.model.filter.*;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
 
 import java.util.function.Function;
 
@@ -114,4 +115,27 @@ class TsdlQueryParserFilterDeclarationTest extends BaseQueryParserTest {
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-3.4447);
     }
+
+    @Test
+    void filterDeclaration_sampleAsArgument() {
+        var queryString = """
+          WITH SAMPLES:
+            avg(_input) AS average
+          FILTER:
+            AND(gt(average))
+          YIELD: data points
+          """;
+
+        var query = parser.parseQuery(queryString);
+
+        assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.type(AndConnective.class))
+          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(GtFilter.class))
+          .extracting(GtFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+          .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
+          .isEqualTo("average");
+    }
+
 }

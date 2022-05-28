@@ -37,7 +37,7 @@ class TsdlQueryParserIntegrationTest extends BaseQueryParserTest {
         sum(_input) AS s4
 
       FILTER:
-        AND(gt(2), NOT(lt(3.5)))
+        AND(gt(s2), NOT(lt(3.5)))
 
       WITH EVENTS:
         AND(lt(3.5)) AS low,
@@ -73,7 +73,10 @@ class TsdlQueryParserIntegrationTest extends BaseQueryParserTest {
           .hasSize(2)
           .satisfies(filterArguments -> {
               assertThat(filterArguments.get(0))
-                .isEqualTo(element.getFilter(FilterType.GT, element.getFilterArgument(2.0)));
+                .asInstanceOf(InstanceOfAssertFactories.type(GtFilter.class))
+                .extracting(GtFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+                .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("s2");
 
               assertThat(filterArguments.get(1))
                 .isEqualTo(element.getNegatedFilter(element.getFilter(FilterType.LT, element.getFilterArgument(3.5))));

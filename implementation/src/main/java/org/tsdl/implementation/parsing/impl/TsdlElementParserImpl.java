@@ -60,7 +60,6 @@ public class TsdlElementParserImpl implements TsdlElementParser {
 
         var symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
-        symbols.setGroupingSeparator(',');
         decimalFormat.setDecimalFormatSymbols(symbols);
 
         var parsePosition = new ParsePosition(0);
@@ -70,10 +69,18 @@ public class TsdlElementParserImpl implements TsdlElementParser {
               new ParseException("Failed to parse entire string: '%s' at index %d.".formatted(str, parsePosition.getIndex()),
                 parsePosition.getIndex()));
         }
-        return parsedNumber.doubleValue();
+
+        var num = parsedNumber.doubleValue();
+        if (Double.isNaN(num)) {
+            throw new TsdlParserException("NaN is not a valid number.");
+        } else if (Double.isInfinite(num)) {
+            throw new TsdlParserException("Infinity or negative infinity is not a valid number.");
+        } else {
+            return parsedNumber.doubleValue() + 0.0; // "+ 0.0" makes that special case -0.0 is still returned as 0.0
+        }
     }
 
-    private  <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
+    private <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
         return Arrays.stream(clazz.getEnumConstants())
           .filter(element -> element.representation().equals(str))
           .findFirst()
