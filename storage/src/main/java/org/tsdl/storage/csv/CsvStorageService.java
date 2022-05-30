@@ -40,10 +40,12 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
         Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           lookupConfiguration.isPropertySet(CsvStorageProperty.FILE_PATH),
-          "'FILE_PATH' property is required to load data with the CSV storage service.");
+          "'%s' property ('%s') is required to load data with the CSV storage service.",
+          CsvStorageProperty.FILE_PATH.name(), CsvStorageProperty.FILE_PATH.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           lookupConfiguration.isPropertySet(CsvStorageProperty.FIELD_SEPARATOR),
-          "'FILE_SEPARATOR' property is required to load data with the CSV storage service.");
+          "'%s' property ('%s') is required to load data with the CSV storage service.",
+          CsvStorageProperty.FIELD_SEPARATOR.name(), CsvStorageProperty.FIELD_SEPARATOR.identifier());
 
         var filePath = lookupConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
         var fieldSeparator = lookupConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
@@ -58,23 +60,27 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
         Conditions.checkNotNull(Condition.ARGUMENT, loadedData, "Data to transform must not be null.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.VALUE_COLUMN),
-          "'COLUMN_INDEX' property is required to transform data loaded by the CSV storage service into data points.");
+          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          CsvStorageProperty.VALUE_COLUMN.name(), CsvStorageProperty.VALUE_COLUMN.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_COLUMN),
-          "'TIME_COLUMN' property is required to transform data loaded by the CSV storage service into data points.");
+          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          CsvStorageProperty.TIME_COLUMN.name(), CsvStorageProperty.TIME_COLUMN.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_FORMAT),
-          "'TIME_FORMAT' property is required to transform data loaded by the CSV storage service into data points.");
+          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          CsvStorageProperty.TIME_FORMAT.name(), CsvStorageProperty.TIME_FORMAT.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.SKIP_HEADERS),
-          "'SKIP_HEADERS' property is required to transform data loaded by the CSV storage service into data points.");
-
+          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
 
         var skipHeaders = transformationConfiguration.getProperty(CsvStorageProperty.SKIP_HEADERS, Integer.class);
         Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT,
           skipHeaders,
           0,
-          "'SKIP_HEADERS' property must be greater than or equal to 0.");
+          "'%' property ('%s') must be greater than or equal to 0.",
+          CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
 
         var valueIndex = transformationConfiguration.getProperty(CsvStorageProperty.VALUE_COLUMN, Integer.class);
         var timeIndex = transformationConfiguration.getProperty(CsvStorageProperty.TIME_COLUMN, Integer.class);

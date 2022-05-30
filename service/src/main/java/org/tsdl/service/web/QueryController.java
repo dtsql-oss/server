@@ -51,7 +51,11 @@ public class QueryController {
     public List<DataPoint> query(@Valid @RequestBody
                                  @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
                                  QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
-        LOGGER.info("Executing query...");
+        LOGGER.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
+        LOGGER.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
+        LOGGER.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
+        LOGGER.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
+        LOGGER.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
 
         var storageSpec = querySpecification.getStorage();
         var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());
