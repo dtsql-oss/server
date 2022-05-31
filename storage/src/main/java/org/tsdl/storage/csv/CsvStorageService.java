@@ -11,7 +11,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -86,7 +86,7 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
         var timeIndex = transformationConfiguration.getProperty(CsvStorageProperty.TIME_COLUMN, Integer.class);
         var formatter = DateTimeFormatter
           .ofPattern(transformationConfiguration.getProperty(CsvStorageProperty.TIME_FORMAT, String.class))
-          .withZone(ZoneId.systemDefault());
+          .withZone(ZoneOffset.UTC);
 
         return loadedData.stream()
           .skip(skipHeaders)

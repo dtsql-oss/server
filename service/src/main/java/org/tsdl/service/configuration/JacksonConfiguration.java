@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.TimeZone;
 
 @Configuration
@@ -25,7 +25,7 @@ public class JacksonConfiguration {
           .indentOutput(true)
           .findModulesViaServiceLoader(true)
           .modules(new JavaTimeModule())
-          .timeZone(TimeZone.getTimeZone(ZoneId.systemDefault())) // serialize ZonedDateTime in primaryTimeZone
+          .timeZone(TimeZone.getTimeZone(ZoneOffset.UTC)) // serialize ZonedDateTime in primaryTimeZone
           .build();
     }
 }

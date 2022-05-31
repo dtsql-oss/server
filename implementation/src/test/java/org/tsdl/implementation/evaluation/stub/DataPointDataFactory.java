@@ -4,7 +4,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.tsdl.infrastructure.model.DataPoint;
 
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,7 +16,7 @@ public final class DataPointDataFactory {
 
     private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter
       .ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-      .withZone(ZoneId.systemDefault());
+      .withZone(ZoneOffset.UTC);
 
     public static Stream<Arguments> dataPoints_0() {
         return Stream.of(
