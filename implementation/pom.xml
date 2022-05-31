@@ -28,6 +28,11 @@
             <artifactId>storage</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.tsdl</groupId>
+            <artifactId>test-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr.version}</version>
@@ -46,13 +51,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.tsdl</groupId>
-            <artifactId>infrastructure</artifactId>
-            <type>test-jar</type>
-            <version>${revision}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
@@ -68,12 +66,6 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>${jfreechart.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

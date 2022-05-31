@@ -1,4 +1,4 @@
-package org.tsdl.infrastructure.extension;
+package org.tsdl.testutil.visualization.impl;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -12,6 +12,9 @@ import org.jfree.data.xy.XYDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
+import org.tsdl.testutil.visualization.api.TsdlTestInfo;
+import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 
 import javax.swing.*;
 import java.awt.*;

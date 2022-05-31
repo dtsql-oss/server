@@ -1,4 +1,4 @@
-package org.tsdl.infrastructure.extension;
+package org.tsdl.testutil.visualization.impl;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
@@ -6,6 +6,10 @@ import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.testutil.visualization.api.DisableTsdlTestVisualization;
+import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
+import org.tsdl.testutil.visualization.api.TsdlTestInfo;
+import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -56,7 +60,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
         }
 
         var visualizationConfig = extensionContext.getRequiredTestMethod().getAnnotation(TsdlTestVisualization.class);
-        var testInfo = new TsdlTestInfo(shortTestName, longTestName, argumentSeries);
+        var testInfo = TsdlTestInfo.of(shortTestName, longTestName, argumentSeries);
 
         var executeTest = testVisualizer.visualizeBlocking(testInfo, visualizationConfig);
         if (executeTest) {

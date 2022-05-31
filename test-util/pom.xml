@@ -10,10 +10,10 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>infrastructure</artifactId>
+    <artifactId>test-util</artifactId>
     <version>${revision}</version>
-    <name>infrastructure</name>
-    <description>Provides common interfaces to be adhered to by TSDL components.</description>
+    <name>test-util</name>
+    <description>Collection of utilities and tools related to the testing infrastructure.</description>
 
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
@@ -21,38 +21,28 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.tsdl</groupId>
+            <artifactId>infrastructure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>${jfreechart.version}</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin.version}</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -65,4 +55,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

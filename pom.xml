@@ -15,6 +15,7 @@
         <module>service</module>
         <module>implementation</module>
         <module>storage</module>
+        <module>test-util</module>
     </modules>
 
     <build>
@@ -41,6 +42,11 @@
             <dependency>
                 <groupId>org.tsdl</groupId>
                 <artifactId>implementation</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>test-util</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

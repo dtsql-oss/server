@@ -4,8 +4,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.api.QueryService;
-import org.tsdl.infrastructure.extension.TsdlTestVisualization;
-import org.tsdl.infrastructure.extension.TsdlTestVisualizer;
+import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
+import org.tsdl.testutil.visualization.impl.TsdlTestVisualizer;
 import org.tsdl.infrastructure.model.DataPoint;
 
 import java.util.List;
