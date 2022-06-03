@@ -40,7 +40,7 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
         for (int i = 0; i < sourceFiles.size(); i++) {
             var testSource = sourceFiles.get(i);
             var testUrl = Thread.currentThread().getContextClassLoader().getResource(testSource.value());
-            Conditions.checkNotNull(Condition.STATE, testUrl, "Could not read file '%s'", testSource);
+            Conditions.checkNotNull(Condition.STATE, testUrl, "Could not read file '%s'", testSource.value());
 
             //noinspection ConstantConditions
             var testFile = testUrl.getPath();

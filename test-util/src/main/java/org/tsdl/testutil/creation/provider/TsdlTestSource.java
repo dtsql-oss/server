@@ -11,4 +11,7 @@ public @interface TsdlTestSource {
     String value();
 
     String timestampFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
+
+    // TODO
+    int skipHeaders() default 0;
 }

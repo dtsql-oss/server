@@ -117,7 +117,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
           Instant.now().minus(5 * 12 * 30, ChronoUnit.DAYS), // 5 years
           Instant.now().plus(5 * 12 * 30, ChronoUnit.DAYS) // 5 years
         );
-
+        // TODO also serialize avg, sum etc. as header comments
         var output = new StringBuilder();
         if ("CSV".equals(type)) {
             for (int i = 0; i < lst.size(); i++) {

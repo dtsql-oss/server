@@ -10,7 +10,7 @@ public class TestDataPainterWindow extends JFrame {
 
     private final JSpinner numThickness = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
 
-    private final JSpinner numSampleRate = new JSpinner(new SpinnerNumberModel(1, 1, 50, 1));
+    private final JSpinner numSampleRate = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
     private final PainterFrame painter = new PainterFrame((Integer) numThickness.getValue(), (Integer) numSampleRate.getValue());
 
     private final JComboBox<String> cmbOutput = new JComboBox<>(new String[]{"CSV", "Java"});
