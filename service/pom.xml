@@ -19,7 +19,6 @@
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <spring.version>2.7.0</spring.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
-        <lombok.version>1.18.24</lombok.version>
         <kotlin.version>1.6.21</kotlin.version>
     </properties>
 
@@ -50,7 +49,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.7</version>
+            <version>1.6.8</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

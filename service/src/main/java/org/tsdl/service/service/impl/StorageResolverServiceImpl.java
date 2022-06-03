@@ -21,7 +21,7 @@ public class StorageResolverServiceImpl implements StorageResolverService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // unchecked operation required due to type erasure
     public TsdlStorage<Object, StorageServiceConfiguration> resolve(String storageIdentifier) throws UnknownStorageException {
         var storageBeanReference = STORAGE_BEAN_NAME_TEMPLATE.formatted(storageIdentifier);
         if (!storageServices.containsKey(storageBeanReference)) {

@@ -1,3 +1,8 @@
+logging:
+  config: "./logback.xml"
+  file-name: "server"
+  directory: "./logs"
+
 springdoc:
   api-docs:
     enabled: true

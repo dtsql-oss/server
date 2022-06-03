@@ -2,13 +2,13 @@ package org.tsdl.infrastructure.common;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 public final class Conditions {
     private Conditions() {
     }
 
-    public static void checkIsTrue(Condition conditionType, Boolean expression, String messageTemplate, Object... messageArguments) {
+    public static void checkIsTrue(Condition conditionType, boolean expression, String messageTemplate, Object... messageArguments) {
         if (!expression) {
             throw exception(conditionType, String.format(messageTemplate, messageArguments));
         }
@@ -18,11 +18,11 @@ public final class Conditions {
         checkIsTrue(conditionType, expression, "Boolean expression must evaluate to true.");
     }
 
-    public static void checkIsTrue(Condition conditionType, Supplier<Boolean> predicate, String messageTemplate, Object... messageArguments) {
-        checkIsTrue(conditionType, predicate.get(), messageTemplate, messageArguments);
+    public static void checkIsTrue(Condition conditionType, BooleanSupplier predicate, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, predicate.getAsBoolean(), messageTemplate, messageArguments);
     }
 
-    public static void checkIsTrue(Condition conditionType, Supplier<Boolean> predicate) {
+    public static void checkIsTrue(Condition conditionType, BooleanSupplier predicate) {
         checkIsTrue(conditionType, predicate, "Boolean predicate must evaluate to true.");
     }
 
@@ -34,11 +34,11 @@ public final class Conditions {
         checkIsFalse(conditionType, expression, "Boolean expression must evaluate to false.");
     }
 
-    public static void checkIsFalse(Condition conditionType, Supplier<Boolean> predicate, String messageTemplate, Object... messageArguments) {
-        checkIsFalse(conditionType, predicate.get(), messageTemplate, messageArguments);
+    public static void checkIsFalse(Condition conditionType, BooleanSupplier predicate, String messageTemplate, Object... messageArguments) {
+        checkIsFalse(conditionType, predicate.getAsBoolean(), messageTemplate, messageArguments);
     }
 
-    public static void checkIsFalse(Condition conditionType, Supplier<Boolean> predicate) {
+    public static void checkIsFalse(Condition conditionType, BooleanSupplier predicate) {
         checkIsFalse(conditionType, predicate, "Boolean predicate must evaluate to false.");
     }
 
@@ -89,6 +89,22 @@ public final class Conditions {
 
     public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2) {
         checkIsTrue(conditionType, i1 >= i2, "First integer must be greater than second.");
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Object[] array, int requiredSize, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, Objects.equals(array.length, requiredSize), messageTemplate, messageArguments);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Object[] array, int requiredSize) {
+        checkIsTrue(conditionType, Objects.equals(array.length, requiredSize), "Collection size must be equactly %s", requiredSize);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Collection<?> collection, int requiredSize, String messageTemplate, Object... messageArguments) {
+        checkIsTrue(conditionType, Objects.equals(collection.size(), requiredSize), messageTemplate, messageArguments);
+    }
+
+    public static void checkSizeExactly(Condition conditionType, Collection<?> collection, int requiredSize) {
+        checkIsTrue(conditionType, Objects.equals(collection.size(), requiredSize), "Collection size must be equactly %s", requiredSize);
     }
 
     private static RuntimeException exception(Condition condition, String message) {

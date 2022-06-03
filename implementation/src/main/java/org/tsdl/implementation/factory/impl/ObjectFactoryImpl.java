@@ -5,16 +5,14 @@ import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.factory.TsdlElementFactory;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.TsdlErrorListener;
-import org.tsdl.implementation.parsing.TsdlParser;
+import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.impl.TsdlElementParserImpl;
-import org.tsdl.implementation.parsing.impl.TsdlParserImpl;
+import org.tsdl.implementation.parsing.impl.TsdlQueryParserImpl;
 
 public class ObjectFactoryImpl implements ObjectFactory {
-    static ObjectFactory INSTANCE = new ObjectFactoryImpl();
-
     @Override
-    public TsdlParser getParser() {
-        return new TsdlParserImpl();
+    public TsdlQueryParser queryParser() {
+        return new TsdlQueryParserImpl();
     }
 
     @Override
@@ -28,7 +26,7 @@ public class ObjectFactoryImpl implements ObjectFactory {
     }
 
     @Override
-    public ANTLRErrorListener getErrorListener() {
+    public ANTLRErrorListener errorListener() {
         return new TsdlErrorListener();
     }
 }

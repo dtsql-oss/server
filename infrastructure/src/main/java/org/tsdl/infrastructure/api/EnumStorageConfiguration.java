@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class EnumStorageConfiguration implements StorageServiceConfiguration {
+    public static final String PROPERTY_MUST_NOT_BE_NULL = "Property must not be null.";
     protected final Map<StorageProperty, Object> properties;
 
     protected EnumStorageConfiguration() {
@@ -22,7 +23,7 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
 
     @Override
     public boolean isPropertySet(StorageProperty property) {
-        Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, property, PROPERTY_MUST_NOT_BE_NULL);
         checkKnownProperty(property);
 
         return properties.containsKey(property);
@@ -30,7 +31,7 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
 
     @Override
     public Object getProperty(StorageProperty property) {
-        Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, property, PROPERTY_MUST_NOT_BE_NULL);
         checkKnownProperty(property);
 
         return properties.get(property);
@@ -38,7 +39,7 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
 
     @Override
     public <V> V getProperty(StorageProperty property, Class<V> targetType) {
-        Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, property, PROPERTY_MUST_NOT_BE_NULL);
         Conditions.checkNotNull(Condition.ARGUMENT, targetType, "Target type must not be null.");
         checkKnownProperty(property);
 
@@ -54,7 +55,7 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
 
     @Override
     public Object setProperty(StorageProperty property, Object value) {
-        Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, property, PROPERTY_MUST_NOT_BE_NULL);
         Conditions.checkNotNull(Condition.ARGUMENT, value, "Property value must not be null.");
         checkKnownProperty(property);
 
@@ -71,7 +72,7 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
 
     @Override
     public Object unsetProperty(StorageProperty property) {
-        Conditions.checkNotNull(Condition.ARGUMENT, property, "Property must not be null.");
+        Conditions.checkNotNull(Condition.ARGUMENT, property, PROPERTY_MUST_NOT_BE_NULL);
         checkKnownProperty(property);
 
         return properties.remove(property);

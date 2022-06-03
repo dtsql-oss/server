@@ -3,8 +3,9 @@ package org.tsdl.service.web;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ import java.util.Map;
 @Tag(name = "TSDL Query", description = "Endpoint exposing TSDL query services for generic storage implementations.")
 @Validated
 public class QueryController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryController.class);
     private final StorageResolverService storageServiceResolver;
     private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
 
@@ -44,13 +46,17 @@ public class QueryController {
     }
 
     @PostMapping
-    @Operation(summary = "Execute query")
-    @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
-    })
-    public List<DataPoint> execute(@Valid @RequestBody
-                                   @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                                   QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+    @Operation(summary = "Execute query over configurable storage provider.")
+    @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
+    public List<DataPoint> query(@Valid @RequestBody
+                                 @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
+                                 QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+        LOGGER.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
+        LOGGER.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
+        LOGGER.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
+        LOGGER.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
+        LOGGER.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
+
         var storageSpec = querySpecification.getStorage();
         var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());
 

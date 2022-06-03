@@ -1,7 +1,7 @@
 package org.tsdl.implementation.evaluation;
 
 import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.parsing.TsdlParser;
+import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -11,7 +11,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 import java.util.List;
 
 public class TsdlQueryService implements QueryService {
-    private final TsdlParser parser = ObjectFactory.INSTANCE.getParser();
+    private final TsdlQueryParser parser = ObjectFactory.INSTANCE.queryParser();
 
     @Override
     public QueryResult query(List<DataPoint> data, String query) {

@@ -3,7 +3,7 @@ package org.tsdl.storage.csv.stub;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -15,7 +15,7 @@ public final class CsvRowDataFactory {
 
     private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter
       .ofPattern("MM/dd/yyyy HH:mm:ss")
-      .withZone(ZoneId.systemDefault());
+      .withZone(ZoneOffset.UTC);
 
     public static Stream<Arguments> threeEntries() {
         return Stream.of(

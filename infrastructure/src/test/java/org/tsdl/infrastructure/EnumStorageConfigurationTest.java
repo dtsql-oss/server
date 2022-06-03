@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class EnumStorageConfigurationTest {
+class EnumStorageConfigurationTest {
 
     @Test
     void simpleConfiguration_defaultConstructor_noPropertyInitialized() {

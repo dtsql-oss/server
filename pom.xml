@@ -15,6 +15,7 @@
         <module>service</module>
         <module>implementation</module>
         <module>storage</module>
+        <module>test-util</module>
     </modules>
 
     <build>
@@ -43,11 +44,16 @@
                 <artifactId>implementation</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>test-util</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
-        <revision>0.1-SNAPSHOT</revision>        <!-- MUST be called "revision" -->
+        <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
         <java.version>17</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
@@ -57,6 +63,9 @@
         <mockito.version>4.5.1</mockito.version>
         <antlr.version>4.10.1</antlr.version>
         <mojo.version>3.3.0</mojo.version>
+        <jfreechart.version>1.5.3</jfreechart.version>
+        <logback.version>1.2.11</logback.version>
+        <lombok.version>1.18.24</lombok.version>
     </properties>
 
 </project>
