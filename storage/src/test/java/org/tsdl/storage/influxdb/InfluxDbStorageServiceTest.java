@@ -28,14 +28,13 @@ class InfluxDbStorageServiceTest {
     var service = spy(InfluxDbStorageService.class);
 
     doAnswer(invocationOnMock -> {
-      var serviceMock = (InfluxDbStorageService) invocationOnMock.getMock();
-
       var clientMock = mock(InfluxDBClient.class);
       var queryMock = mock(QueryApi.class);
       var mockedData = fluxTableMocksFromData(persistedData);
       when(clientMock.getQueryApi()).thenReturn(queryMock);
       when(queryMock.query(anyString())).thenReturn(mockedData);
 
+      var serviceMock = (InfluxDbStorageService) invocationOnMock.getMock();
       service.dbClient = clientMock;
       serviceMock.queryApi = queryMock;
       return null;

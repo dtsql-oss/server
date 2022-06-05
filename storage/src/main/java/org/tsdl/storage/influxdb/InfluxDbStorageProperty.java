@@ -3,46 +3,53 @@ package org.tsdl.storage.influxdb;
 import java.time.Instant;
 import org.tsdl.infrastructure.api.StorageProperty;
 
+/**
+ * Container for properties belonging to {@link InfluxDbStorageConfiguration}.
+ */
 public enum InfluxDbStorageProperty implements StorageProperty {
   /**
-   * initialize
+   * Used by initialize.
    */
   TOKEN("token", char[].class),
 
   /**
-   * initialize
+   * Used by initialize.
    */
   ORGANIZATION("organization", String.class),
 
   /**
-   * store, load
+   * Used by store, load.
    */
   BUCKET("bucket", String.class),
 
   /**
-   * initialize
+   * Used by initialize.
    */
   URL("url", String.class),
 
   /**
-   * load
+   * Used by load.
    */
   QUERY("query", String.class),
 
   /**
-   * load
+   * Used by load.
    */
   LOAD_FROM("loadFrom", Instant.class),
 
   /*
-   * load
+   * Used by load.
    */
   LOAD_UNTIL("loadUntil", Instant.class),
 
   /**
-   * transform
+   * <p>
+   * Used by transform.
+   * </p>
+   * <p>
    * -1: take values from all tables
    * >= 0: index of table to take values from
+   * </p>
    */
   TABLE_INDEX("tableIndex", Integer.class);
 

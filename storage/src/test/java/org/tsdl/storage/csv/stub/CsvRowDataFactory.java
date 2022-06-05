@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 
+
 @SuppressWarnings("unused") // only referenced by string literals, therefore usage unrecognized
 public final class CsvRowDataFactory {
   private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter

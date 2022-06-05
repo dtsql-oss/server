@@ -14,6 +14,9 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * An implementation of {@link StorageService} for a storage mechanism targeting data deposited in an InfluxDB instance.
+ */
 public final class InfluxDbStorageService implements StorageService<FluxTable, InfluxDbStorageConfiguration> {
 
   // influx uses rfc3339 timestamps (https://docs.influxdata.com/flux/v0.x/data-types/basic/time/#time-syntax)
@@ -69,11 +72,12 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
     Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
     Conditions.checkIsTrue(
         Condition.ARGUMENT,
-        lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY) ^
-            (lookupConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET) &&
-                lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_FROM) &&
-                lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_UNTIL)),
-        "Either '%s' property ('%s') or (exclusively) '%s', '%s' and '%s' properties ('%s', '%s' and '%s') are required to load data with the InfluxDB storage service.",
+        lookupConfiguration.isPropertySet(InfluxDbStorageProperty.QUERY)
+            ^ (lookupConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET)
+            && lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_FROM)
+            && lookupConfiguration.isPropertySet(InfluxDbStorageProperty.LOAD_UNTIL)),
+        "Either '%s' property ('%s') or (exclusively) '%s', '%s' and '%s' properties ('%s', '%s' and '%s') are "
+            + "required to load data with the InfluxDB storage service.",
         InfluxDbStorageProperty.QUERY.name(), InfluxDbStorageProperty.QUERY.identifier(),
         InfluxDbStorageProperty.BUCKET.name(), InfluxDbStorageProperty.LOAD_FROM.name(), InfluxDbStorageProperty.LOAD_UNTIL.name(),
         InfluxDbStorageProperty.BUCKET.identifier(), InfluxDbStorageProperty.LOAD_FROM.identifier(), InfluxDbStorageProperty.LOAD_UNTIL.identifier()

@@ -5,6 +5,12 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Default implementation of {@link DataPoint}.
+ *
+ * @param timestamp date-time component of the instance
+ * @param value value component of the instance
+ */
 public record TsdlDataPoint(Instant timestamp, Object value) implements DataPoint {
   public TsdlDataPoint {
     Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");

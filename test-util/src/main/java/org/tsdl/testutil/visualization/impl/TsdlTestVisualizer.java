@@ -14,6 +14,9 @@ import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
 import org.tsdl.testutil.visualization.api.TsdlTestInfo;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 
+/**
+ * A JUnit5 extension intercepting the start of test methods. Used to visually preview time series data supplied to a test.
+ */
 public class TsdlTestVisualizer implements InvocationInterceptor {
   private static final Logger LOGGER = LoggerFactory.getLogger(TsdlTestVisualizer.class);
 

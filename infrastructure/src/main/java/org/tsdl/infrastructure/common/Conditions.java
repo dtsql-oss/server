@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
+/**
+ * Provides utility methods verifying state and/or method arguments.
+ */
 public final class Conditions {
   private Conditions() {
   }

@@ -33,6 +33,9 @@ import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * Reference implementation of {@link TsdlElementFactory}.
+ */
 public class TsdlElementFactoryImpl implements TsdlElementFactory {
   @Override
   public TsdlIdentifier getIdentifier(String name) {

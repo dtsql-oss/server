@@ -2,35 +2,42 @@ package org.tsdl.storage.csv;
 
 import org.tsdl.infrastructure.api.StorageProperty;
 
+/**
+ * Container for properties belonging to {@link CsvStorageConfiguration}.
+ */
 public enum CsvStorageProperty implements StorageProperty {
   /**
-   * load
+   * Used by load.
    */
   FILE_PATH("filePath", String.class),
 
   /**
-   * load
+   * Used by load.
    */
   FIELD_SEPARATOR("fieldSeparator", Character.class),
 
   /**
-   * transform
+   * Used by transform.
    */
   TIME_COLUMN("timeColumn", Integer.class),
 
   /**
-   * transform
+   * Used by transform.
    */
   TIME_FORMAT("timeFormat", String.class),
 
   /**
-   * transform
+   * Used by transform.
    */
   VALUE_COLUMN("valueColumn", Integer.class),
 
   /**
-   * transform
-   * number of rows to skip at beginning
+   * <p>
+   * Used by transform.
+   * </p>
+   * <p>
+   * Specifies the number of rows to skip before the actual data starts.
+   * </p>
    */
   SKIP_HEADERS("skipHeaders", Integer.class);
 

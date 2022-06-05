@@ -18,6 +18,9 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.WindowConstants;
 
+/**
+ * Represents a window hosting {@link PainterFrame}, allowing users to visually paint test data to generate with their mouse.
+ */
 public class TestDataPainterWindow extends JFrame {
 
   private final JSpinner numThickness = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
@@ -29,6 +32,9 @@ public class TestDataPainterWindow extends JFrame {
 
   private final JCheckBox chkTopmost = new JCheckBox("Always on Top", true);
 
+  /**
+   * Initializes a new instance of {@link TestDataPainterWindow}.
+   */
   public TestDataPainterWindow() {
     super("Test Data Painter");
 

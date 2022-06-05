@@ -4,6 +4,9 @@ import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Default implementation of {@link NegatedSinglePointFilter}.
+ */
 public record NegatedSinglePointFilterImpl(SinglePointFilter filter) implements NegatedSinglePointFilter {
   @Override
   public boolean evaluate(DataPoint dataPoint) {

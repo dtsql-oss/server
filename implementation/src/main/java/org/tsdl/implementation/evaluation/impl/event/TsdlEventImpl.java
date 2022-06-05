@@ -4,5 +4,8 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 
+/**
+ * Default implementation of {@link TsdlEvent}.
+ */
 public record TsdlEventImpl(SinglePointFilterConnective definition, TsdlIdentifier identifier) implements TsdlEvent {
 }

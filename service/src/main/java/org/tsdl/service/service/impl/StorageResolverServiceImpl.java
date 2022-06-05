@@ -8,6 +8,9 @@ import org.tsdl.service.exception.UnknownStorageException;
 import org.tsdl.service.model.TsdlStorage;
 import org.tsdl.service.service.StorageResolverService;
 
+/**
+ * Default implementation of {@link StorageResolverService}.
+ */
 @Service
 public class StorageResolverServiceImpl implements StorageResolverService {
   private static final String STORAGE_BEAN_NAME_TEMPLATE = "storage.%s";

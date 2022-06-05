@@ -31,8 +31,11 @@ import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
 import org.tsdl.testutil.visualization.api.TsdlTestInfo;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 
-public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisualizer {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JFreeChartTimeSeriesTestVisualizer.class);
+/**
+ * Implementation of {@link TimeSeriesTestVisualizer} depending on the JFreeChart visualization library.
+ */
+public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisualizer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(JfreeChartTimeSeriesTestVisualizer.class);
   private final SingleActionAwait singleActionAwait = new SingleActionAwait();
   private TestVisualizationWindow visualizer;
   private Point lastLocation;
@@ -122,7 +125,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
       var renderPointShapes = visualizationInfo == null || visualizationInfo.renderPointShape();
       var renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-      for (int i = 0; i < plot.getSeriesCount(); i++) {
+      for (var i = 0; i < plot.getSeriesCount(); i++) {
         renderer.setSeriesShapesVisible(i, renderPointShapes);
       }
 

@@ -5,6 +5,9 @@ import org.tsdl.implementation.factory.impl.ObjectFactoryImpl;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 
+/**
+ * A factory for instantiating key elements.
+ */
 public interface ObjectFactory {
   ObjectFactory INSTANCE = new ObjectFactoryImpl();
 

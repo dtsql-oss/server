@@ -16,6 +16,9 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Provides time series, i.e. lists of {@link DataPoint}, to unit tests based on {@link TsdlTestSources} annotations on a unit test.
+ */
 public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<TsdlTestSources> {
   private List<TsdlTestSource> sourceFiles;
 
@@ -25,7 +28,7 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
     Conditions.checkNotNull(Condition.ARGUMENT, tsdlTestSources.value(), "%s's value must not be null.", TsdlTestSources.class.getSimpleName());
 
     sourceFiles = new ArrayList<>();
-    for (TsdlTestSource source : tsdlTestSources.value()) {
+    for (var source : tsdlTestSources.value()) {
       Conditions.checkNotNull(Condition.ARGUMENT, source.value(), "%s's value must not be null.", TsdlTestSource.class.getSimpleName());
       sourceFiles.add(source);
     }
@@ -36,7 +39,7 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
     Conditions.checkNotNull(Condition.STATE, sourceFiles, "List of test source files has not been initialized.");
 
     var arguments = new Object[sourceFiles.size()];
-    for (int i = 0; i < sourceFiles.size(); i++) {
+    for (var i = 0; i < sourceFiles.size(); i++) {
       var testSource = sourceFiles.get(i);
       var testUrl = Thread.currentThread().getContextClassLoader().getResource(testSource.value());
       Conditions.checkNotNull(Condition.STATE, testUrl, "Could not read file '%s'", testSource.value());
@@ -55,9 +58,11 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
           var date = split[0].trim();
           var value = split[1].trim();
 
-          dataPoints.add(DataPoint.of(
-              formatter.parse(date, Instant::from),
-              Double.parseDouble(value))
+          dataPoints.add(
+              DataPoint.of(
+                  formatter.parse(date, Instant::from),
+                  Double.parseDouble(value)
+              )
           );
         }
       }

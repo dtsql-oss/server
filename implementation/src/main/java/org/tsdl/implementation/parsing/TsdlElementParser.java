@@ -6,6 +6,9 @@ import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 
+/**
+ * Provides methods for parsing elements/components of {@link org.tsdl.implementation.model.TsdlQuery}.
+ */
 public interface TsdlElementParser {
   ConnectiveIdentifier parseConnectiveIdentifier(String str);
 

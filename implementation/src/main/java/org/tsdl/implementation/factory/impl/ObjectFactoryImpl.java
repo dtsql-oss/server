@@ -9,6 +9,9 @@ import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.impl.TsdlElementParserImpl;
 import org.tsdl.implementation.parsing.impl.TsdlQueryParserImpl;
 
+/**
+ * Default implementation of {@link ObjectFactory}.
+ */
 public class ObjectFactoryImpl implements ObjectFactory {
   @Override
   public TsdlQueryParser queryParser() {

@@ -9,6 +9,9 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
 
+/**
+ * Representation of TSDl query.
+ */
 public interface TsdlQuery {
   Set<TsdlIdentifier> identifiers();
 

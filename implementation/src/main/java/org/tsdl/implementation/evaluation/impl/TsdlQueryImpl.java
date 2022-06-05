@@ -11,6 +11,9 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
 
+/**
+ * Default implementation of {@link TsdlQuery}.
+ */
 @Builder
 public record TsdlQueryImpl(
     Set<TsdlIdentifier> identifiers,

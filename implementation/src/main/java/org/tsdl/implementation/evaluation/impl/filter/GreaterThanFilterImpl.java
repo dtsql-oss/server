@@ -6,6 +6,9 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Default implementation of {@link GreaterThanFilter}.
+ */
 public record GreaterThanFilterImpl(TsdlFilterArgument threshold) implements GreaterThanFilter {
   @Override
   public boolean evaluate(DataPoint dataPoint) {

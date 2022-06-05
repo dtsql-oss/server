@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -22,6 +21,9 @@ import java.util.stream.IntStream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/**
+ * Represents a panel which allows users to paint time series to be used as test input data with their mouse.
+ */
 public class PainterFrame extends JPanel implements MouseMotionListener {
   public static final String INSTANT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
   public static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter
@@ -82,10 +84,10 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     addMouseMotionListener(this);
   }
 
-  public static Instant randomInstantBetween(Instant startInclusive, Instant endExclusive) {
-    long startSeconds = startInclusive.getEpochSecond();
-    long endSeconds = endExclusive.getEpochSecond();
-    long random = ThreadLocalRandom
+  private static Instant randomInstantBetween(Instant startInclusive, Instant endExclusive) {
+    var startSeconds = startInclusive.getEpochSecond();
+    var endSeconds = endExclusive.getEpochSecond();
+    var random = ThreadLocalRandom
         .current()
         .nextLong(startSeconds, endSeconds);
 
@@ -93,7 +95,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
   }
 
   private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-    Set<Object> seen = ConcurrentHashMap.newKeySet();
+    var seen = ConcurrentHashMap.newKeySet();
     return t -> seen.add(keyExtractor.apply(t));
   }
 
@@ -110,7 +112,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     this.repaint();
   }
 
-  public String getOutput(String type, Instant referenceDate) {
+  String getOutput(String type, Instant referenceDate) {
     var lst = IntStream.range(0, points.size())
         .filter(n -> n % sampleRate == 0)
         .mapToObj(points::get)
@@ -125,8 +127,8 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     // TODO also serialize avg, sum etc. as header comments
     var output = new StringBuilder();
     if ("CSV".equals(type)) {
-      for (int i = 0; i < lst.size(); i++) {
-        Point point = lst.get(i);
+      for (var i = 0; i < lst.size(); i++) {
+        var point = lst.get(i);
         output
             .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
             .append(";")
@@ -135,8 +137,8 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
       }
     } else if ("Java".equals(type)) {
       output.append("List.of(\n");
-      for (int i = 0; i < lst.size(); i++) {
-        Point point = lst.get(i);
+      for (var i = 0; i < lst.size(); i++) {
+        var point = lst.get(i);
         var trailingComma = i == lst.size() - 1 ? "" : ",";
         output
             .append("  DataPoint.of(")
@@ -153,6 +155,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     return output.toString();
   }
 
+  //CHECKSTYLE.OFF: MissingJavadocMethod - No documentation for external interface method needed.
   public void mouseDragged(MouseEvent e) {
     var g = getGraphics();
     g.setColor(Color.blue);
@@ -162,6 +165,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     var dpValue = -e.getY() + this.getHeight() / 2; // e.g. for height = 200: (0 -> 200), (200 -> 0), (400 -> -200)....y' = -y + 200
     points.add(new Point(dpDate, dpValue));
   }
+  //CHECKSTYLE.ON: MissingJavadocMethod
 
   public void mouseMoved(MouseEvent e) {
     // do nothing

@@ -5,6 +5,9 @@ import java.util.Map;
 import org.tsdl.infrastructure.api.EnumStorageConfiguration;
 import org.tsdl.infrastructure.api.StorageProperty;
 
+/**
+ * An {@link EnumStorageConfiguration} for configuring {@link InfluxDbStorageConfiguration} instances.
+ */
 public final class InfluxDbStorageConfiguration extends EnumStorageConfiguration {
   public InfluxDbStorageConfiguration(Map<StorageProperty, Object> properties) {
     super(properties);

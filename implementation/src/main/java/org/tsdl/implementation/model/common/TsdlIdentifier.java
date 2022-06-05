@@ -1,5 +1,8 @@
 package org.tsdl.implementation.model.common;
 
+/**
+ * A query element that is identifiable by some string.
+ */
 public interface TsdlIdentifier extends Identifiable {
   String name();
 

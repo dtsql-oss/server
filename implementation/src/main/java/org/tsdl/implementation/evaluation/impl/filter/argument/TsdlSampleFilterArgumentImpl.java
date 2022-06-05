@@ -6,6 +6,9 @@ import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * Default implementation of {@link TsdlSampleFilterArgument}.
+ */
 public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
   private final TsdlSample sample;
   private Double value;
@@ -43,7 +46,7 @@ public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TsdlSampleFilterArgumentImpl that = (TsdlSampleFilterArgumentImpl) o;
+    var that = (TsdlSampleFilterArgumentImpl) o;
     return Objects.equals(value, that.value) && Objects.equals(sample, that.sample);
   }
 

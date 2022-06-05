@@ -1,6 +1,7 @@
 package org.tsdl.implementation.factory;
 
 import java.util.List;
+import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -14,6 +15,9 @@ import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 
+/**
+ * Factory for creating elements of a {@link TsdlQuery}.
+ */
 public interface TsdlElementFactory {
   TsdlIdentifier getIdentifier(String name);
 

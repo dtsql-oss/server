@@ -2,6 +2,9 @@ package org.tsdl.implementation.parsing.enums;
 
 import org.tsdl.implementation.model.common.Identifiable;
 
+/**
+ * A filter.
+ */
 public enum FilterType implements Identifiable {
   GT("gt"), LT("lt");
 

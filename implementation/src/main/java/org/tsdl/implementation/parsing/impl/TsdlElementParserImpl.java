@@ -18,6 +18,9 @@ import org.tsdl.implementation.parsing.exception.TsdlParserException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * Default implementation of {@link TsdlElementParser}.
+ */
 public class TsdlElementParserImpl implements TsdlElementParser {
 
   public static final String STRING_TO_PARSE_MUST_NOT_BE_NULL = "String to parse must not be null";

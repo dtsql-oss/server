@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * An abstract base class for preferred implementations of the {@link StorageServiceConfiguration} interface, namely as enums.
+ */
 public abstract class EnumStorageConfiguration implements StorageServiceConfiguration {
   public static final String PROPERTY_MUST_NOT_BE_NULL = "Property must not be null.";
   protected final Map<StorageProperty, Object> properties;

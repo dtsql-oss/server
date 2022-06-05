@@ -9,6 +9,9 @@ import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
 
+/**
+ * Default implementation of {@link QueryService}.
+ */
 public class TsdlQueryService implements QueryService {
   private final TsdlQueryParser parser = ObjectFactory.INSTANCE.queryParser();
 

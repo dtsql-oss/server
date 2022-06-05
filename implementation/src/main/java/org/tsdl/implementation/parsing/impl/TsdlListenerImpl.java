@@ -24,6 +24,10 @@ import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
 
 // TODO: use visitor instead of listener?
+
+/**
+ * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
+ */
 public class TsdlListenerImpl extends TsdlParserBaseListener {
   private final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
   private final TsdlElementFactory elementFactory = ObjectFactory.INSTANCE.elementFactory();
@@ -204,5 +208,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         .build();
   }
 
-  private enum IdentifierType {EVENT, SAMPLE}
+  private enum IdentifierType {
+    EVENT, SAMPLE
+  }
 }

@@ -35,7 +35,7 @@ public abstract class StorageServiceConfigurationMapper {
     }
 
     for (var mapping : properties.entrySet()) {
-      StorageProperty property = StorageProperty.fromIdentifier(mapping.getKey(), propertyClass);
+      var property = StorageProperty.fromIdentifier(mapping.getKey(), propertyClass);
       var typeConformValue = retrieveValue(property, mapping.getValue());
       serviceConfiguration.setProperty(property, typeConformValue);
     }

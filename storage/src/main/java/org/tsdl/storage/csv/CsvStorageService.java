@@ -14,6 +14,9 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * An implementation of {@link StorageService} for a storage mechanism targeting CSV files.
+ */
 public final class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
   public static final String TRANSFORMATION_PROPERTY_REQUIRED =
       "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.";

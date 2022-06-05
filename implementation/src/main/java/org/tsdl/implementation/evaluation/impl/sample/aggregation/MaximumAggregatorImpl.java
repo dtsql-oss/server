@@ -4,6 +4,9 @@ import java.util.List;
 import org.tsdl.implementation.model.sample.aggregation.MaximumAggregator;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Default implementation of {@link MaximumAggregator}.
+ */
 public class MaximumAggregatorImpl implements MaximumAggregator {
   @Override
   public double compute(List<DataPoint> dataPoints) {

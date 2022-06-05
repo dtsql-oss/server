@@ -11,6 +11,9 @@ import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParserException;
 
+/**
+ * Default implementation of {@link TsdlQuery}.
+ */
 public class TsdlQueryParserImpl implements TsdlQueryParser {
   private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
 

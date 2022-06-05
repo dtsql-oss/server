@@ -3,6 +3,9 @@ package org.tsdl.infrastructure.api;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a container for the configuration (properties) of a {@link StorageService}.
+ */
 public interface StorageServiceConfiguration {
 
   boolean isPropertySet(StorageProperty property);

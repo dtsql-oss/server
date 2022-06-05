@@ -5,6 +5,9 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * Default implementation of {@link FollowsOperator}.
+ */
 public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements FollowsOperator {
   @Override
   public boolean isTrue() {
