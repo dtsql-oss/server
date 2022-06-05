@@ -76,7 +76,7 @@ public class TestDataPainterWindow extends JFrame {
             var outputType = Objects.requireNonNull(cmbOutput.getSelectedItem()).toString();
 
             var instantUserInput = JOptionPane.showInputDialog(this,
-              "Enter date-time of first data point ('%s').\nEmpty or invalid input leads to a random date-time being picked.".formatted(
+              "Enter date-time of first data point ('%s').%nEmpty or invalid input leads to a random date-time being picked.".formatted(
                 PainterFrame.INSTANT_PATTERN),
               PainterFrame.INSTANT_FORMATTER.format(Instant.now())
             );

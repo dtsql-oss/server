@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public final class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
+    public static final String TRANSFORMATION_PROPERTY_REQUIRED = "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.";
+
     @Override
     public void initialize(CsvStorageConfiguration serviceConfiguration) {
         // no initialization needed
@@ -60,19 +62,19 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
         Conditions.checkNotNull(Condition.ARGUMENT, loadedData, "Data to transform must not be null.");
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.VALUE_COLUMN),
-          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          TRANSFORMATION_PROPERTY_REQUIRED,
           CsvStorageProperty.VALUE_COLUMN.name(), CsvStorageProperty.VALUE_COLUMN.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_COLUMN),
-          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          TRANSFORMATION_PROPERTY_REQUIRED,
           CsvStorageProperty.TIME_COLUMN.name(), CsvStorageProperty.TIME_COLUMN.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_FORMAT),
-          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          TRANSFORMATION_PROPERTY_REQUIRED,
           CsvStorageProperty.TIME_FORMAT.name(), CsvStorageProperty.TIME_FORMAT.identifier());
         Conditions.checkIsTrue(Condition.ARGUMENT,
           transformationConfiguration.isPropertySet(CsvStorageProperty.SKIP_HEADERS),
-          "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.",
+          TRANSFORMATION_PROPERTY_REQUIRED,
           CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
 
         var skipHeaders = transformationConfiguration.getProperty(CsvStorageProperty.SKIP_HEADERS, Integer.class);

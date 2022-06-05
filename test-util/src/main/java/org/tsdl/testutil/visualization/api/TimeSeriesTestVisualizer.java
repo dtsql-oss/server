@@ -5,7 +5,7 @@ import org.tsdl.testutil.visualization.impl.JFreeChartTimeSeriesTestVisualizer;
 public interface TimeSeriesTestVisualizer {
     boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration);
 
-    static TimeSeriesTestVisualizer INSTANCE() {
+    static TimeSeriesTestVisualizer instance() {
         return new JFreeChartTimeSeriesTestVisualizer();
     }
 }

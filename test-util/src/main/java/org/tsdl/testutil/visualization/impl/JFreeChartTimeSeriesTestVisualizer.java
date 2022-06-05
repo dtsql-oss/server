@@ -37,8 +37,10 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
     @Override
     public boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration) {
         if (visualizationConfiguration != null && visualizationConfiguration.skipVisualization()) {
-            LOGGER.debug("Skipping visualization of test '%s' because the 'skipVisualization' parameter of the @%s' annotation is true."
-              .formatted(testInformation.longName(), TsdlTestVisualization.class.getSimpleName()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Skipping visualization of test '{}' because the 'skipVisualization' parameter of the @{}' annotation is true.",
+                  testInformation.longName(), TsdlTestVisualization.class.getSimpleName());
+            }
             return true;
         }
 
@@ -58,7 +60,7 @@ public class JFreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
         lastLocation = visualizer.locationOnClose;
 
         if (errorMessage != null) {
-            LOGGER.warn("Encountered problem while visualizing test: %s".formatted(errorMessage));
+            LOGGER.warn("Encountered problem while visualizing test: {}", errorMessage);
             LOGGER.warn("Executing test anyway, without prior visualization.");
             return true;
         }

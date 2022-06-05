@@ -5,7 +5,6 @@ import org.tsdl.infrastructure.api.StorageProperty;
 import org.tsdl.infrastructure.api.StorageServiceConfiguration;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
-import org.tsdl.service.exception.InputInterpretationException;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +28,7 @@ public abstract class StorageServiceConfigurationMapper {
 
     public StorageServiceConfiguration mapToConfiguration(Map<String, Object> properties,
                                                           Supplier<StorageServiceConfiguration> configurationSupplier,
-                                                          Class<? extends Enum<?>> propertyClass) throws InputInterpretationException {
+                                                          Class<? extends Enum<?>> propertyClass) {
         var serviceConfiguration = configurationSupplier.get();
 
         if (properties == null) {

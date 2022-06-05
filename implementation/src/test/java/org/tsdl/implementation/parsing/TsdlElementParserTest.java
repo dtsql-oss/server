@@ -183,11 +183,7 @@ class TsdlElementParserTest {
     })
     @ParameterizedTest
     void parseNumber_invalidNumber_throws(String str) {
-        assertThatThrownBy(() -> {
-            var num = PARSER.parseNumber(str);
-            System.out.println(str + " -> " + num);
-        })
-          .isInstanceOf(TsdlParserException.class);
+        assertThatThrownBy(() -> PARSER.parseNumber(str)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test

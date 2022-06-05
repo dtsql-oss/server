@@ -20,7 +20,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
 
     private static final String DISABLING_ENVIRONMENT_VARIABLE = "TSDL_SKIP_TEST_VISUALIZATION";
 
-    private final TimeSeriesTestVisualizer testVisualizer = TimeSeriesTestVisualizer.INSTANCE();
+    private final TimeSeriesTestVisualizer testVisualizer = TimeSeriesTestVisualizer.instance();
 
     @Override // for @ParameterizedTest
     public void interceptTestTemplateMethod(Invocation<Void> invocation,
@@ -44,7 +44,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
 
         var argumentSeries = extractTimeSeriesArguments(invocationContext.getArguments());
         if (argumentSeries.isEmpty()) {
-            LOGGER.debug("Skipping visualization of test '%s' because there is no parameter of type List<DataPoint>.".formatted(longTestName));
+            LOGGER.debug("Skipping visualization of test '{}' because there is no parameter of type List<DataPoint>.", longTestName);
             invocation.proceed();
             return;
         }
@@ -53,8 +53,8 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
         var annotationPresent = extensionContext.getRequiredTestClass().isAnnotationPresent(DisableTsdlTestVisualization.class);
         var shouldSkipVisualization = envVariablePresent || annotationPresent;
         if (shouldSkipVisualization) {
-            LOGGER.debug("Skipping visualization of test '%s' because environment variable '%s' is set to 'true' or '@%s' annotation is present."
-              .formatted(longTestName, DISABLING_ENVIRONMENT_VARIABLE, DisableTsdlTestVisualization.class.getSimpleName()));
+            LOGGER.debug("Skipping visualization of test '{}' because environment variable '{}' is set to 'true' or '@{}' annotation is present.",
+              longTestName, DISABLING_ENVIRONMENT_VARIABLE, DisableTsdlTestVisualization.class.getSimpleName());
             invocation.proceed();
             return;
         }
@@ -66,7 +66,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
         if (executeTest) {
             invocation.proceed();
         } else {
-            LOGGER.info("Test '%s' was skipped by user input in TsdlTestVisualizer dialog.".formatted(longTestName));
+            LOGGER.info("Test '{}' was skipped by user input in TsdlTestVisualizer dialog.", longTestName);
             invocation.skip();
         }
     }

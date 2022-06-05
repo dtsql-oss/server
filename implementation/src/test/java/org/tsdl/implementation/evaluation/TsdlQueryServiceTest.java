@@ -37,6 +37,7 @@ class TsdlQueryServiceTest {
             all periods
           """;
 
+        // TODO
         //var result = queryService.query(dps, query);
     }
 
@@ -61,6 +62,7 @@ class TsdlQueryServiceTest {
             all periods
           """;
 
+        // TODO
         //var result = queryService.query(dps, query);
     }
 

@@ -64,14 +64,17 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
 
             @Override
             public void componentMoved(ComponentEvent e) {
+                // nothing to do
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
+                // nothing to do
             }
 
             @Override
             public void componentHidden(ComponentEvent e) {
+                // nothing to do
             }
         });
 
@@ -114,8 +117,8 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
           .toList();
 
         var lowestDate = referenceDate != null ? referenceDate : randomInstantBetween(
-          Instant.now().minus(5 * 12 * 30, ChronoUnit.DAYS), // 5 years
-          Instant.now().plus(5 * 12 * 30, ChronoUnit.DAYS) // 5 years
+          Instant.now().minus(5L * 12 * 30, ChronoUnit.DAYS), // 5 years
+          Instant.now().plus(5L * 12 * 30, ChronoUnit.DAYS) // 5 years
         );
         // TODO also serialize avg, sum etc. as header comments
         var output = new StringBuilder();
@@ -138,7 +141,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
                   .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
                   .append(", ")
                   .append(point.getY())
-                  .append(")%s\n".formatted(trailingComma));
+                  .append(")%s%n".formatted(trailingComma));
             }
             output.append(")");
         } else {
