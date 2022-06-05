@@ -7,5 +7,5 @@ import org.tsdl.infrastructure.model.DataPoint;
  * value.
  */
 public interface SinglePointFilter {
-    boolean evaluate(DataPoint dataPoint);
+  boolean evaluate(DataPoint dataPoint);
 }

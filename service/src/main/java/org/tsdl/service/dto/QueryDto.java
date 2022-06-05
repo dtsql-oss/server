@@ -1,18 +1,17 @@
 package org.tsdl.service.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class QueryDto {
-    @NotNull
-    @Valid
-    private StorageDto storage;
+  @NotNull
+  @Valid
+  private StorageDto storage;
 
-    @NotNull
-    private String tsdlQuery;
+  @NotNull
+  private String tsdlQuery;
 }

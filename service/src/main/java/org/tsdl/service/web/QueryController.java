@@ -4,6 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,58 +26,54 @@ import org.tsdl.service.mapper.StorageServiceConfigurationMapper;
 import org.tsdl.service.model.TsdlStorage;
 import org.tsdl.service.service.StorageResolverService;
 
-import javax.validation.Valid;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/query")
 @Tag(name = "TSDL Query", description = "Endpoint exposing TSDL query services for generic storage implementations.")
 @Validated
 public class QueryController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryController.class);
-    private final StorageResolverService storageServiceResolver;
-    private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
+  private static final Logger LOGGER = LoggerFactory.getLogger(QueryController.class);
+  private final StorageResolverService storageServiceResolver;
+  private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
 
-    private final QueryService queryService;
+  private final QueryService queryService;
 
-    @Autowired
-    public QueryController(StorageResolverService storageServiceResolver, StorageServiceConfigurationMapper storageServiceConfigurationMapper, QueryService queryService) {
-        this.storageServiceResolver = storageServiceResolver;
-        this.storageServiceConfigurationMapper = storageServiceConfigurationMapper;
-        this.queryService = queryService;
-    }
+  @Autowired
+  public QueryController(StorageResolverService storageServiceResolver, StorageServiceConfigurationMapper storageServiceConfigurationMapper,
+                         QueryService queryService) {
+    this.storageServiceResolver = storageServiceResolver;
+    this.storageServiceConfigurationMapper = storageServiceConfigurationMapper;
+    this.queryService = queryService;
+  }
 
-    @PostMapping
-    @Operation(summary = "Execute query over configurable storage provider.")
-    @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
-    public List<DataPoint> query(@Valid @RequestBody
-                                 @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                                 QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
-        LOGGER.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
-        LOGGER.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
-        LOGGER.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
-        LOGGER.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
-        LOGGER.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
+  @PostMapping
+  @Operation(summary = "Execute query over configurable storage provider.")
+  @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
+  public List<DataPoint> query(@Valid @RequestBody
+                               @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
+                               QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+    LOGGER.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
+    LOGGER.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
+    LOGGER.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
+    LOGGER.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
+    LOGGER.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
 
-        var storageSpec = querySpecification.getStorage();
-        var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());
+    var storageSpec = querySpecification.getStorage();
+    var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());
 
-        var serviceConfig = mapConfig(storageSpec.getServiceConfiguration(), tsdlStorage);
-        var lookupConfig = mapConfig(storageSpec.getLookupConfiguration(), tsdlStorage);
-        var transformationConfig = mapConfig(storageSpec.getTransformationConfiguration(), tsdlStorage);
+    var serviceConfig = mapConfig(storageSpec.getServiceConfiguration(), tsdlStorage);
+    var lookupConfig = mapConfig(storageSpec.getLookupConfiguration(), tsdlStorage);
+    var transformationConfig = mapConfig(storageSpec.getTransformationConfiguration(), tsdlStorage);
 
-        tsdlStorage.storageService().initialize(serviceConfig);
-        var fetchedData = tsdlStorage.storageService().load(lookupConfig);
-        var dataPoints = tsdlStorage.storageService().transform(fetchedData, transformationConfig);
+    tsdlStorage.storageService().initialize(serviceConfig);
+    var fetchedData = tsdlStorage.storageService().load(lookupConfig);
+    var dataPoints = tsdlStorage.storageService().transform(fetchedData, transformationConfig);
 
-        var queriedData = queryService.query(dataPoints, querySpecification.getTsdlQuery());
-        return queriedData.getItems();
-    }
+    var queriedData = queryService.query(dataPoints, querySpecification.getTsdlQuery());
+    return queriedData.getItems();
+  }
 
-    private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage)
+  private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage)
       throws InputInterpretationException {
-        return storageServiceConfigurationMapper.mapToConfiguration(properties, targetStorage.configurationSupplier(), targetStorage.propertyClass());
-    }
+    return storageServiceConfigurationMapper.mapToConfiguration(properties, targetStorage.configurationSupplier(), targetStorage.propertyClass());
+  }
 }

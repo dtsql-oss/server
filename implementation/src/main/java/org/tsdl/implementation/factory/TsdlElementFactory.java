@@ -1,5 +1,6 @@
 package org.tsdl.implementation.factory;
 
+import java.util.List;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -13,24 +14,22 @@ import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 
-import java.util.List;
-
 public interface TsdlElementFactory {
-    TsdlIdentifier getIdentifier(String name);
+  TsdlIdentifier getIdentifier(String name);
 
-    SinglePointFilter getFilter(FilterType type, TsdlFilterArgument argument);
+  SinglePointFilter getFilter(FilterType type, TsdlFilterArgument argument);
 
-    NegatedSinglePointFilter getNegatedFilter(SinglePointFilter filter);
+  NegatedSinglePointFilter getNegatedFilter(SinglePointFilter filter);
 
-    SinglePointFilterConnective getConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters);
+  SinglePointFilterConnective getConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters);
 
-    TsdlFilterArgument getFilterArgument(Double value);
+  TsdlFilterArgument getFilterArgument(Double value);
 
-    TsdlFilterArgument getFilterArgument(TsdlSample sample);
+  TsdlFilterArgument getFilterArgument(TsdlSample sample);
 
-    TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier);
+  TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier);
 
-    TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
+  TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
 
-    TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
+  TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
 }

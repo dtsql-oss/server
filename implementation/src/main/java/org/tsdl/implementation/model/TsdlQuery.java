@@ -1,5 +1,7 @@
 package org.tsdl.implementation.model;
 
+import java.util.List;
+import java.util.Set;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -7,19 +9,16 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
 
-import java.util.List;
-import java.util.Set;
-
 public interface TsdlQuery {
-    Set<TsdlIdentifier> identifiers();
+  Set<TsdlIdentifier> identifiers();
 
-    SinglePointFilterConnective filter();
+  SinglePointFilterConnective filter();
 
-    List<TsdlSample> samples();
+  List<TsdlSample> samples();
 
-    List<TsdlEvent> events();
+  List<TsdlEvent> events();
 
-    TemporalOperator choice();
+  TemporalOperator choice();
 
-    ResultFormat result();
+  ResultFormat result();
 }

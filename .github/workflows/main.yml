@@ -34,7 +34,7 @@ jobs:
       - name: Run Build
         run: |
           make all-build
-      
+
   check:
     runs-on: ubuntu-latest
     steps:

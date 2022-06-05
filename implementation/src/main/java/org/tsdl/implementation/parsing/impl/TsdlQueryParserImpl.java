@@ -12,29 +12,29 @@ import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParserException;
 
 public class TsdlQueryParserImpl implements TsdlQueryParser {
-    private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
+  private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
 
-    @Override
-    public TsdlQuery parseQuery(String query) {
-        try {
-            var lexer = new TsdlLexer(CharStreams.fromString(query));
-            lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
-            lexer.addErrorListener(errorListener);
+  @Override
+  public TsdlQuery parseQuery(String query) {
+    try {
+      var lexer = new TsdlLexer(CharStreams.fromString(query));
+      lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
+      lexer.addErrorListener(errorListener);
 
-            var tokens = new CommonTokenStream(lexer);
-            var parser = new org.tsdl.grammar.TsdlParser(tokens);
-            parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
-            parser.addErrorListener(errorListener);
+      var tokens = new CommonTokenStream(lexer);
+      var parser = new org.tsdl.grammar.TsdlParser(tokens);
+      parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
+      parser.addErrorListener(errorListener);
 
-            var walker = new ParseTreeWalker();
-            var tsdlListener = new TsdlListenerImpl();
-            walker.walk(tsdlListener, parser.tsdlQuery());
+      var walker = new ParseTreeWalker();
+      var tsdlListener = new TsdlListenerImpl();
+      walker.walk(tsdlListener, parser.tsdlQuery());
 
-            return tsdlListener.getQuery();
-        } catch (TsdlParserException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new TsdlParserException("Parsing query string failed.", e);
-        }
+      return tsdlListener.getQuery();
+    } catch (TsdlParserException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new TsdlParserException("Parsing query string failed.", e);
     }
+  }
 }

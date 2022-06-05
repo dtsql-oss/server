@@ -1,18 +1,17 @@
 package org.tsdl.testutil.visualization.api;
 
+import java.util.List;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.testutil.visualization.impl.TsdlTestInfoImpl;
 
-import java.util.List;
-
 public interface TsdlTestInfo {
-    String shortName();
+  static TsdlTestInfo of(String shortName, String longName, List<List<DataPoint>> timeSeries) {
+    return new TsdlTestInfoImpl(shortName, longName, timeSeries);
+  }
 
-    String longName();
+  String shortName();
 
-    List<List<DataPoint>> timeSeries();
+  String longName();
 
-    static TsdlTestInfo of(String shortName, String longName, List<List<DataPoint>> timeSeries) {
-        return new TsdlTestInfoImpl(shortName, longName, timeSeries);
-    }
+  List<List<DataPoint>> timeSeries();
 }

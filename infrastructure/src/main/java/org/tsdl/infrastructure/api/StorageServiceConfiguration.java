@@ -5,17 +5,17 @@ import java.util.Map;
 
 public interface StorageServiceConfiguration {
 
-    boolean isPropertySet(StorageProperty property);
+  boolean isPropertySet(StorageProperty property);
 
-    Object getProperty(StorageProperty property);
+  Object getProperty(StorageProperty property);
 
-    <V> V getProperty(StorageProperty property, Class<V> targetType);
+  <V> V getProperty(StorageProperty property, Class<V> targetType);
 
-    Object setProperty(StorageProperty property, Object value);
+  Object setProperty(StorageProperty property, Object value);
 
-    Object unsetProperty(StorageProperty property);
+  Object unsetProperty(StorageProperty property);
 
-    List<StorageProperty> getSupportedProperties();
+  List<StorageProperty> getSupportedProperties();
 
-    Map<StorageProperty, Object> getSetProperties();
+  Map<StorageProperty, Object> getSetProperties();
 }

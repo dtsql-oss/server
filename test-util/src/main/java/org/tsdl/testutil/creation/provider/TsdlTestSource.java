@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TsdlTestSource {
-    String value();
+  String value();
 
-    String timestampFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
+  String timestampFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
 
-    // TODO
-    int skipHeaders() default 0;
+  // TODO
+  int skipHeaders() default 0;
 }

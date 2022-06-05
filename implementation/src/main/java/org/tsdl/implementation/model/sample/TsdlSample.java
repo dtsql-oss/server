@@ -4,7 +4,7 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 
 public interface TsdlSample {
-    TsdlAggregator aggregator();
+  TsdlAggregator aggregator();
 
-    TsdlIdentifier identifier();
+  TsdlIdentifier identifier();
 }

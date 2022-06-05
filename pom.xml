@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.tsdl</groupId>
@@ -25,8 +26,30 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.3.0</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <failsOnError>true</failsOnError>
+                    <failOnViolation>true</failOnViolation>
+                    <violationSeverity>warning</violationSeverity>
+                    <consoleOutput>true</consoleOutput>
+                    <configLocation>${checkstyle.config}</configLocation>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -56,6 +79,7 @@
         <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
         <java.version>17</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
+        <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M6</maven.surefire.plugin.version>
         <assertj.version>3.23.1</assertj.version>
@@ -66,6 +90,9 @@
         <jfreechart.version>1.5.3</jfreechart.version>
         <logback.version>1.2.11</logback.version>
         <lombok.version>1.18.24</lombok.version>
+        <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
+        <checkstyle.version>9.3</checkstyle.version>
+        <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
 
 </project>

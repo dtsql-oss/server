@@ -4,7 +4,7 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 
 public interface TsdlEvent {
-    SinglePointFilterConnective definition();
+  SinglePointFilterConnective definition();
 
-    TsdlIdentifier identifier();
+  TsdlIdentifier identifier();
 }

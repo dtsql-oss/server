@@ -6,10 +6,10 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
 public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements PrecedesOperator {
-    @Override
-    public boolean isTrue() {
-        Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First event argument must not be null.");
-        Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second event argument must not be null.");
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public boolean isTrue() {
+    Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First event argument must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second event argument must not be null.");
+    throw new UnsupportedOperationException();
+  }
 }

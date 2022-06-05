@@ -6,13 +6,13 @@ import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 
 public interface ObjectFactory {
-    ObjectFactory INSTANCE = new ObjectFactoryImpl();
+  ObjectFactory INSTANCE = new ObjectFactoryImpl();
 
-    TsdlQueryParser queryParser();
+  TsdlQueryParser queryParser();
 
-    TsdlElementParser elementParser();
+  TsdlElementParser elementParser();
 
-    TsdlElementFactory elementFactory();
+  TsdlElementFactory elementFactory();
 
-    ANTLRErrorListener errorListener();
+  ANTLRErrorListener errorListener();
 }

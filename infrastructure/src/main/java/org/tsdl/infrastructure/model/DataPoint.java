@@ -1,21 +1,20 @@
 package org.tsdl.infrastructure.model;
 
+import java.time.Instant;
 import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
 
-import java.time.Instant;
-
 public interface DataPoint {
-    Instant getTimestamp();
+  static DataPoint of(Instant timestamp, Object value) {
+    return new TsdlDataPoint(timestamp, value);
+  }
 
-    Object getValue();
+  Instant getTimestamp();
 
-    Long asInteger();
+  Object getValue();
 
-    Double asDecimal();
+  Long asInteger();
 
-    String asText();
+  Double asDecimal();
 
-    static DataPoint of(Instant timestamp, Object value) {
-        return new TsdlDataPoint(timestamp, value);
-    }
+  String asText();
 }

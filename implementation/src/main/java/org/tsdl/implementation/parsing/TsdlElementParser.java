@@ -7,15 +7,15 @@ import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 
 public interface TsdlElementParser {
-    ConnectiveIdentifier parseConnectiveIdentifier(String str);
+  ConnectiveIdentifier parseConnectiveIdentifier(String str);
 
-    FilterType parseFilterType(String str);
+  FilterType parseFilterType(String str);
 
-    ResultFormat parseResultFormat(String str);
+  ResultFormat parseResultFormat(String str);
 
-    AggregatorType parseAggregatorType(String str);
+  AggregatorType parseAggregatorType(String str);
 
-    TemporalRelationType parseTemporalRelationType(String str);
+  TemporalRelationType parseTemporalRelationType(String str);
 
-    Double parseNumber(String str);
+  Double parseNumber(String str);
 }

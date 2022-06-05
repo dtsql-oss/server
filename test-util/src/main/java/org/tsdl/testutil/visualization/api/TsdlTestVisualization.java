@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TsdlTestVisualization {
-    String PRECISE_AXIS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    String DEFAULT_AXIS_FORMAT = "";
+  String PRECISE_AXIS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+  String DEFAULT_AXIS_FORMAT = "";
 
-    boolean skipVisualization() default false;
+  boolean skipVisualization() default false;
 
-    boolean renderPointShape() default true;
+  boolean renderPointShape() default true;
 
-    String dateAxisFormat() default DEFAULT_AXIS_FORMAT;
+  String dateAxisFormat() default DEFAULT_AXIS_FORMAT;
 }
