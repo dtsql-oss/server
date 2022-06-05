@@ -52,9 +52,9 @@ jobs:
       - name: Make Maven Wrapper Executable
         run: |
           chmod +x mvnw
-      # - name: Execute Maven checkstyle Plugin TODO: add checkstyle to project and CI
-      #  run: |
-      #    ./mvnw $MAVEN_CLI_OPTS checkstyle:check
+      - name: Execute Maven checkstyle Plugin
+        run: |
+          ./mvnw $MAVEN_CLI_OPTS checkstyle:check
 
   test:
     if: ${{ always() }}
