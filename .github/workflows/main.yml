@@ -58,7 +58,7 @@ jobs:
           chmod +x mvnw
       - name: Execute Maven checkstyle Plugin
         run: |
-          ./mvnw $MAVEN_CLI_OPTS $FAIL_NEVER checkstyle:check
+          ./mvnw $MAVEN_CLI_OPTS $FAIL_NEVER checkstyle:check | perl -pe 'END { exit $status } $status=1 if /BUILD FAILURE/;'
 
   test:
     if: ${{ always() }}
