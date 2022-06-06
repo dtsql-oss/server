@@ -101,5 +101,6 @@ jobs:
             **/logs/**
             !.git/**
             **/surefire-reports/** 
+            **/target/site/jacoco/**
             ./service/service_api.json
             ./service/service_api.yaml
