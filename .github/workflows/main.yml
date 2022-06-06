@@ -84,6 +84,12 @@ jobs:
         run: |
           ./mvnw $MAVEN_CLI_OPTS $FAIL_END clean verify
 
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: ${{ always() }}
+        with:
+          report_paths: '**/surefire-reports/*.xml'
+
       - name: Upload Build Artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
