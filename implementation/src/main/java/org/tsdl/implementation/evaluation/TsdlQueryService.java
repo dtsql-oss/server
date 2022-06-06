@@ -1,5 +1,8 @@
 package org.tsdl.implementation.evaluation;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.TsdlPeriod;
 
 /**
  * Default implementation of {@link QueryService}.
@@ -40,6 +44,59 @@ public class TsdlQueryService implements QueryService {
       setSampleFilterArgumentValues(parsedQuery, sampleValues);
 
       var filteredDataPoints = parsedQuery.filter().isPresent() ? parsedQuery.filter().get().evaluateFilters(data) : data;
+
+      var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
+      var periods = new HashMap<TsdlIdentifier, List<TsdlPeriod>>();
+      if (!parsedQuery.events().isEmpty()) {
+        for (var i = 0; i < filteredDataPoints.size(); i++) {
+          var dp = filteredDataPoints.get(i);
+          for (var event : parsedQuery.events()) {
+            var eventId = event.identifier();
+            if (event.definition().isSatisfied(dp)) {
+              // satisfied - either period is still going on or the period starts
+              if (eventMarkers.containsKey(eventId)) {
+                // period is still going on
+
+                if (i == filteredDataPoints.size() - 1) {
+                  // if, however, the end of the data is reached, the period must end, too
+                  periods.putIfAbsent(eventId, new ArrayList<>());
+
+                  var periodStart = eventMarkers.get(eventId);
+                  var periodEnd = dp.getTimestamp();
+                  var index = periods.get(eventId).size();
+
+                  var period = QueryResult.of(index, periodStart, periodEnd);
+                  periods.get(eventId).add(period);
+
+                  eventMarkers.remove(eventId);
+                }
+              } else {
+                // new period starts
+                eventMarkers.put(eventId, dp.getTimestamp());
+              }
+            } else {
+              // not satisfied - either period ends, or there is still no open period
+              if (eventMarkers.containsKey(eventId)) {
+                // period ended
+                periods.putIfAbsent(eventId, new ArrayList<>());
+
+                var periodStart = eventMarkers.get(eventId);
+                var periodEnd = filteredDataPoints.get(i - 1).getTimestamp();
+                var index = periods.get(eventId).size();
+
+                var period = QueryResult.of(index, periodStart, periodEnd);
+                periods.get(eventId).add(period);
+
+                eventMarkers.remove(eventId);
+              } else {
+                // nothing to do - still no open period
+              }
+            }
+          }
+        }
+      }
+
+      // TODO fix indices in periods, in conjunction wtih CHOOSE - implement CHOOSE
 
       return QueryResult.of(filteredDataPoints);
     } catch (TsdlEvaluationException e) {

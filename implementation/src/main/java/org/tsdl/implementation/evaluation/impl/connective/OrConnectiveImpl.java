@@ -10,9 +10,14 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 public record OrConnectiveImpl(List<SinglePointFilter> filters) implements OrConnective {
   @Override
+  public boolean isSatisfied(DataPoint dp) {
+    return filters().stream().anyMatch(filter -> filter.evaluate(dp));
+  }
+
+  @Override
   public List<DataPoint> evaluateFilters(List<DataPoint> data) {
     return data.stream()
-        .filter(dp -> filters().stream().anyMatch(filter -> filter.evaluate(dp)))
+        .filter(this::isSatisfied)
         .toList();
   }
 }

@@ -12,4 +12,6 @@ public interface SinglePointFilterConnective {
   List<SinglePointFilter> filters();
 
   List<DataPoint> evaluateFilters(List<DataPoint> data);
+
+  boolean isSatisfied(DataPoint dp);
 }
