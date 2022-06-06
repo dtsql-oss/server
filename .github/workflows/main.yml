@@ -86,14 +86,13 @@ jobs:
 
       - name: Upload Build Artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-artifacts
           # Filename of service_api.(json|yaml) of API artifacts has to be kept in sync with the value of the LOCAL_FILE_NAME
           # constant in the "service/src/test/java/com/tsdl/service/ApiGenerationTest.java" file.
-          # TODO generate surefire XML reports
           path: |
-            '**/logs/**'
-            '**/surefire-reports/**' 
+            **/logs/**
+            **/surefire-reports/** 
             ./service/service_api.json
             ./service/service_api.yaml

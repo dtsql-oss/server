@@ -91,7 +91,7 @@
         <logback.version>1.2.11</logback.version>
         <lombok.version>1.18.24</lombok.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-        <checkstyle.version>10.3</checkstyle.version>
+        <checkstyle.version>9.3</checkstyle.version>
         <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
 
