@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.api.StorageServiceConfiguration;
-import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.service.dto.QueryDto;
 import org.tsdl.service.exception.InputInterpretationException;
 import org.tsdl.service.exception.UnknownStorageException;
@@ -47,14 +46,13 @@ public class QueryController {
   @PostMapping
   @Operation(summary = "Execute query over configurable storage provider.")
   @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
-  public List<DataPoint> query(@Valid @RequestBody
-                               @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                               QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+  public QueryResult query(@Valid @RequestBody
+                           @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
+                           QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
     log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
     log.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
     log.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
     log.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
-    log.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
 
     var storageSpec = querySpecification.getStorage();
     var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());
@@ -67,8 +65,7 @@ public class QueryController {
     var fetchedData = tsdlStorage.storageService().load(lookupConfig);
     var dataPoints = tsdlStorage.storageService().transform(fetchedData, transformationConfig);
 
-    var queriedData = queryService.query(dataPoints, querySpecification.getTsdlQuery());
-    return queriedData.getItems();
+    return queryService.query(dataPoints, querySpecification.getTsdlQuery());
   }
 
   private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage)

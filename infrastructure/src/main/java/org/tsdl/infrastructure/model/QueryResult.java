@@ -1,16 +1,16 @@
 package org.tsdl.infrastructure.model;
 
 import java.util.List;
-import org.tsdl.infrastructure.model.impl.TsdlQueryResult;
+import org.tsdl.infrastructure.model.impl.TsdlDataPointsImpl;
 
 /**
- * Result of the evaluation process of a TSDL query.
+ * A result of the evaluation process of a TSDL query.
  */
 public interface QueryResult {
 
-  static QueryResult of(List<DataPoint> items) {
-    return new TsdlQueryResult(items);
-  }
+  QueryResultType type();
 
-  List<DataPoint> getItems();
+  static QueryResult of(List<DataPoint> items) {
+    return new TsdlDataPointsImpl(items);
+  }
 }

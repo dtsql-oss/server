@@ -3,6 +3,7 @@ package org.tsdl.implementation.evaluation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.infrastructure.model.TsdlDataPoints;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
@@ -109,7 +111,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -127,7 +131,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -146,7 +152,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -165,7 +173,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -183,7 +193,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -202,7 +214,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -220,7 +234,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -239,7 +255,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -257,7 +275,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -276,7 +296,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -294,7 +316,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -313,7 +337,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -331,7 +357,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -350,7 +378,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -368,7 +398,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -387,7 +419,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -408,7 +442,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
@@ -422,7 +458,9 @@ class TsdlQueryServiceTest {
 
       var result = queryService.query(dataPoints, query);
 
-      assertThat(result.getItems())
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
     }
