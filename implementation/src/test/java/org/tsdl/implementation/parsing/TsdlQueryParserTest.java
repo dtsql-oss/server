@@ -111,12 +111,14 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .isPresent().get()
           .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1);
 
-      assertThat(query.filter().filters().get(0))
-          .asInstanceOf(InstanceOfAssertFactories.type(GreaterThanFilter.class))
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(0), InstanceOfAssertFactories.type(GreaterThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(23.4);
     }
@@ -132,7 +134,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .isPresent().get()
           .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(LowerThanFilter.class))
@@ -151,7 +154,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .isPresent().get()
           .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
@@ -175,29 +179,34 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .isPresent().get()
           .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(4);
 
-      assertThat(query.filter().filters().get(0))
-          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(0), InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LowerThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(25.1);
 
-      assertThat(query.filter().filters().get(1))
-          .asInstanceOf(InstanceOfAssertFactories.type(GreaterThanFilter.class))
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(1), InstanceOfAssertFactories.type(GreaterThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(3.4);
 
-      assertThat(query.filter().filters().get(2))
-          .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(2), InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(GreaterThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(1000d);
 
-      assertThat(query.filter().filters().get(3))
-          .asInstanceOf(InstanceOfAssertFactories.type(LowerThanFilter.class))
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(3), InstanceOfAssertFactories.type(LowerThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-3.4447);
     }
@@ -215,7 +224,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .isPresent().get()
           .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(GreaterThanFilter.class))
@@ -325,7 +335,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.choice())
-          .asInstanceOf(InstanceOfAssertFactories.type(PrecedesOperator.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(PrecedesOperator.class))
+          .isPresent().get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
             assertThat(op.operand1().identifier().name()).isEqualTo("e1");
@@ -345,7 +356,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.choice())
-          .asInstanceOf(InstanceOfAssertFactories.type(FollowsOperator.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(FollowsOperator.class))
+          .isPresent().get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
             assertThat(op.operand1().identifier().name()).isEqualTo("e2");
@@ -468,7 +480,8 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.type(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .isPresent().get()
           .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(2)
           .satisfies(filterArguments -> {
@@ -574,7 +587,8 @@ class TsdlQueryParserTest {
       var low = query.events().stream().filter(event -> event.identifier().name().equals("low")).findFirst().orElseThrow();
       var high = query.events().stream().filter(event -> event.identifier().name().equals("high")).findFirst().orElseThrow();
       assertThat(query.choice())
-          .asInstanceOf(InstanceOfAssertFactories.type(PrecedesOperator.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(PrecedesOperator.class))
+          .isPresent().get()
           .extracting(PrecedesOperator::cardinality, PrecedesOperator::operand1, PrecedesOperator::operand2)
           .containsExactly(2, low, high);
     }
@@ -598,6 +612,19 @@ class TsdlQueryParserTest {
           """;
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(DuplicateIdentifierException.class);
+    }
+
+    @Test
+    void integration_optionalDirectives_parsedAsEmpty() {
+      var queryString = "YIELD: data points";
+      var query = PARSER.parseQuery(queryString);
+
+      assertThat(query.filter()).isNotPresent();
+      assertThat(query.samples()).isEmpty();
+      assertThat(query.events()).isEmpty();
+      assertThat(query.choice()).isNotPresent();
+      assertThat(query.identifiers()).isEmpty();
+      assertThat(query.result()).isNotNull();
     }
   }
 }

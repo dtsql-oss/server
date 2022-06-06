@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 
 /**
  * Represents a panel which allows users to paint time series to be used as test input data with their mouse.
@@ -124,35 +126,15 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
         Instant.now().minus(5L * 12 * 30, ChronoUnit.DAYS), // 5 years
         Instant.now().plus(5L * 12 * 30, ChronoUnit.DAYS) // 5 years
     );
-    // TODO also serialize avg, sum etc. as header comments
-    var output = new StringBuilder();
-    if ("CSV".equals(type)) {
-      for (var i = 0; i < lst.size(); i++) {
-        var point = lst.get(i);
-        output
-            .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
-            .append(";")
-            .append(point.getY())
-            .append("\n");
-      }
-    } else if ("Java".equals(type)) {
-      output.append("List.of(\n");
-      for (var i = 0; i < lst.size(); i++) {
-        var point = lst.get(i);
-        var trailingComma = i == lst.size() - 1 ? "" : ",";
-        output
-            .append("  DataPoint.of(")
-            .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
-            .append(", ")
-            .append(point.getY())
-            .append(")%s%n".formatted(trailingComma));
-      }
-      output.append(")");
-    } else {
-      throw new IllegalArgumentException("Unknown output type '%s'".formatted(type));
-    }
 
-    return output.toString();
+    Conditions.checkContains(Condition.ARGUMENT, List.of("Java", "CSV"), type, "Unknown output type '%s'", type);
+
+    // TODO also serialize avg, sum etc. as header comments
+    return switch (type) {
+      case "CSV" -> serializeCsv(lst, lowestDate);
+      case "Java" -> serializeJava(lst, lowestDate);
+      default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
+    };
   }
 
   //CHECKSTYLE.OFF: MissingJavadocMethod - No documentation for external interface method needed.
@@ -169,5 +151,34 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
 
   public void mouseMoved(MouseEvent e) {
     // do nothing
+  }
+
+  private String serializeCsv(List<Point> lst, Instant lowestDate) {
+    var output = new StringBuilder();
+    for (var i = 0; i < lst.size(); i++) {
+      var point = lst.get(i);
+      output
+          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(";")
+          .append(point.getY())
+          .append("\n");
+    }
+    return output.toString();
+  }
+
+  private String serializeJava(List<Point> lst, Instant lowestDate) {
+    var output = new StringBuilder();
+    for (var i = 0; i < lst.size(); i++) {
+      var point = lst.get(i);
+      var trailingComma = i == lst.size() - 1 ? "" : ",";
+      output
+          .append("  DataPoint.of(")
+          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(", ")
+          .append(point.getY())
+          .append(")%s%n".formatted(trailingComma));
+    }
+    output.append(")");
+    return output.toString();
   }
 }

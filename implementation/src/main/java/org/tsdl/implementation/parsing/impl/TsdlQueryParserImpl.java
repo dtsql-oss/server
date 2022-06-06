@@ -10,6 +10,8 @@ import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 
 /**
  * Default implementation of {@link TsdlQuery}.
@@ -20,6 +22,8 @@ public class TsdlQueryParserImpl implements TsdlQueryParser {
   @Override
   public TsdlQuery parseQuery(String query) {
     try {
+      Conditions.checkNotNull(Condition.ARGUMENT, query, "Query to parse must not be null.");
+
       var lexer = new TsdlLexer(CharStreams.fromString(query));
       lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
       lexer.addErrorListener(errorListener);

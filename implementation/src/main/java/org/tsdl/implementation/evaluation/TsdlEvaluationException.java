@@ -1,6 +1,6 @@
 package org.tsdl.implementation.evaluation;
 
-public class TsdlEvaluationException extends Exception {
+public class TsdlEvaluationException extends RuntimeException {
   public TsdlEvaluationException() {
   }
 

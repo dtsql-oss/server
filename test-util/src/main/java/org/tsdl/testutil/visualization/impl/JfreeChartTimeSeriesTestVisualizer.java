@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.DateAxis;
@@ -24,8 +25,6 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
 import org.tsdl.testutil.visualization.api.TsdlTestInfo;
@@ -34,8 +33,8 @@ import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 /**
  * Implementation of {@link TimeSeriesTestVisualizer} depending on the JFreeChart visualization library.
  */
+@Slf4j
 public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisualizer {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JfreeChartTimeSeriesTestVisualizer.class);
   private final SingleActionAwait singleActionAwait = new SingleActionAwait();
   private TestVisualizationWindow visualizer;
   private Point lastLocation;
@@ -45,8 +44,8 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
   @Override
   public boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration) {
     if (visualizationConfiguration != null && visualizationConfiguration.skipVisualization()) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Skipping visualization of test '{}' because the 'skipVisualization' parameter of the @{}' annotation is true.",
+      if (log.isDebugEnabled()) {
+        log.debug("Skipping visualization of test '{}' because the 'skipVisualization' parameter of the @{}' annotation is true.",
             testInformation.longName(), TsdlTestVisualization.class.getSimpleName());
       }
       return true;
@@ -68,8 +67,8 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
     lastLocation = visualizer.locationOnClose;
 
     if (errorMessage != null) {
-      LOGGER.warn("Encountered problem while visualizing test: {}", errorMessage);
-      LOGGER.warn("Executing test anyway, without prior visualization.");
+      log.warn("Encountered problem while visualizing test: {}", errorMessage);
+      log.warn("Executing test anyway, without prior visualization.");
       return true;
     }
 

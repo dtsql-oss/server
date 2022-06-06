@@ -113,7 +113,11 @@ public final class Conditions {
     checkIsTrue(conditionType, Objects.equals(collection.size(), requiredSize), "Collection size must be equactly %s", requiredSize);
   }
 
-  private static RuntimeException exception(Condition condition, String message) {
+  public static RuntimeException exception(Condition condition, String messageTemplate, Object... messageArguments) {
+    return exception(condition, String.format(messageTemplate, messageArguments));
+  }
+
+  public static RuntimeException exception(Condition condition, String message) {
     return switch (condition) {
       case STATE -> new IllegalStateException(message);
       case ARGUMENT -> new IllegalArgumentException(message);

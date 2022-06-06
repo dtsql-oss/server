@@ -8,8 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,8 +29,8 @@ import org.tsdl.service.service.StorageResolverService;
 @RequestMapping("/query")
 @Tag(name = "TSDL Query", description = "Endpoint exposing TSDL query services for generic storage implementations.")
 @Validated
+@Slf4j
 public class QueryController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(QueryController.class);
   private final StorageResolverService storageServiceResolver;
   private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
 
@@ -51,11 +50,11 @@ public class QueryController {
   public List<DataPoint> query(@Valid @RequestBody
                                @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
                                QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
-    LOGGER.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
-    LOGGER.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
-    LOGGER.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
-    LOGGER.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
-    LOGGER.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
+    log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
+    log.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
+    log.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
+    log.debug("Transformation configuration: {}", querySpecification.getStorage().getTransformationConfiguration());
+    log.debug("TSDL Query: {}", querySpecification.getTsdlQuery());
 
     var storageSpec = querySpecification.getStorage();
     var tsdlStorage = storageServiceResolver.resolve(storageSpec.getName());

@@ -50,7 +50,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   @Override
   public void enterFiltersDeclaration(TsdlParser.FiltersDeclarationContext ctx) {
     var connective = parseSinglePointFilterConnective(ctx.filterConnective());
-    queryBuilder.filter(connective);
+    queryBuilder.filterValue(connective);
   }
 
   @Override
@@ -111,7 +111,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var relationType = elementParser.parseTemporalRelationType(choiceStatement.temporalRelation().getText());
     var operator = elementFactory.getChoice(relationType, chosenEvents);
 
-    queryBuilder.choice(operator);
+    queryBuilder.choiceValue(operator);
   }
 
   @Override
