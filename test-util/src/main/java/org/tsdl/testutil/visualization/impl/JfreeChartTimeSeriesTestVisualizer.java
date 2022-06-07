@@ -7,7 +7,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javax.swing.JButton;
@@ -83,13 +84,26 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
       var newSeries = new TimeSeries(String.format("Series%d", i));
       for (var dataPoint : series) {
-        newSeries.add(new Millisecond(Date.from(dataPoint.getTimestamp())), dataPoint.asDecimal());
+        newSeries.add(dataPointFromTimestamp(dataPoint.getTimestamp()), dataPoint.asDecimal());
       }
 
       dataset.addSeries(newSeries);
     }
 
     return dataset;
+  }
+
+  private Millisecond dataPointFromTimestamp(Instant timestamp) {
+    var zonedTimestamp = timestamp.atZone(ZoneOffset.UTC);
+    return new Millisecond(
+        zonedTimestamp.getNano() / 1_000_000,
+        zonedTimestamp.getSecond(),
+        zonedTimestamp.getMinute(),
+        zonedTimestamp.getHour(),
+        zonedTimestamp.getDayOfMonth(),
+        zonedTimestamp.getMonthValue(),
+        zonedTimestamp.getYear()
+    );
   }
 
   private static class TestVisualizationWindow extends JFrame {
