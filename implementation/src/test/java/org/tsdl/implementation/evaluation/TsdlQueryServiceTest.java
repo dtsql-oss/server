@@ -58,7 +58,7 @@ class TsdlQueryServiceTest {
             OR(gt(175)) AS high
                     
           CHOOSE:
-            low precedes high
+            low follows high
                     
           YIELD:
             all periods

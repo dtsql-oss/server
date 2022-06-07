@@ -13,6 +13,8 @@ public interface TsdlPeriod extends QueryResult {
 
   Instant end();
 
+  TsdlPeriod withIndex(int index);
+
   @Override
   default QueryResultType type() {
     return QueryResultType.PERIOD;

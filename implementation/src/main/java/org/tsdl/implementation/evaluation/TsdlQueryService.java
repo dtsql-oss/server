@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.tsdl.implementation.evaluation.impl.choice.AnnotatedTsdlPeriodImpl;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
+import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
@@ -22,7 +24,6 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
-import org.tsdl.infrastructure.model.TsdlPeriod;
 
 /**
  * Default implementation of {@link QueryService}.
@@ -43,67 +44,77 @@ public class TsdlQueryService implements QueryService {
       final var sampleValues = computeSamples(parsedQuery.samples(), data);
       setSampleFilterArgumentValues(parsedQuery, sampleValues);
 
-      var filteredDataPoints = parsedQuery.filter().isPresent() ? parsedQuery.filter().get().evaluateFilters(data) : data;
+      var relevantDataPoints = parsedQuery.filter().isPresent()
+          ? parsedQuery.filter().get().evaluateFilters(data)
+          : data;
 
-      var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
-      var periods = new HashMap<TsdlIdentifier, List<TsdlPeriod>>();
-      if (!parsedQuery.events().isEmpty()) {
-        for (var i = 0; i < filteredDataPoints.size(); i++) {
-          var dp = filteredDataPoints.get(i);
-          for (var event : parsedQuery.events()) {
-            var eventId = event.identifier();
-            if (event.definition().isSatisfied(dp)) {
-              // satisfied - either period is still going on or the period starts
-              if (eventMarkers.containsKey(eventId)) {
-                // period is still going on
-
-                if (i == filteredDataPoints.size() - 1) {
-                  // if, however, the end of the data is reached, the period must end, too
-                  periods.putIfAbsent(eventId, new ArrayList<>());
-
-                  var periodStart = eventMarkers.get(eventId);
-                  var periodEnd = dp.getTimestamp();
-                  var index = periods.get(eventId).size();
-
-                  var period = QueryResult.of(index, periodStart, periodEnd);
-                  periods.get(eventId).add(period);
-
-                  eventMarkers.remove(eventId);
-                }
-              } else {
-                // new period starts
-                eventMarkers.put(eventId, dp.getTimestamp());
-              }
-            } else {
-              // not satisfied - either period ends, or there is still no open period
-              if (eventMarkers.containsKey(eventId)) {
-                // period ended
-                periods.putIfAbsent(eventId, new ArrayList<>());
-
-                var periodStart = eventMarkers.get(eventId);
-                var periodEnd = filteredDataPoints.get(i - 1).getTimestamp();
-                var index = periods.get(eventId).size();
-
-                var period = QueryResult.of(index, periodStart, periodEnd);
-                periods.get(eventId).add(period);
-
-                eventMarkers.remove(eventId);
-              } else {
-                // nothing to do - still no open period
-              }
-            }
-          }
-        }
+      if (parsedQuery.events().isEmpty()) {
+        return QueryResult.of(relevantDataPoints);
       }
 
-      // TODO fix indices in periods, in conjunction wtih CHOOSE - implement CHOOSE
+      var detectedPeriods = detectPeriods(relevantDataPoints, parsedQuery);
+      if (parsedQuery.choice().isPresent()) {
+        return parsedQuery.choice().get().evaluate(detectedPeriods);
+      } else {
+        return QueryResult.of(relevantDataPoints);
+      }
 
-      return QueryResult.of(filteredDataPoints);
+      // TODO respect output result type
     } catch (TsdlEvaluationException e) {
       throw e;
     } catch (Exception e) {
       throw new TsdlEvaluationException("Query evaluation failed.", e);
     }
+  }
+
+  /**
+   * Precondition: SampleFilterArgument values have been set
+   * Postcondition: detected periods are ordered by start time; for equal start times, the period whose declaring event has the lower index is first
+   */
+  private List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, TsdlQuery query) {
+    var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
+    var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
+    for (var i = 0; i < dataPoints.size(); i++) {
+      var dp = dataPoints.get(i);
+      for (var event : query.events()) {
+        var eventId = event.identifier();
+        if (event.definition().isSatisfied(dp)) {
+          // satisfied - either period is still going on or the period starts
+
+          if (eventMarkers.containsKey(eventId)) {
+            // period is still going on
+
+            if (i == dataPoints.size() - 1) {
+              // if the end of the data is reached, the period must end, too
+              finalizePeriod(detectedPeriods, eventMarkers, eventId, dp.getTimestamp());
+            }
+          } else {
+            // new period starts
+            eventMarkers.put(eventId, dp.getTimestamp());
+          }
+
+        } else {
+          // not satisfied - either period ends, or there is still no open period
+
+          //noinspection StatementWithEmptyBody
+          if (eventMarkers.containsKey(eventId)) {
+            // period ended
+            finalizePeriod(detectedPeriods, eventMarkers, eventId, dataPoints.get(i - 1).getTimestamp());
+          } else {
+            // nothing to do - still no open period
+          }
+        }
+      }
+    }
+
+    return detectedPeriods;
+  }
+
+  private void finalizePeriod(List<AnnotatedTsdlPeriod> periods, Map<TsdlIdentifier, Instant> eventMarkers, TsdlIdentifier eventId,
+                              Instant periodEnd) {
+    var finalizedPeriod = QueryResult.of(-1, eventMarkers.get(eventId), periodEnd);
+    periods.add(new AnnotatedTsdlPeriodImpl(finalizedPeriod, eventId));
+    eventMarkers.remove(eventId);
   }
 
   private Map<TsdlIdentifier, Double> computeSamples(List<TsdlSample> samples, List<DataPoint> input) {
