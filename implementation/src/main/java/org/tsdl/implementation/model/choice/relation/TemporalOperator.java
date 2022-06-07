@@ -11,7 +11,7 @@ public interface TemporalOperator {
   int cardinality();
 
   /**
-   * Precondition: annotated periods are ordered by start time
+   * Precondition: annotated periods are ordered by start time.
    */
   TsdlPeriods evaluate(List<AnnotatedTsdlPeriod> periods);
 }

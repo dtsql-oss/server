@@ -20,12 +20,13 @@ import org.tsdl.infrastructure.model.TsdlPeriods;
 public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements FollowsOperator {
   @Override
   public TsdlPeriods evaluate(List<AnnotatedTsdlPeriod> periods) {
-    Conditions.checkNotNull(Condition.ARGUMENT,periods,"Annotated periods as input to temporal operator must not be null.");
-    Conditions.checkNotNull(Condition.STATE, operand1, "First event argument must not be null.");
-    Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument must not be null.");
+    log.debug("Evaluating 'follows' temporal operator.");
+    Conditions.checkNotNull(Condition.ARGUMENT, periods, "Annotated periods as input to 'follows' operator must not be null.");
+    Conditions.checkNotNull(Condition.STATE, operand1, "First event argument of 'follows' operator must not be null.");
+    Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument of 'follows' operator must not be null.");
 
     if (periods.size() < 2) {
-      log.debug("Less than two annotated periods as input, hence resulting period set is empty.");
+      log.debug("Less than two annotated periods as input, hence resulting set of 'follows' periods is empty.");
       return QueryResult.of(0, List.of());
     }
 
@@ -44,8 +45,8 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
   }
 
   private boolean follows(AnnotatedTsdlPeriod previousPeriod, AnnotatedTsdlPeriod currentPeriod) {
-    return Objects.equals(operand2().identifier(), previousPeriod.event()) &&
-        Objects.equals(operand1().identifier(), currentPeriod.event());
+    return Objects.equals(operand2().identifier(), previousPeriod.event())
+        && Objects.equals(operand1().identifier(), currentPeriod.event());
   }
 
   private TsdlPeriod mergePeriods(AnnotatedTsdlPeriod period1, AnnotatedTsdlPeriod period2, int index) {

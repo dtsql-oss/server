@@ -51,20 +51,28 @@ class TsdlQueryServiceTest {
     @TsdlTestSources({
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
+    @TsdlTestVisualization(skipVisualization = false)
     void queryChooseEvents_ltThenGtLiteralArgumentsSmallInput(List<DataPoint> dps) {
       var query = """
+          WITH SAMPLES:
+            avg(_input) AS mean
+            
+          FILTER:
+            AND(NOT(lt(80)))
+            
           USING EVENTS:
-            AND(lt(175)) AS low,
-            OR(gt(175)) AS high
-                    
+            AND(lt(mean)) AS low,
+            OR(gt(mean)) AS high
+
           CHOOSE:
-            low follows high
-                    
+            low precedes high
+
           YIELD:
             all periods
           """;
 
       var result = queryService.query(dps, query);
+      System.out.println();
     }
 
     @ParameterizedTest

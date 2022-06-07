@@ -17,6 +17,7 @@ import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.ThresholdFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.infrastructure.api.QueryService;
@@ -24,6 +25,8 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.TsdlPeriod;
+import org.tsdl.infrastructure.model.TsdlPeriods;
 
 /**
  * Default implementation of {@link QueryService}.
@@ -54,12 +57,11 @@ public class TsdlQueryService implements QueryService {
 
       var detectedPeriods = detectPeriods(relevantDataPoints, parsedQuery);
       if (parsedQuery.choice().isPresent()) {
-        return parsedQuery.choice().get().evaluate(detectedPeriods);
+        var periods = parsedQuery.choice().get().evaluate(detectedPeriods);
+        return getResult(periods, parsedQuery.result(), relevantDataPoints);
       } else {
-        return QueryResult.of(relevantDataPoints);
+        return getResult(relevantDataPoints, parsedQuery.result());
       }
-
-      // TODO respect output result type
     } catch (TsdlEvaluationException e) {
       throw e;
     } catch (Exception e) {
@@ -67,8 +69,86 @@ public class TsdlQueryService implements QueryService {
     }
   }
 
+  private QueryResult getResult(List<DataPoint> dataPoints, ResultFormat type) {
+    if (type == ResultFormat.DATA_POINTS) {
+      return QueryResult.of(dataPoints);
+    }
+
+    // TODO replace start/end calculation by .get(0) and .get(size() - 1)?
+    var summary = dataPoints.stream()
+        .mapToLong(dp -> dp.getTimestamp().toEpochMilli())
+        .summaryStatistics();
+    var periodStart = Instant.ofEpochMilli(summary.getMin());
+    var periodEnd = Instant.ofEpochMilli(summary.getMax());
+    var period = QueryResult.of(0, periodStart, periodEnd);
+
+    if (type == ResultFormat.LONGEST_PERIOD || type == ResultFormat.SHORTEST_PERIOD) {
+      return period;
+    }
+
+    if (type == ResultFormat.ALL_PERIODS) {
+      return QueryResult.of(1, List.of(period));
+    }
+
+    throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
+  }
+
+  private QueryResult getResult(TsdlPeriods periods, ResultFormat type, List<DataPoint> dataPoints) {
+    switch (type) {
+      case ALL_PERIODS -> {
+        return periods;
+      }
+
+      case LONGEST_PERIOD -> {
+        TsdlPeriod longestPeriod = null;
+        var greatestDistance = Long.MIN_VALUE;
+        for (var period : periods.periods()) {
+          var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
+          if (distance > greatestDistance) {
+            greatestDistance = distance;
+            longestPeriod = period;
+          }
+        }
+
+        return longestPeriod;
+
+      }
+
+      case SHORTEST_PERIOD -> {
+        TsdlPeriod shortestPeriod = null;
+        var smallestDistance = Long.MAX_VALUE;
+        for (var period : periods.periods()) {
+          var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            shortestPeriod = period;
+          }
+        }
+
+        return shortestPeriod;
+      }
+
+      case DATA_POINTS -> {
+        var pointsInPeriods = dataPoints.stream()
+            .filter(dp -> containsDataPoint(periods.periods(), dp.getTimestamp()))
+            .toList();
+        return QueryResult.of(pointsInPeriods);
+      }
+      default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
+    }
+  }
+
+  private boolean containsDataPoint(List<TsdlPeriod> periods, Instant timestamp) {
+    return periods.stream()
+        .anyMatch(period -> isWithinRange(timestamp, period.start(), period.end()));
+  }
+
+  private boolean isWithinRange(Instant date, Instant leftIntervalBound, Instant rightIntervalBound) {
+    return !(date.isBefore(leftIntervalBound) || date.isAfter(rightIntervalBound));
+  }
+
   /**
-   * Precondition: SampleFilterArgument values have been set
+   * Precondition: SampleFilterArgument values have been set.
    * Postcondition: detected periods are ordered by start time; for equal start times, the period whose declaring event has the lower index is first
    */
   private List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, TsdlQuery query) {
