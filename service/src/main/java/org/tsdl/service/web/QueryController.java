@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.api.StorageServiceConfiguration;
-import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.service.dto.QueryDto;
+import org.tsdl.service.dto.QueryResultDto;
 import org.tsdl.service.exception.InputInterpretationException;
 import org.tsdl.service.exception.UnknownStorageException;
+import org.tsdl.service.mapper.QueryResultMapper;
 import org.tsdl.service.mapper.StorageServiceConfigurationMapper;
 import org.tsdl.service.model.TsdlStorage;
 import org.tsdl.service.service.StorageResolverService;
@@ -32,21 +33,23 @@ import org.tsdl.service.service.StorageResolverService;
 public class QueryController {
   private final StorageResolverService storageServiceResolver;
   private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
+  private final QueryResultMapper queryResultMapper;
 
   private final QueryService queryService;
 
   @Autowired
   public QueryController(StorageResolverService storageServiceResolver, StorageServiceConfigurationMapper storageServiceConfigurationMapper,
-                         QueryService queryService) {
+                         QueryResultMapper queryResultMapper, QueryService queryService) {
     this.storageServiceResolver = storageServiceResolver;
     this.storageServiceConfigurationMapper = storageServiceConfigurationMapper;
+    this.queryResultMapper = queryResultMapper;
     this.queryService = queryService;
   }
 
   @PostMapping
   @Operation(summary = "Execute query over configurable storage provider.")
   @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
-  public QueryResult query(@Valid @RequestBody
+  public QueryResultDto query(@Valid @RequestBody
                            @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
                            QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
     log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
@@ -65,7 +68,8 @@ public class QueryController {
     var fetchedData = tsdlStorage.storageService().load(lookupConfig);
     var dataPoints = tsdlStorage.storageService().transform(fetchedData, transformationConfig);
 
-    return queryService.query(dataPoints, querySpecification.getTsdlQuery());
+    var queryResult = queryService.query(dataPoints, querySpecification.getTsdlQuery());
+    return queryResultMapper.entityToDto(queryResult);
   }
 
   private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage)
