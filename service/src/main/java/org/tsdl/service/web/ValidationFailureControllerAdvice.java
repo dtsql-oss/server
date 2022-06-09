@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
@@ -66,7 +65,7 @@ public class ValidationFailureControllerAdvice {
                   fieldError.getRejectedValue(),
                   !StringUtils.hasText(errorMessage) ? fieldError.getDefaultMessage() : errorMessage);
             })
-            .collect(Collectors.toList()), ex,
+            .toList(), ex,
         request);
   }
 
@@ -88,7 +87,7 @@ public class ValidationFailureControllerAdvice {
                 violation.getPropertyPath().toString(),
                 violation.getInvalidValue(),
                 violation.getMessage()))
-            .collect(Collectors.toList()),
+            .toList(),
         ex,
         request);
   }

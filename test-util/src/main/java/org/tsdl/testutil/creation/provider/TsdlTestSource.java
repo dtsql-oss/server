@@ -21,8 +21,6 @@ public @interface TsdlTestSource {
    */
   String timestampFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
 
-  // TODO
-
   /**
    * The number of rows to skip in the resource file before the actual data starts.
    */

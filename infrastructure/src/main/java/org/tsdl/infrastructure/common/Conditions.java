@@ -3,6 +3,7 @@ package org.tsdl.infrastructure.common;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import lombok.NonNull;
 
 /**
  * Provides utility methods verifying state and/or method arguments.
@@ -53,11 +54,13 @@ public final class Conditions {
     checkEquals(conditionType, obj1, obj2, "Operands must be equal.");
   }
 
+  @NonNull
   public static <T> T checkNotNull(Condition conditionType, T value, String messageTemplate, Object... messageArguments) {
     checkIsTrue(conditionType, value != null, messageTemplate, messageArguments);
     return value;
   }
 
+  @NonNull
   public static <T> T checkNotNull(Condition conditionType, T value) {
     return checkNotNull(conditionType, value, "Operand must not be null.");
   }

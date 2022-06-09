@@ -13,9 +13,14 @@ import org.tsdl.infrastructure.common.Conditions;
 
 @Mapper
 public abstract class StorageServiceConfigurationMapper {
+  // TODO instead of confusing, nested map, introduce PropertyValueConverter class and use a collection of them in here
   private static final Map<Class<?>, Map<Class<?>, UnaryOperator<Object>>> PROPERTY_VALUE_CONVERTERS = Map.of(
       Character.class, Map.of(
-          String.class, v -> ((String) v).charAt(0) // TODO make more strict (i.e. throw instead of cutting off extraneous characters)?
+          String.class, v -> {
+            var input = (String) v;
+            Conditions.checkIsTrue(Condition.ARGUMENT, input.length() == 1, "String to map to character must be of length 1.");
+            return input.charAt(0);
+          }
       ),
       char[].class, Map.of(
           String.class, v -> ((String) v).toCharArray()

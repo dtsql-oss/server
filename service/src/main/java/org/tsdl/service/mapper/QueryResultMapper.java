@@ -6,7 +6,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.service.dto.QueryResultDto;
 
 @Mapper
-public abstract class QueryResultMapper {
+public interface QueryResultMapper {
   @Mapping(target = "type", expression = "java(result.type())")
-  public abstract QueryResultDto entityToDto(QueryResult result);
+  QueryResultDto entityToDto(QueryResult result);
 }

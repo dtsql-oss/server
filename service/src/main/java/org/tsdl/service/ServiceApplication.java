@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Main application representing service exposing TSDL query capabilities.
+ * Main Spring Boot application representing the REST service exposing TSDL query capabilities.
  */
 @SpringBootApplication
 public class ServiceApplication {

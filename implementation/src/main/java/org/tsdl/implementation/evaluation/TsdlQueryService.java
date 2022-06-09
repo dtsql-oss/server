@@ -13,6 +13,7 @@ import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
+import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.ThresholdFilter;
@@ -74,12 +75,10 @@ public class TsdlQueryService implements QueryService {
       return QueryResult.of(dataPoints);
     }
 
-    // TODO replace start/end calculation by .get(0) and .get(size() - 1)?
-    var summary = dataPoints.stream()
-        .mapToLong(dp -> dp.getTimestamp().toEpochMilli())
-        .summaryStatistics();
-    var periodStart = Instant.ofEpochMilli(summary.getMin());
-    var periodEnd = Instant.ofEpochMilli(summary.getMax());
+    // since order preservation is part of the filter contract, we may assume the first element to be the start and the last element to be the end
+    var periodStart = dataPoints.get(0).getTimestamp();
+    var periodEnd = dataPoints.get(dataPoints.size() - 1).getTimestamp();
+
     var period = QueryResult.of(0, periodStart, periodEnd);
 
     if (type == ResultFormat.LONGEST_PERIOD || type == ResultFormat.SHORTEST_PERIOD) {
@@ -95,11 +94,10 @@ public class TsdlQueryService implements QueryService {
 
   private QueryResult getResult(TsdlPeriods periods, ResultFormat type, List<DataPoint> dataPoints) {
     switch (type) {
-      case ALL_PERIODS -> {
+      case ALL_PERIODS:
         return periods;
-      }
 
-      case LONGEST_PERIOD -> {
+      case LONGEST_PERIOD:
         TsdlPeriod longestPeriod = null;
         var greatestDistance = Long.MIN_VALUE;
         for (var period : periods.periods()) {
@@ -109,12 +107,9 @@ public class TsdlQueryService implements QueryService {
             longestPeriod = period;
           }
         }
-
         return longestPeriod;
 
-      }
-
-      case SHORTEST_PERIOD -> {
+      case SHORTEST_PERIOD:
         TsdlPeriod shortestPeriod = null;
         var smallestDistance = Long.MAX_VALUE;
         for (var period : periods.periods()) {
@@ -124,17 +119,16 @@ public class TsdlQueryService implements QueryService {
             shortestPeriod = period;
           }
         }
-
         return shortestPeriod;
-      }
 
-      case DATA_POINTS -> {
+      case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
             .filter(dp -> containsDataPoint(periods.periods(), dp.getTimestamp()))
             .toList();
         return QueryResult.of(pointsInPeriods);
-      }
-      default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
+
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
     }
   }
 
@@ -143,8 +137,8 @@ public class TsdlQueryService implements QueryService {
         .anyMatch(period -> isWithinRange(timestamp, period.start(), period.end()));
   }
 
-  private boolean isWithinRange(Instant date, Instant leftIntervalBound, Instant rightIntervalBound) {
-    return !(date.isBefore(leftIntervalBound) || date.isAfter(rightIntervalBound));
+  private boolean isWithinRange(Instant date, Instant intervalStart, Instant intervalEnd) {
+    return !(date.isBefore(intervalStart) || date.isAfter(intervalEnd));
   }
 
   /**
@@ -154,40 +148,48 @@ public class TsdlQueryService implements QueryService {
   private List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, TsdlQuery query) {
     var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
     var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
+
     for (var i = 0; i < dataPoints.size(); i++) {
-      var dp = dataPoints.get(i);
+      var currentDataPoint = dataPoints.get(i);
+      var previousDataPoint = i > 0 ? dataPoints.get(i - 1) : null;
       for (var event : query.events()) {
-        var eventId = event.identifier();
-        if (event.definition().isSatisfied(dp)) {
-          // satisfied - either period is still going on or the period starts
-
-          if (eventMarkers.containsKey(eventId)) {
-            // period is still going on
-
-            if (i == dataPoints.size() - 1) {
-              // if the end of the data is reached, the period must end, too
-              finalizePeriod(detectedPeriods, eventMarkers, eventId, dp.getTimestamp());
-            }
-          } else {
-            // new period starts
-            eventMarkers.put(eventId, dp.getTimestamp());
-          }
-
-        } else {
-          // not satisfied - either period ends, or there is still no open period
-
-          //noinspection StatementWithEmptyBody
-          if (eventMarkers.containsKey(eventId)) {
-            // period ended
-            finalizePeriod(detectedPeriods, eventMarkers, eventId, dataPoints.get(i - 1).getTimestamp());
-          } else {
-            // nothing to do - still no open period
-          }
-        }
+        markEvent(currentDataPoint, previousDataPoint, i == dataPoints.size() - 1, event, eventMarkers, detectedPeriods);
       }
     }
 
     return detectedPeriods;
+  }
+
+  private void markEvent(DataPoint currentDataPoint, DataPoint previousDataPoint, boolean isLastDataPoint, TsdlEvent event,
+                         HashMap<TsdlIdentifier, Instant> eventMarkers, ArrayList<AnnotatedTsdlPeriod> detectedPeriods) {
+    var eventId = event.identifier();
+    if (event.definition().isSatisfied(currentDataPoint)) {
+      // satisfied - either period is still going on or the period starts
+
+      if (eventMarkers.containsKey(eventId)) {
+        // period is still going on
+
+        if (isLastDataPoint) {
+          // if the end of the data is reached, the period must end, too
+          finalizePeriod(detectedPeriods, eventMarkers, eventId, currentDataPoint.getTimestamp());
+        }
+      } else {
+        // new period starts
+        eventMarkers.put(eventId, currentDataPoint.getTimestamp());
+      }
+
+    } else {
+      // not satisfied - either period ends, or there is still no open period
+
+      //noinspection StatementWithEmptyBody
+      if (eventMarkers.containsKey(eventId)) {
+        // period ended
+        Conditions.checkNotNull(Condition.ARGUMENT, previousDataPoint, "When closing a period, there must be a previous data point.");
+        finalizePeriod(detectedPeriods, eventMarkers, eventId, previousDataPoint.getTimestamp());
+      } else {
+        // nothing to do - still no open period
+      }
+    }
   }
 
   private void finalizePeriod(List<AnnotatedTsdlPeriod> periods, Map<TsdlIdentifier, Instant> eventMarkers, TsdlIdentifier eventId,

@@ -18,7 +18,6 @@ import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.api.StorageServiceConfiguration;
 import org.tsdl.service.dto.QueryDto;
 import org.tsdl.service.dto.QueryResultDto;
-import org.tsdl.service.exception.InputInterpretationException;
 import org.tsdl.service.exception.UnknownStorageException;
 import org.tsdl.service.mapper.QueryResultMapper;
 import org.tsdl.service.mapper.StorageServiceConfigurationMapper;
@@ -51,7 +50,7 @@ public class QueryController {
   @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
   public QueryResultDto query(@Valid @RequestBody
                            @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                           QueryDto querySpecification) throws UnknownStorageException, InputInterpretationException, IOException {
+                           QueryDto querySpecification) throws UnknownStorageException, IOException {
     log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
     log.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
     log.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
@@ -72,8 +71,7 @@ public class QueryController {
     return queryResultMapper.entityToDto(queryResult);
   }
 
-  private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage)
-      throws InputInterpretationException {
+  private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage) {
     return storageServiceConfigurationMapper.mapToConfiguration(properties, targetStorage.configurationSupplier(), targetStorage.propertyClass());
   }
 }

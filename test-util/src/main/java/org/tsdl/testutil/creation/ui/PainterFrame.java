@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -129,10 +130,10 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
 
     Conditions.checkContains(Condition.ARGUMENT, List.of("Java", "CSV"), type, "Unknown output type '%s'", type);
 
-    // TODO also serialize avg, sum etc. as header comments
+    var summaryStatistics = lst.stream().mapToDouble(Point::getY).summaryStatistics();
     return switch (type) {
-      case "CSV" -> serializeCsv(lst, lowestDate);
-      case "Java" -> serializeJava(lst, lowestDate);
+      case "CSV" -> serializeCsv(lst, lowestDate, summaryStatistics);
+      case "Java" -> serializeJava(lst, lowestDate, summaryStatistics);
       default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
     };
   }
@@ -153,8 +154,15 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     // do nothing
   }
 
-  private String serializeCsv(List<Point> lst, Instant lowestDate) {
+  private String serializeCsv(List<Point> lst, Instant lowestDate, DoubleSummaryStatistics summaryStatistics) {
     var output = new StringBuilder();
+
+    output.append("# avg: ").append(summaryStatistics.getAverage()).append("\n");
+    output.append("# sum: ").append(summaryStatistics.getSum()).append("\n");
+    output.append("# min: ").append(summaryStatistics.getMin()).append("\n");
+    output.append("# max: ").append(summaryStatistics.getMax()).append("\n");
+    output.append("# count: ").append(summaryStatistics.getCount()).append("\n");
+
     for (var i = 0; i < lst.size(); i++) {
       var point = lst.get(i);
       output
@@ -166,8 +174,18 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     return output.toString();
   }
 
-  private String serializeJava(List<Point> lst, Instant lowestDate) {
+  private String serializeJava(List<Point> lst, Instant lowestDate, DoubleSummaryStatistics summaryStatistics) {
     var output = new StringBuilder();
+
+    output.append("/* statistics\n");
+    output.append(" avg: ").append(summaryStatistics.getAverage()).append("\n");
+    output.append(" sum: ").append(summaryStatistics.getSum()).append("\n");
+    output.append(" min: ").append(summaryStatistics.getMin()).append("\n");
+    output.append(" max: ").append(summaryStatistics.getMax()).append("\n");
+    output.append(" count: ").append(summaryStatistics.getCount()).append("\n");
+    output.append("*/\n");
+
+    output.append("List.of(\n");
     for (var i = 0; i < lst.size(); i++) {
       var point = lst.get(i);
       var trailingComma = i == lst.size() - 1 ? "" : ",";

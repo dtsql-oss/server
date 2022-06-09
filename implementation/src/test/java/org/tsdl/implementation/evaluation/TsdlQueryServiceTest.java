@@ -49,9 +49,9 @@ class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @TsdlTestSources({
-        @TsdlTestSource(DATA_ROOT + "series2.csv")
+        @TsdlTestSource(value = DATA_ROOT + "series2.csv", skipHeaders = 3)
     })
-    @TsdlTestVisualization(skipVisualization = false)
+    @TsdlTestVisualization(skipVisualization = true)
     void queryChooseEvents_ltThenGtLiteralArgumentsSmallInput(List<DataPoint> dps) {
       var query = """
           WITH SAMPLES:

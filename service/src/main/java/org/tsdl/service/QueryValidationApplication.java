@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParserException;
@@ -24,14 +25,14 @@ public class QueryValidationApplication extends JFrame {
 
   private final JTextArea txtResult = new JTextArea();
 
-  private final TsdlQueryParser queryParser = ObjectFactory.INSTANCE.queryParser();
+  private final transient TsdlQueryParser queryParser = ObjectFactory.INSTANCE.queryParser();
 
   private QueryValidationApplication() {
     super("TSDL Syntax Checker");
 
     getContentPane().add(createContentPane(), BorderLayout.CENTER);
 
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setSize(1000, INITIAL_HEIGHT);
     setLocationRelativeTo(null);
     setVisible(true);
@@ -45,7 +46,7 @@ public class QueryValidationApplication extends JFrame {
     );
 
     splitPane.setOneTouchExpandable(true);
-    splitPane.setDividerLocation(Double.valueOf(INITIAL_HEIGHT * 0.8).intValue());
+    splitPane.setDividerLocation((int) (INITIAL_HEIGHT * 0.8));
 
     return splitPane;
   }
@@ -85,6 +86,7 @@ public class QueryValidationApplication extends JFrame {
 
   private JComponent createBottomPanel() {
     var bottomPanel = new JPanel(new BorderLayout());
+    bottomPanel.add(new JLabel("Validation result:"), BorderLayout.NORTH);
 
     txtResult.setBackground(new Color(235, 235, 235));
     txtResult.setEditable(false);

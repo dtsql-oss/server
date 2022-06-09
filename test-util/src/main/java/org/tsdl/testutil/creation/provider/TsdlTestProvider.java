@@ -44,16 +44,21 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
       var testUrl = Thread.currentThread().getContextClassLoader().getResource(testSource.value());
       Conditions.checkNotNull(Condition.STATE, testUrl, "Could not read file '%s'", testSource.value());
 
-      //noinspection ConstantConditions
       var testFile = testUrl.getPath();
       var dataPoints = new ArrayList<DataPoint>();
       var formatter = DateTimeFormatter
           .ofPattern(testSource.timestampFormat())
           .withZone(ZoneOffset.UTC);
 
+      var skippedHeaders = 0;
       try (var reader = new BufferedReader(new FileReader(testFile))) {
         String line;
         while ((line = reader.readLine()) != null) {
+          if (skippedHeaders < testSource.skipHeaders()) {
+            skippedHeaders++;
+            continue;
+          }
+
           var split = line.split(";");
           var date = split[0].trim();
           var value = split[1].trim();
