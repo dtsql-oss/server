@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <spring.version>2.7.0</spring.version>
-        <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
+        <org.mapstruct.version>1.5.1.Final</org.mapstruct.version>
         <kotlin.version>1.7.0</kotlin.version>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
     </properties>
