@@ -77,7 +77,7 @@ class TsdlElementParserTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "      ", "0", "1"})
+  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "cnt", "      ", "0", "1"})
   void parseAggregatorType_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseAggregatorType(representation)).isInstanceOf(NoSuchElementException.class);
   }

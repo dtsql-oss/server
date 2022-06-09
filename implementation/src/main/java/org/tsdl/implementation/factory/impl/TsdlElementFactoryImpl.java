@@ -14,6 +14,7 @@ import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilter
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
@@ -91,6 +92,7 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
       case MAXIMUM -> new MaximumAggregatorImpl();
       case MINIMUM -> new MinimumAggregatorImpl();
       case SUM -> new SumAggregatorImpl();
+      case COUNT -> new CountAggregatorImpl();
     };
 
     return new TsdlSampleImpl(aggregator, identifier);

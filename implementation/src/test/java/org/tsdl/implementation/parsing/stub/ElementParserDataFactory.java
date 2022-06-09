@@ -40,7 +40,8 @@ public final class ElementParserDataFactory {
         Arguments.of("avg", AggregatorType.AVERAGE),
         Arguments.of("max", AggregatorType.MAXIMUM),
         Arguments.of("min", AggregatorType.MINIMUM),
-        Arguments.of("sum", AggregatorType.SUM)
+        Arguments.of("sum", AggregatorType.SUM),
+        Arguments.of("count", AggregatorType.COUNT)
     );
   }
 

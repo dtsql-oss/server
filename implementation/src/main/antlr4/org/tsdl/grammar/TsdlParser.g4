@@ -105,6 +105,7 @@ aggregatorFunction
   |  AGGREGATOR_MAX
   |  AGGREGATOR_MIN
   |  AGGREGATOR_SUM
+  |  AGGREGATOR_COUNT
   ;
 
 aggregatorInput

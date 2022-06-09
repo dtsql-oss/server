@@ -56,6 +56,7 @@ AGGREGATOR_AVG  :  'avg'  ;
 AGGREGATOR_MAX  :  'max'  ;
 AGGREGATOR_MIN  :  'min'  ;
 AGGREGATOR_SUM  :  'sum'  ;
+AGGREGATOR_COUNT  :  'count'  ;
 INPUT_VARIABLE  :  '_input'  ;
 
 IDENTIFIER

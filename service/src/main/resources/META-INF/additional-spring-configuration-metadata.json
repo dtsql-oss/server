@@ -13,7 +13,7 @@
     {
       "name": "application.version",
       "type": "java.lang.String",
-      "description": "The application version, as defined in the pom.xml."
+      "description": "The current version of the application, as specified in the corresponding pom.xml."
     }
   ]
 }

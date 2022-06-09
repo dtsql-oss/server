@@ -24,7 +24,6 @@ public class MaximumAggregatorImpl implements MaximumAggregator {
 
     log.debug("Calculated sample (maximum) to be {}.", max);
 
-
     return max;
   }
 }

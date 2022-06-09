@@ -6,7 +6,7 @@ import org.tsdl.implementation.model.common.Identifiable;
  * An aggregator.
  */
 public enum AggregatorType implements Identifiable {
-  AVERAGE("avg"), MAXIMUM("max"), MINIMUM("min"), SUM("sum");
+  AVERAGE("avg"), MAXIMUM("max"), MINIMUM("min"), SUM("sum"), COUNT("count");
 
   private final String representation;
 
