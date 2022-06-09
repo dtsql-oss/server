@@ -1,15 +1,42 @@
 package org.tsdl.infrastructure.model.impl;
 
 import java.time.Instant;
-import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
 /**
  * Default implementation of the {@link TsdlPeriod} interface.
  */
-public record TsdlPeriodImpl(int index, Instant start, Instant end) implements TsdlPeriod {
+public record TsdlPeriodImpl(Integer index, Instant start, Instant end) implements TsdlPeriod {
+  /**
+   * Create an {@link TsdlPeriodSetImpl} instance. Either all parameters have to be null (being equivalent to {@link TsdlPeriod#EMPTY}, or
+   * at least the {@link Instant} arguments {@code start} and {@code end}. The {@code index} parameter may be null because initializing a
+   * {@link TsdlPeriod} with unknown index (because it becomes known/computed only later on) is allowed.
+   */
+  public TsdlPeriodImpl {
+    if (!emptyData(index, start, end)) {
+      if (index != null) {
+        // initializing with unknown index is okay (e.g. if it is known/calculated only later on)
+        Conditions.checkNotNull(Condition.ARGUMENT, index, "Period index must not be null.");
+        Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, index, 0, "Index must be greater than or equal to zero.");
+      }
+
+      Conditions.checkNotNull(Condition.ARGUMENT, start, "Period start must not be null.");
+      Conditions.checkNotNull(Condition.ARGUMENT, end, "Period end must not be null.");
+    }
+  }
+
+  public TsdlPeriodImpl() {
+    this(null, null, null);
+  }
+
   @Override
-  public TsdlPeriod withIndex(int index) {
-    return QueryResult.of(index, this.start, this.end);
+  public boolean isEmpty() {
+    return emptyData(index, start, end);
+  }
+
+  private static boolean emptyData(Integer index, Instant start, Instant end) {
+    return index == null && start == null && end == null;
   }
 }

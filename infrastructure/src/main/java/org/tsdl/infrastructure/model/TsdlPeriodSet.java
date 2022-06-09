@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * A result of the evaluation process of a TSDL query that consists of multiple {@link TsdlPeriod} instances..
  */
-public interface TsdlPeriods extends QueryResult {
+public interface TsdlPeriodSet extends QueryResult {
 
   int totalPeriods();
 
@@ -13,6 +13,6 @@ public interface TsdlPeriods extends QueryResult {
 
   @Override
   default QueryResultType type() {
-    return QueryResultType.PERIODS;
+    return QueryResultType.PERIOD_SET;
   }
 }

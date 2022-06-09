@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlPeriod;
-import org.tsdl.infrastructure.model.TsdlPeriods;
+import org.tsdl.infrastructure.model.TsdlPeriodSet;
 
 /**
  * Default implementation of {@link QueryService}.
@@ -92,34 +93,16 @@ public class TsdlQueryService implements QueryService {
     throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
   }
 
-  private QueryResult getResult(TsdlPeriods periods, ResultFormat type, List<DataPoint> dataPoints) {
+  private QueryResult getResult(TsdlPeriodSet periods, ResultFormat type, List<DataPoint> dataPoints) {
     switch (type) {
       case ALL_PERIODS:
         return periods;
 
       case LONGEST_PERIOD:
-        TsdlPeriod longestPeriod = null;
-        var greatestDistance = Long.MIN_VALUE;
-        for (var period : periods.periods()) {
-          var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
-          if (distance > greatestDistance) {
-            greatestDistance = distance;
-            longestPeriod = period;
-          }
-        }
-        return longestPeriod;
+        return findSpecialPeriod(periods.periods(), true);
 
       case SHORTEST_PERIOD:
-        TsdlPeriod shortestPeriod = null;
-        var smallestDistance = Long.MAX_VALUE;
-        for (var period : periods.periods()) {
-          var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
-          if (distance < smallestDistance) {
-            smallestDistance = distance;
-            shortestPeriod = period;
-          }
-        }
-        return shortestPeriod;
+        return findSpecialPeriod(periods.periods(), false);
 
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
@@ -130,6 +113,25 @@ public class TsdlQueryService implements QueryService {
       default:
         throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
     }
+  }
+
+  private TsdlPeriod findSpecialPeriod(List<TsdlPeriod> periods, boolean longest) {
+    var optimalDistance = longest ? Long.MIN_VALUE : Long.MAX_VALUE;
+    //CHECKSTYLE.OFF: MatchXpath - false positive, 'var' cannot be used here (type 'BiFunction<Long, Long, Boolean>' cannot be inferred)
+    BiFunction<Long, Long, Boolean> comparer = longest
+        ? (newValue, currentOptimum) -> newValue > currentOptimum
+        : (newValue, currentOptimum) -> newValue < currentOptimum;
+    //CHECKSTYLE.ON: MatchXpath
+
+    TsdlPeriod specialPeriod = null;
+    for (var period : periods) {
+      var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
+      if (comparer.apply(distance, optimalDistance)) {
+        optimalDistance = distance;
+        specialPeriod = period;
+      }
+    }
+    return specialPeriod != null ? specialPeriod : TsdlPeriod.EMPTY;
   }
 
   private boolean containsDataPoint(List<TsdlPeriod> periods, Instant timestamp) {
@@ -194,7 +196,7 @@ public class TsdlQueryService implements QueryService {
 
   private void finalizePeriod(List<AnnotatedTsdlPeriod> periods, Map<TsdlIdentifier, Instant> eventMarkers, TsdlIdentifier eventId,
                               Instant periodEnd) {
-    var finalizedPeriod = QueryResult.of(-1, eventMarkers.get(eventId), periodEnd);
+    var finalizedPeriod = QueryResult.of(null, eventMarkers.get(eventId), periodEnd);
     periods.add(new AnnotatedTsdlPeriodImpl(finalizedPeriod, eventId));
     eventMarkers.remove(eventId);
   }

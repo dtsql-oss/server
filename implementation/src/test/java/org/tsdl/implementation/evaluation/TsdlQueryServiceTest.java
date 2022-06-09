@@ -2,6 +2,7 @@ package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Instant;
 import java.util.List;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +12,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.QueryResultType;
 import org.tsdl.infrastructure.model.TsdlDataPoints;
+import org.tsdl.infrastructure.model.TsdlPeriod;
+import org.tsdl.infrastructure.model.TsdlPeriodSet;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
@@ -27,52 +32,67 @@ class TsdlQueryServiceTest {
   class QueryChooseEvents {
     @ParameterizedTest
     @TsdlTestSources({
-        @TsdlTestSource(DATA_ROOT + "series0.csv")
+        @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
-    @TsdlTestVisualization(renderPointShape = false)
-    void queryChooseEvents_ltThenGtLiteralArguments(List<DataPoint> dps) {
+    void queryChooseEvents_lowPrecedesHighLiteralEventDefinition(List<DataPoint> dps) {
       var query = """
           USING EVENTS:
-            AND(lt(3.4)) AS low,
-            OR(gt(3.4)) AS high
-                    
+            AND(lt(80)) AS low,
+            OR(gt(80.0)) AS high
           CHOOSE:
             low precedes high
-                    
-          YIELD:
-            all periods
-          """;
-
-      // TODO
-      //var result = queryService.query(dps, query);
-    }
-
-    @ParameterizedTest
-    @TsdlTestSources({
-        @TsdlTestSource(value = DATA_ROOT + "series2.csv", skipHeaders = 3)
-    })
-    @TsdlTestVisualization(skipVisualization = true)
-    void queryChooseEvents_ltThenGtLiteralArgumentsSmallInput(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-            avg(_input) AS mean
-            
-          FILTER:
-            AND(NOT(lt(80)))
-            
-          USING EVENTS:
-            AND(lt(mean)) AS low,
-            OR(gt(mean)) AS high
-
-          CHOOSE:
-            low precedes high
-
           YIELD:
             all periods
           """;
 
       var result = queryService.query(dps, query);
-      System.out.println();
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(1);
+            assertThat(periodSet.periods()).hasSize(1);
+            assertThat(periodSet.periods().get(0))
+                .isEqualTo(
+                    QueryResult.of(0, Instant.parse("2022-12-15T01:21:48.000Z"), Instant.parse("2022-12-15T07:51:48.000Z"))
+                );
+          });
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_lowFollowsHighSampleEventDefinition(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg(_input) AS myAvg
+          USING EVENTS:
+            AND(lt(myAvg)) AS low,
+            AND(gt(myAvg)) AS high
+          CHOOSE:
+            low follows high
+          YIELD:
+            all periods
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(2);
+            assertThat(periodSet.periods()).hasSize(2);
+
+            assertThat(periodSet.periods().get(0)).isEqualTo(
+                QueryResult.of(0, Instant.parse("2022-12-15T02:51:48.000Z"), Instant.parse("2022-12-15T04:36:48.000Z"))
+            );
+            assertThat(periodSet.periods().get(1)).isEqualTo(
+                QueryResult.of(1, Instant.parse("2022-12-15T04:51:48.000Z"), Instant.parse("2022-12-15T09:21:48.000Z"))
+            );
+          });
     }
 
     @ParameterizedTest
@@ -80,24 +100,213 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series1.csv")
     })
     @TsdlTestVisualization(renderPointShape = false)
-    void queryChooseEvents_ltThenGtSampleArguments(List<DataPoint> dps) {
-      // arithmetic mean of data point values is ~74.16667
+    void queryChooseEvents_lowPrecedesHigh_returnsShortestPeriod(List<DataPoint> dps) {
       var query = """
-          WITH SAMPLES:
-            avg(_input) AS mean
-                    
           USING EVENTS:
-            AND(lt(mean)) AS low, OR(gt(mean)) AS high
-                    
+            AND(lt(60)) AS low,
+            OR(gt(60)) AS high
           CHOOSE:
             low precedes high
-                    
+          YIELD:
+            shortest period
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriod.class))
+          .isEqualTo(
+              QueryResult.of(1, Instant.parse("2022-06-01T19:14:59.306Z"), Instant.parse("2022-06-01T19:29:59.306Z"))
+          );
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series1.csv")
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryChooseEvents_lowFollowsHigh_returnsLongestPeriod(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg(_input) AS myAvg
+          USING EVENTS:
+            AND(lt(myAvg)) AS low,
+            OR(gt(myAvg)) AS high
+          CHOOSE:
+            low follows high
+          YIELD:
+            longest period
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriod.class))
+          .isEqualTo(
+              QueryResult.of(2, Instant.parse("2022-06-02T00:44:59.306Z"), Instant.parse("2022-06-02T07:44:59.306Z"))
+          );
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_highPrecedesLow_returnsAllMatchingDataPoints(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(lt(80)) AS low,
+            OR(gt(80)) AS high
+          CHOOSE:
+            high precedes low
+          YIELD:
+            data points
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.DATA_POINTS);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .isEqualTo(
+              QueryResult.of(
+                  dps.stream()
+                      .filter(dp -> dp.getTimestamp().isAfter(Instant.parse("2022-12-15T02:36:48.000Z")))
+                      .toList()
+              )
+          );
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_impossibleAllPeriodsChoice_emptyPeriodSet(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(lt(-1000)) AS low,
+            OR(gt(2000)) AS high
+          CHOOSE:
+            high precedes low
           YIELD:
             all periods
           """;
 
-      // TODO
-      //var result = queryService.query(dps, query);
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .extracting(TsdlPeriodSet::totalPeriods, TsdlPeriodSet::periods)
+          .containsExactly(0, List.of());
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_impossibleLongestPeriodChoice_returnsEmptyPeriod(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(lt(-1000)) AS low,
+            OR(gt(2000)) AS high
+          CHOOSE:
+            high precedes low
+          YIELD:
+            longest period
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriod.class))
+          .isNotNull()
+          .extracting(QueryResult::type, TsdlPeriod::isEmpty)
+          .containsExactly(QueryResultType.PERIOD, true);
+    }
+
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_impossibleShortestPeriodChoice_returnsEmptyPeriod(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(lt(-1000)) AS low,
+            OR(gt(2000)) AS high
+          CHOOSE:
+            high precedes low
+          YIELD:
+            shortest period
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriod.class))
+          .isNotNull()
+          .extracting(QueryResult::type, TsdlPeriod::isEmpty)
+          .containsExactly(QueryResultType.PERIOD, true);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_impossibleDataPointsChoice_returnsEmptyList(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(lt(-1000)) AS low,
+            OR(gt(2000)) AS high
+          CHOOSE:
+            high precedes low
+          YIELD:
+            data points
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .isNotNull()
+          .extracting(QueryResult::type, TsdlDataPoints::items)
+          .containsExactly(QueryResultType.DATA_POINTS, List.of());
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series3.csv", skipHeaders = 5)
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryChooseEvents_choiceBetweenFiltersWithDifferentThresholds(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(gt(220)) AS high,
+            AND(lt(-20)) AS low
+          CHOOSE:
+            high precedes low
+          YIELD:
+            all periods
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(2);
+            assertThat(periodSet.periods()).hasSize(2);
+
+            assertThat(periodSet.periods().get(0)).isEqualTo(
+                QueryResult.of(0, Instant.parse("2022-06-10T05:57:58.012Z"), Instant.parse("2022-06-11T06:12:58.012Z"))
+            );
+            assertThat(periodSet.periods().get(1)).isEqualTo(
+                QueryResult.of(1, Instant.parse("2022-06-14T15:42:58.012Z"), Instant.parse("2022-06-15T04:57:58.012Z"))
+            );
+          });
     }
 
   }
@@ -148,7 +357,7 @@ class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
-    @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT, renderPointShape = true)
+    @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -169,7 +378,7 @@ class TsdlQueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
-    @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT, renderPointShape = true)
+    @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gtSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -471,6 +680,46 @@ class TsdlQueryServiceTest {
           .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
           .isEqualTo(expectedItems);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series0.csv")
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryIntegration_filterBeforeEventChoiceCutsOffPeriodCorrectly(List<DataPoint> dps) {
+      var queryWithoutFilter = """
+          USING EVENTS: AND(lt(170)) AS low, AND(gt(170)) AS high
+          CHOOSE: low follows high
+          YIELD: all periods
+          """;
+      var queryWithFilter = "FILTER: AND(NOT(lt(130)))\n" + queryWithoutFilter;
+
+      var resultWithoutFilter = queryService.query(dps, queryWithoutFilter);
+      var resultWithFilter = queryService.query(dps, queryWithFilter);
+
+      // test data visualization shows that periods are the same, except the third one where the filter cuts off some of the last values
+      assertThat(resultWithoutFilter)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .extracting(TsdlPeriodSet::totalPeriods)
+          .isEqualTo(3);
+      assertThat(resultWithFilter)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .extracting(TsdlPeriodSet::totalPeriods)
+          .isEqualTo(3);
+
+      var periodsWithoutFilter = (TsdlPeriodSet) resultWithoutFilter;
+      var periodsWitFilter = (TsdlPeriodSet) resultWithFilter;
+
+      // first two periods are the same
+      assertThat(periodsWithoutFilter)
+          .extracting(ps -> ps.periods().get(0), ps -> ps.periods().get(1))
+          .containsExactly(periodsWitFilter.periods().get(0), periodsWitFilter.periods().get(1));
+
+      // third one differs only in end
+      assertThat(periodsWithoutFilter.periods().get(2).start()).isEqualTo(periodsWitFilter.periods().get(2).start());
+      assertThat(periodsWithoutFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T09:35:33.164Z"));
+      assertThat(periodsWitFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T01:35:33.164Z"));
     }
   }
 }

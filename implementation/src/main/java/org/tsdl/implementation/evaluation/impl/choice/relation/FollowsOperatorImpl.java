@@ -11,7 +11,7 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlPeriod;
-import org.tsdl.infrastructure.model.TsdlPeriods;
+import org.tsdl.infrastructure.model.TsdlPeriodSet;
 
 /**
  * Default implementation of {@link FollowsOperator}.
@@ -19,7 +19,7 @@ import org.tsdl.infrastructure.model.TsdlPeriods;
 @Slf4j
 public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements FollowsOperator {
   @Override
-  public TsdlPeriods evaluate(List<AnnotatedTsdlPeriod> periods) {
+  public TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
     log.debug("Evaluating 'follows' temporal operator.");
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Annotated periods as input to 'follows' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand1, "First event argument of 'follows' operator must not be null.");
