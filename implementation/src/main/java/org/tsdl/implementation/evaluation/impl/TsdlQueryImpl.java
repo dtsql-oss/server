@@ -12,6 +12,8 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 
 /**
  * Default implementation of {@link TsdlQuery}.
@@ -25,6 +27,13 @@ public record TsdlQueryImpl(
     TemporalOperator choiceValue,
     ResultFormat result
 ) implements TsdlQuery {
+  public TsdlQueryImpl {
+    Conditions.checkNotNull(Condition.ARGUMENT, identifiers, "Set of identifiers must no be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, samples, "List of samples must no be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, events, "List of events must no be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, result, "Result format must no be null.");
+  }
+
   @Override
   public Optional<SinglePointFilterConnective> filter() {
     return Optional.ofNullable(this.filterValue);

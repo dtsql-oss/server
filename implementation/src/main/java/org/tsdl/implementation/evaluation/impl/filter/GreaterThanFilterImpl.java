@@ -10,6 +10,10 @@ import org.tsdl.infrastructure.model.DataPoint;
  * Default implementation of {@link GreaterThanFilter}.
  */
 public record GreaterThanFilterImpl(TsdlFilterArgument threshold) implements GreaterThanFilter {
+  public GreaterThanFilterImpl {
+    Conditions.checkNotNull(Condition.ARGUMENT, threshold, "Threshold of 'greater than' filter must not be null.");
+  }
+
   @Override
   public boolean evaluate(DataPoint dataPoint) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");

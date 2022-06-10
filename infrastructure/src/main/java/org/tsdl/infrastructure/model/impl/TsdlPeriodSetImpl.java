@@ -14,4 +14,9 @@ public record TsdlPeriodSetImpl(int totalPeriods, List<TsdlPeriod> periods) impl
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Period list must not be null.");
     Conditions.checkEquals(Condition.ARGUMENT, totalPeriods, periods.size(), "Argument 'totalPeriods' must be equal to the size of 'periods'.");
   }
+
+  @Override
+  public boolean isEmpty() {
+    return totalPeriods == 0 && periods.isEmpty();
+  }
 }

@@ -14,6 +14,7 @@ public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
   private Double value;
 
   public TsdlSampleFilterArgumentImpl(TsdlSample sample, Double value) {
+    Conditions.checkNotNull(Condition.ARGUMENT, sample, "Sample of sample filter argument must not be null.");
     this.sample = sample;
     this.value = value;
   }

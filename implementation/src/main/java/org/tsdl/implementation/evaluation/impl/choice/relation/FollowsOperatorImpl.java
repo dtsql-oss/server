@@ -18,6 +18,11 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
  */
 @Slf4j
 public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements FollowsOperator {
+  public FollowsOperatorImpl {
+    Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First operand of 'follows' operator must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second operand of 'follows' operator must not be null.");
+  }
+
   @Override
   public TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
     log.debug("Evaluating 'follows' temporal operator.");
@@ -27,7 +32,7 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
 
     if (periods.size() < 2) {
       log.debug("Less than two annotated periods as input, hence resulting set of 'follows' periods is empty.");
-      return QueryResult.of(0, List.of());
+      return TsdlPeriodSet.EMPTY;
     }
 
     var chosenPeriods = new ArrayList<TsdlPeriod>();
@@ -41,6 +46,7 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
       }
     }
 
+    log.debug("Evaluation of 'follows' resulted in a period set with {} periods.", chosenPeriods.size());
     return QueryResult.of(chosenPeriods.size(), chosenPeriods);
   }
 

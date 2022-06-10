@@ -27,10 +27,6 @@ public record TsdlPeriodImpl(Integer index, Instant start, Instant end) implemen
     }
   }
 
-  public TsdlPeriodImpl() {
-    this(null, null, null);
-  }
-
   @Override
   public boolean isEmpty() {
     return emptyData(index, start, end);

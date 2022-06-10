@@ -26,6 +26,8 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.testutil.visualization.api.TimeSeriesTestVisualizer;
 import org.tsdl.testutil.visualization.api.TsdlTestInfo;
@@ -81,6 +83,7 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
     for (var i = 0; i < timeSeries.size(); i++) {
       var series = timeSeries.get(i);
+      Conditions.checkNotNull(Condition.ARGUMENT, series, "Time series instances of list of time series must not be null.");
 
       var newSeries = new TimeSeries(String.format("Series%d", i));
       for (var dataPoint : series) {

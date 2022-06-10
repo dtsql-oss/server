@@ -198,8 +198,8 @@ class TsdlQueryServiceTest {
       assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
-          .extracting(TsdlPeriodSet::totalPeriods, TsdlPeriodSet::periods)
-          .containsExactly(0, List.of());
+          .extracting(TsdlPeriodSet::totalPeriods, TsdlPeriodSet::periods, TsdlPeriodSet::isEmpty)
+          .containsExactly(0, List.of(), true);
     }
 
     @ParameterizedTest
