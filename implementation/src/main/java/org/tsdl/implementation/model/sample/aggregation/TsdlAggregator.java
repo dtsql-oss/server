@@ -18,7 +18,7 @@ public interface TsdlAggregator {
   /**
    * Returns the computed aggregator value. If it has not been computed yet, a {@link IllegalStateException} is thrown.
    */
-  double computedValue();
+  double value();
 
   /**
    * Indicates whether the aggregator value has already been computed.

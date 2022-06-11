@@ -30,7 +30,7 @@ public class MinimumAggregatorImpl implements MinimumAggregator {
   }
 
   @Override
-  public double computedValue() {
+  public double value() {
     Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Minimum value must have been computed before accessing it.");
     return min;
   }

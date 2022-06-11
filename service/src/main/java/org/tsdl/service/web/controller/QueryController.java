@@ -1,4 +1,4 @@
-package org.tsdl.service.web;
+package org.tsdl.service.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -25,7 +25,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
    */
   public TsdlSampleOutputFormatter(String... args) {
     Conditions.checkNotNull(Condition.ARGUMENT, args, "Output formatting arguments must not be null.");
-    Conditions.checkSizeExactly(Condition.ARGUMENT, args, 1, "Sample output formatting arguments must be of size 1.");
+    Conditions.checkSizeExactly(Condition.ARGUMENT, args, 1, "There must be exactly one argument to the sample output formatter.");
 
     var decimalArgument = elementParser.parseInteger(args[0]);
     Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, decimalArgument, 0, "Number of decimal places must be greater than or equal to 0.");
@@ -47,7 +47,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
 
     var sampleName = obj.identifier().name();
     var aggregatorFunction = obj.aggregator().type().representation();
-    var value = obj.aggregator().computedValue();
+    var value = obj.aggregator().value();
 
     return "sample '%s' of '%s' aggregator := %s".formatted(sampleName, aggregatorFunction, decimalFormat.format(value));
   }

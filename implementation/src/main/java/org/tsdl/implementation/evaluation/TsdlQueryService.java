@@ -204,7 +204,7 @@ public class TsdlQueryService implements QueryService {
   private Map<TsdlIdentifier, Double> computeSamples(List<TsdlSample> samples, List<DataPoint> input) {
     return samples.stream().collect(Collectors.toMap(
             TsdlSample::identifier,
-            sample -> sample.aggregator().compute(input)
+            sample -> sample.compute(input)
         )
     );
   }

@@ -30,7 +30,7 @@ public class AverageAggregatorImpl implements AverageAggregator {
   }
 
   @Override
-  public double computedValue() {
+  public double value() {
     Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Average value must have been computed before accessing it.");
     return avg;
   }

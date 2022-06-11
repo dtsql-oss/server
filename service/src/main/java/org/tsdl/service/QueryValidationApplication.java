@@ -73,7 +73,7 @@ public class QueryValidationApplication extends JFrame {
         while (ex.getCause() != null) {
           error.append("\n-> with cause:\n");
           error.append(ex.getCause().getMessage());
-          ex = e.getCause();
+          ex = ex.getCause();
         }
 
         txtResult.setText("ERROR!%n%s".formatted(error.toString()));

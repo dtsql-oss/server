@@ -27,7 +27,7 @@ public class CountAggregatorImpl implements CountAggregator {
   }
 
   @Override
-  public double computedValue() {
+  public double value() {
     Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Count value must have been computed before accessing it.");
     return count;
   }

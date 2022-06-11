@@ -30,7 +30,7 @@ public class MaximumAggregatorImpl implements MaximumAggregator {
   }
 
   @Override
-  public double computedValue() {
+  public double value() {
     Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Maximum value must have been computed before accessing it.");
     return max;
   }

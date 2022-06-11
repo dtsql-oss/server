@@ -1,4 +1,4 @@
-package org.tsdl.service.web;
+package org.tsdl.service.web.infrastructure;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.tsdl.service.web.ValidationFailureControllerAdvice.ValidationErrorsHolder.ValidationError;
+import org.tsdl.service.web.infrastructure.ValidationFailureControllerAdvice.ValidationErrorsHolder.ValidationError;
 
 /**
  * Advice for REST controllers that registers exception handlers for when a validation performed by Spring fails. More specifically, this

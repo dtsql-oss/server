@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.tsdl.service.web.LoggingRequestInterceptor;
+import org.tsdl.service.web.infrastructure.LoggingRequestInterceptor;
 
 /**
  * Provides the capability of overriding callback methods to customize the configuration of the Spring MVC.
@@ -21,6 +21,7 @@ public class ServerMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(loggingRequestInterceptor)
+        .addPathPatterns("/query/*/")
         .excludePathPatterns("/error");
   }
 }
