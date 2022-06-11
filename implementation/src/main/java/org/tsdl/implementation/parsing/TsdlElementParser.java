@@ -21,4 +21,6 @@ public interface TsdlElementParser {
   TemporalRelationType parseTemporalRelationType(String str);
 
   Double parseNumber(String str);
+
+  Integer parseInteger(String str);
 }

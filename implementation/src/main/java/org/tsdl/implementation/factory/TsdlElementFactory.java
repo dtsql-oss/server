@@ -31,7 +31,7 @@ public interface TsdlElementFactory {
 
   TsdlFilterArgument getFilterArgument(TsdlSample sample);
 
-  TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier);
+  TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
 
   TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
 

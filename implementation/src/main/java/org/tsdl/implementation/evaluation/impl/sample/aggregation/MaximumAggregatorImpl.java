@@ -12,12 +12,14 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Slf4j
 public class MaximumAggregatorImpl implements MaximumAggregator {
+  private Double max;
+
   @Override
   public double compute(List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
     log.debug("Calculating sample (maximum) over {} data points", dataPoints.size());
 
-    var max = dataPoints.stream()
+    max = dataPoints.stream()
         .mapToDouble(DataPoint::asDecimal)
         .max()
         .orElse(0.0);
@@ -25,5 +27,16 @@ public class MaximumAggregatorImpl implements MaximumAggregator {
     log.debug("Calculated sample (maximum) to be {}.", max);
 
     return max;
+  }
+
+  @Override
+  public double computedValue() {
+    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Maximum value must have been computed before accessing it.");
+    return max;
+  }
+
+  @Override
+  public boolean isComputed() {
+    return max != null;
   }
 }

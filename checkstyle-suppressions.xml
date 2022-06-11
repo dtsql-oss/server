@@ -20,6 +20,7 @@
     <suppress files="org[\\/]tsdl[\\/]storage[\\/]csv[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]storage[\\/]influxdb[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]formatting[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
 
     <!-- exception classes tend to have some unused members, which is fine -->

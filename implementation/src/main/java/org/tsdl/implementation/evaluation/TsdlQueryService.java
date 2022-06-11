@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +118,7 @@ public class TsdlQueryService implements QueryService {
   private TsdlPeriod findSpecialPeriod(List<TsdlPeriod> periods, boolean longest) {
     var optimalDistance = longest ? Long.MIN_VALUE : Long.MAX_VALUE;
     //CHECKSTYLE.OFF: MatchXpath - false positive, 'var' cannot be used here (type 'BiFunction<Long, Long, Boolean>' cannot be inferred)
-    BiFunction<Long, Long, Boolean> comparer = longest
+    BiPredicate<Long, Long> comparer = longest
         ? (newValue, currentOptimum) -> newValue > currentOptimum
         : (newValue, currentOptimum) -> newValue < currentOptimum;
     //CHECKSTYLE.ON: MatchXpath
@@ -126,7 +126,7 @@ public class TsdlQueryService implements QueryService {
     TsdlPeriod specialPeriod = null;
     for (var period : periods) {
       var distance = period.end().toEpochMilli() - period.start().toEpochMilli();
-      if (comparer.apply(distance, optimalDistance)) {
+      if (comparer.test(distance, optimalDistance)) {
         optimalDistance = distance;
         specialPeriod = period;
       }

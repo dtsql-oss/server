@@ -12,15 +12,28 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Slf4j
 public class CountAggregatorImpl implements CountAggregator {
+  private Integer count;
+
   @Override
   public double compute(List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
     log.debug("Calculating sample (count) over {} data points", dataPoints.size());
 
-    var count = dataPoints.size();
+    count = dataPoints.size();
 
     log.debug("Calculated sample (count) to be {}.", count);
 
     return count;
+  }
+
+  @Override
+  public double computedValue() {
+    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Count value must have been computed before accessing it.");
+    return count;
+  }
+
+  @Override
+  public boolean isComputed() {
+    return count != null;
   }
 }

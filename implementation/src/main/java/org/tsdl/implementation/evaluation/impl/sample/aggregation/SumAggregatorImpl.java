@@ -12,17 +12,30 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Slf4j
 public class SumAggregatorImpl implements SumAggregator {
+  private Double sum;
+
   @Override
   public double compute(List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
     log.debug("Calculating sample (sum) over {} data points", dataPoints.size());
 
-    var sum = dataPoints.stream()
+    sum = dataPoints.stream()
         .mapToDouble(DataPoint::asDecimal)
         .sum();
 
     log.debug("Calculated sample (sum) to be {}.", sum);
 
     return sum;
+  }
+
+  @Override
+  public double computedValue() {
+    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Sum value must have been computed before accessing it.");
+    return sum;
+  }
+
+  @Override
+  public boolean isComputed() {
+    return sum != null;
   }
 }

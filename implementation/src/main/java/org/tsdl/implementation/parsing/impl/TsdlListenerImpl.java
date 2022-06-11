@@ -123,7 +123,28 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
     var aggregatorType = elementParser.parseAggregatorType(ctx.aggregatorFunctionDeclaration().aggregatorFunction().getText());
     var identifier = parseIdentifier(ctx.identifierDeclaration().identifier());
-    return elementFactory.getSample(aggregatorType, identifier);
+    var includeEcho = ctx.echoStatement() != null;
+    var echoArguments = includeEcho && ctx.echoStatement().echoArgumentList() != null
+        ? parseEchoArguments(ctx.echoStatement().echoArgumentList())
+        : new String[0];
+
+    return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
+  }
+
+  private String[] parseEchoArguments(TsdlParser.EchoArgumentListContext ctx) {
+    var arguments = new ArrayList<String>();
+
+    if (ctx.echoArguments() != null) {
+      var argList = ctx.echoArguments().echoArgumentDeclaration();
+      argList.forEach(arg -> arguments.add(arg.echoArgument().getText()));
+    }
+
+    if (ctx.echoArgumentDeclaration() != null) {
+      var lastArg = ctx.echoArgumentDeclaration().echoArgument();
+      arguments.add(lastArg.getText());
+    }
+
+    return arguments.toArray(String[]::new);
   }
 
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {

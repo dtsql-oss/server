@@ -12,12 +12,14 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Slf4j
 public class MinimumAggregatorImpl implements MinimumAggregator {
+  private Double min;
+
   @Override
   public double compute(List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
     log.debug("Calculating sample (minimum) over {} data points", dataPoints.size());
 
-    var min = dataPoints.stream()
+    min = dataPoints.stream()
         .mapToDouble(DataPoint::asDecimal)
         .min()
         .orElse(0.0);
@@ -25,5 +27,16 @@ public class MinimumAggregatorImpl implements MinimumAggregator {
     log.debug("Calculated sample (minimum) to be {}.", min);
 
     return min;
+  }
+
+  @Override
+  public double computedValue() {
+    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Minimum value must have been computed before accessing it.");
+    return min;
+  }
+
+  @Override
+  public boolean isComputed() {
+    return min != null;
   }
 }

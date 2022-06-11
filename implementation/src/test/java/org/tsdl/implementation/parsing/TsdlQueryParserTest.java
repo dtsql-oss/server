@@ -17,11 +17,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.factory.TsdlElementFactory;
 import org.tsdl.implementation.model.choice.relation.FollowsOperator;
 import org.tsdl.implementation.model.choice.relation.PrecedesOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
+import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.connective.AndConnective;
 import org.tsdl.implementation.model.connective.OrConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
@@ -34,6 +36,7 @@ import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
 import org.tsdl.implementation.model.result.ResultFormat;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.AverageAggregator;
+import org.tsdl.implementation.model.sample.aggregation.CountAggregator;
 import org.tsdl.implementation.model.sample.aggregation.MaximumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.MinimumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.SumAggregator;
@@ -55,7 +58,7 @@ class TsdlQueryParserTest {
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
     @ParameterizedTest
     @ArgumentsSource(SamplesArgumentsProvider.class)
-    void sampleDeclaration_knownAggregatorFunctions(String aggregator, Class<? extends TsdlSample> clazz) {
+    void sampleDeclaration_knownAggregatorFunctionsWithoutEcho(String aggregator, Class<? extends TsdlSample> clazz) {
       var queryString = """
           WITH SAMPLES: %s(_input) AS s1
           YIELD: all periods
@@ -69,7 +72,44 @@ class TsdlQueryParserTest {
           .satisfies(sample -> {
             assertThat(sample.identifier()).isEqualTo(ELEMENTS.getIdentifier("s1"));
             assertThat(sample.aggregator()).isInstanceOf(clazz);
+            assertThat(sample.formatter()).isNotPresent();
           });
+    }
+
+    // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
+    @ParameterizedTest
+    @ArgumentsSource(SamplesArgumentsProvider.class)
+    void sampleDeclaration_knownAggregatorFunctionsWithEcho(String aggregator, Class<? extends TsdlSample> clazz) {
+      var queryString = """
+          WITH SAMPLES: %s(_input) AS s1->echo(9)
+          YIELD: all periods
+          """.formatted(aggregator);
+
+      var query = PARSER.parseQuery(queryString);
+
+      assertThat(query.samples())
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(TsdlSample.class))
+          .satisfies(sample -> {
+            assertThat(sample.identifier()).isEqualTo(ELEMENTS.getIdentifier("s1"));
+            assertThat(sample.aggregator()).isInstanceOf(clazz);
+            assertThat(sample.formatter())
+                .asInstanceOf(InstanceOfAssertFactories.optional(TsdlSampleOutputFormatter.class)).get()
+                .extracting(TsdlOutputFormatter::args)
+                .isEqualTo(new String[] {"9"});
+          });
+    }
+
+    // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
+    @ParameterizedTest
+    @ArgumentsSource(SamplesArgumentsProvider.class)
+    void sampleDeclaration_knownAggregatorFunctionsWithInvalidEchoArgument_throws(String aggregator) {
+      var queryString = """
+          WITH SAMPLES: %s(_input) AS s1 -> echo(NaN)
+          YIELD: all periods
+          """.formatted(aggregator);
+
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @ParameterizedTest
@@ -90,7 +130,8 @@ class TsdlQueryParserTest {
             Arguments.of("avg", AverageAggregator.class),
             Arguments.of("max", MaximumAggregator.class),
             Arguments.of("min", MinimumAggregator.class),
-            Arguments.of("sum", SumAggregator.class)
+            Arguments.of("sum", SumAggregator.class),
+            Arguments.of("count", CountAggregator.class)
         );
       }
     }

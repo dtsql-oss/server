@@ -1,9 +1,11 @@
 package org.tsdl.implementation.factory.impl;
 
 import java.util.List;
+import java.util.Optional;
 import org.tsdl.implementation.evaluation.impl.choice.relation.FollowsOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
+import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
@@ -83,9 +85,15 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   }
 
   @Override
-  public TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier) {
+  public TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type of sample must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for sample must not be null.");
+    if (!includeFormatter) {
+      Conditions.checkSizeExactly(Condition.ARGUMENT,
+          formatterArgs,
+          0,
+          "If no output formatter is attached to a sample, there must not be any formatting arguments.");
+    }
 
     var aggregator = switch (type) {
       case AVERAGE -> new AverageAggregatorImpl();
@@ -95,7 +103,11 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
       case COUNT -> new CountAggregatorImpl();
     };
 
-    return new TsdlSampleImpl(aggregator, identifier);
+    return new TsdlSampleImpl(
+        aggregator,
+        identifier,
+        includeFormatter ? Optional.of(new TsdlSampleOutputFormatter(formatterArgs)) : Optional.empty()
+    );
   }
 
   @Override

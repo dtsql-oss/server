@@ -89,7 +89,28 @@ aggregators
   ;
 
 aggregatorDeclaration
-  :  aggregatorFunctionDeclaration whitespace identifierDeclaration
+  :  aggregatorFunctionDeclaration whitespace identifierDeclaration (whitespace echoStatement)?
+  ;
+
+echoStatement
+  :  ECHO_ARROW whitespace ECHO_LABEL whitespace PARENTHESIS_OPEN whitespace echoArgumentList? whitespace PARENTHESIS_CLOSE
+  ;
+
+echoArgumentList
+  :  echoArguments echoArgumentSeparator echoArgumentDeclaration      // either two or more echo arguments
+  |  echoArgumentDeclaration                                          // or exactly one
+  ;
+
+echoArguments
+  :  echoArgumentDeclaration (echoArgumentSeparator echoArgumentDeclaration)*    // one echo argument plus [0..n] additional arguments
+  ;
+
+echoArgumentDeclaration
+  :  echoArgument
+  ;
+
+echoArgumentSeparator
+  :  COMMA whitespace
   ;
 
 aggregatorFunctionDeclaration
@@ -118,6 +139,10 @@ identifierDeclaration
 
 identifier
   : IDENTIFIER
+  ;
+
+echoArgument
+  : ECHO_ARGUMENT | IDENTIFIER | NUMBER
   ;
 
 connectiveIdentifier

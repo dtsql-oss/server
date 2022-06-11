@@ -59,7 +59,6 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     var decimalFormat = new DecimalFormat();
-
     var symbols = new DecimalFormatSymbols(Locale.US);
     symbols.setDecimalSeparator('.');
     decimalFormat.setDecimalFormatSymbols(symbols);
@@ -81,6 +80,17 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     } else {
       return parsedNumber.doubleValue() + 0.0; // "+ 0.0" makes that special case -0.0 is still returned as 0.0
     }
+  }
+
+  @Override
+  public Integer parseInteger(String str) {
+    var dbl = parseNumber(str);
+    var isInteger = dbl == Math.floor(dbl); // double is not infinite by implementation of "parseDouble", so no !Double.isInfinite() check required
+    if (isInteger) {
+      return dbl.intValue();
+    }
+
+    throw new TsdlParserException("Expected double '%s' to be an integer.".formatted(dbl));
   }
 
   private <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
