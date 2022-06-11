@@ -33,7 +33,8 @@ import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.ThresholdFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.AverageAggregator;
 import org.tsdl.implementation.model.sample.aggregation.CountAggregator;
@@ -451,28 +452,44 @@ class TsdlQueryParserTest {
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
     @ArgumentsSource(ValidInputProvider.class)
     @ParameterizedTest
-    void yieldDeclaration_validRepresentations_parsed(String representation, ResultFormat member) {
-      var queryString = "YIELD: %s".formatted(representation);
+    void yieldDeclaration_validRepresentations_parsed(String queryString, YieldStatement result) {
       var query = PARSER.parseQuery(queryString);
 
-      assertThat(query.result()).isEqualTo(member);
+      assertThat(query.result()).isEqualTo(result);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ALL periods", "longestperiod", "shortest perioD", "", "      ", "0", "1"})
+    @ValueSource(strings = {
+        "ALL periods", "longestperiod", "shortest perioD", "", "      ", "0", "1",
+        "sample ", "sample", "sample   ", "sample 123", "sample 1up"
+    })
     void yieldDeclaration_invalidRepresentations_throws(String representation) {
       var queryString = "YIELD: %s".formatted(representation);
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
+    }
+
+    @Test
+    void yieldDeclaration_unknownSample_throws() {
+      var queryString = "YIELD: sample hello1";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(UnknownIdentifierException.class);
+    }
+
+    @Test
+    void yieldDeclaration_invalidSampleType_throws() {
+      var queryString = "WITH SAMPLES: sum(_input) AS mySum  USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: sample LOW";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(InvalidReferenceException.class);
     }
 
     static class ValidInputProvider implements ArgumentsProvider {
       @Override
       public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         return Stream.of(
-            Arguments.of("all periods", ResultFormat.ALL_PERIODS),
-            Arguments.of("longest period", ResultFormat.LONGEST_PERIOD),
-            Arguments.of("shortest period", ResultFormat.SHORTEST_PERIOD),
-            Arguments.of("data points", ResultFormat.DATA_POINTS)
+            Arguments.of("YIELD: all periods", ELEMENTS.getResult(YieldFormat.ALL_PERIODS, null)),
+            Arguments.of("YIELD: longest period", ELEMENTS.getResult(YieldFormat.LONGEST_PERIOD, null)),
+            Arguments.of("YIELD: shortest period", ELEMENTS.getResult(YieldFormat.SHORTEST_PERIOD, null)),
+            Arguments.of("YIELD: data points", ELEMENTS.getResult(YieldFormat.DATA_POINTS, null)),
+            Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: sample identifier1",
+                ELEMENTS.getResult(YieldFormat.SAMPLE, ELEMENTS.getIdentifier("identifier1")))
         );
 
       }

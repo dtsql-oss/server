@@ -7,7 +7,7 @@ import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 
 /**
@@ -24,5 +24,5 @@ public interface TsdlQuery {
 
   Optional<TemporalOperator> choice();
 
-  ResultFormat result();
+  YieldStatement result();
 }

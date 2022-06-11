@@ -1,6 +1,6 @@
 package org.tsdl.implementation.parsing;
 
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -14,7 +14,7 @@ public interface TsdlElementParser {
 
   FilterType parseFilterType(String str);
 
-  ResultFormat parseResultFormat(String str);
+  YieldFormat parseResultFormat(String str);
 
   AggregatorType parseAggregatorType(String str);
 

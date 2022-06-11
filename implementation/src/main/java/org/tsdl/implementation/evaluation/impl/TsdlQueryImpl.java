@@ -10,7 +10,7 @@ import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -25,7 +25,7 @@ public record TsdlQueryImpl(
     @Singular List<TsdlSample> samples,
     @Singular List<TsdlEvent> events,
     TemporalOperator choiceValue,
-    ResultFormat result
+    YieldStatement result
 ) implements TsdlQuery {
   public TsdlQueryImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, identifiers, "Set of identifiers must no be null.");

@@ -17,6 +17,7 @@ YIELD_ALL_PERIODS  :  'all periods'  ;
 YIELD_LONGEST_PERIOD  :  'longest period'  ;
 YIELD_SHORTEST_PERIOD  :  'shortest period'  ;
 YIELD_DATA_POINTS  :  'data points'  ;
+YIELD_SAMPLE  :  'sample'  ;
 
 CONNECTIVE_NOT  :  'NOT'  ;
 CONNECTIVE_AND  :  'AND'  ;

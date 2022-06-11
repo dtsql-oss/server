@@ -65,6 +65,7 @@ yieldType
   |  YIELD_LONGEST_PERIOD
   |  YIELD_SHORTEST_PERIOD
   |  YIELD_DATA_POINTS
+  |  YIELD_SAMPLE mandatoryWhitespace identifier
   ;
 
 filtersDeclaration

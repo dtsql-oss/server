@@ -9,6 +9,8 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -36,4 +38,6 @@ public interface TsdlElementFactory {
   TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
 
   TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
+
+  YieldStatement getResult(YieldFormat format, TsdlIdentifier identifier);
 }

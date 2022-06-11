@@ -19,7 +19,8 @@ import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.ThresholdFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.infrastructure.api.QueryService;
@@ -53,16 +54,13 @@ public class TsdlQueryService implements QueryService {
           ? parsedQuery.filter().get().evaluateFilters(data)
           : data;
 
-      if (parsedQuery.events().isEmpty()) {
-        return QueryResult.of(relevantDataPoints);
-      }
-
+      // TODO optimization potential: if no events are defined, period detection is not necessary
       var detectedPeriods = detectPeriods(relevantDataPoints, parsedQuery);
       if (parsedQuery.choice().isPresent()) {
         var periods = parsedQuery.choice().get().evaluate(detectedPeriods);
-        return getResult(periods, parsedQuery.result(), relevantDataPoints);
+        return getResult(periods, parsedQuery.result(), relevantDataPoints, sampleValues);
       } else {
-        return getResult(relevantDataPoints, parsedQuery.result());
+        return getResult(relevantDataPoints, parsedQuery.result(), sampleValues);
       }
     } catch (TsdlEvaluationException e) {
       throw e;
@@ -71,30 +69,34 @@ public class TsdlQueryService implements QueryService {
     }
   }
 
-  private QueryResult getResult(List<DataPoint> dataPoints, ResultFormat type) {
-    if (type == ResultFormat.DATA_POINTS) {
+  private QueryResult getResult(List<DataPoint> dataPoints, YieldStatement result, Map<TsdlIdentifier, Double> identifiers) {
+    if (result.format() == YieldFormat.DATA_POINTS) {
       return QueryResult.of(dataPoints);
+    }
+
+    if (result.format() == YieldFormat.SAMPLE) {
+      var sampleValue = identifiers.get(result.sample());
+      return QueryResult.of(sampleValue);
     }
 
     // since order preservation is part of the filter contract, we may assume the first element to be the start and the last element to be the end
     var periodStart = dataPoints.get(0).getTimestamp();
     var periodEnd = dataPoints.get(dataPoints.size() - 1).getTimestamp();
-
     var period = QueryResult.of(0, periodStart, periodEnd);
 
-    if (type == ResultFormat.LONGEST_PERIOD || type == ResultFormat.SHORTEST_PERIOD) {
+    if (result.format() == YieldFormat.LONGEST_PERIOD || result.format() == YieldFormat.SHORTEST_PERIOD) {
       return period;
     }
 
-    if (type == ResultFormat.ALL_PERIODS) {
+    if (result.format() == YieldFormat.ALL_PERIODS) {
       return QueryResult.of(1, List.of(period));
     }
 
-    throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
+    throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);
   }
 
-  private QueryResult getResult(TsdlPeriodSet periods, ResultFormat type, List<DataPoint> dataPoints) {
-    switch (type) {
+  private QueryResult getResult(TsdlPeriodSet periods, YieldStatement result, List<DataPoint> dataPoints, Map<TsdlIdentifier, Double> identifiers) {
+    switch (result.format()) {
       case ALL_PERIODS:
         return periods;
 
@@ -110,8 +112,12 @@ public class TsdlQueryService implements QueryService {
             .toList();
         return QueryResult.of(pointsInPeriods);
 
+      case SAMPLE:
+        var sampleValue = identifiers.get(result.sample());
+        return QueryResult.of(sampleValue);
+
       default:
-        throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", type);
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);
     }
   }
 

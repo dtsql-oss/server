@@ -14,6 +14,7 @@ import org.tsdl.implementation.evaluation.impl.filter.LowerThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregatorImpl;
@@ -28,6 +29,8 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -127,5 +130,11 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
       case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1));
       case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1));
     };
+  }
+
+  @Override
+  public YieldStatement getResult(YieldFormat format, TsdlIdentifier identifier) {
+    Conditions.checkNotNull(Condition.ARGUMENT, format, "Result format must not be null.");
+    return new YieldStatementImpl(format, identifier);
   }
 }

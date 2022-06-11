@@ -10,17 +10,16 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfiguration {
-  @Value("${application.version}")
+  @Value("${application.version:unknown}")
   private String applicationVersion;
 
   @Bean
   public OpenAPI serviceApi() {
-    var appVersion = applicationVersion != null ? applicationVersion : "unknown version";
     return new OpenAPI()
         .components(new Components())
         .info(new Info()
             .title("TSDL Service")
-            .version(appVersion)
+            .version(applicationVersion)
             .description("A REST service exposing TSDL Query capabilities.")
             .termsOfService("TOS")
             .contact(new Contact()

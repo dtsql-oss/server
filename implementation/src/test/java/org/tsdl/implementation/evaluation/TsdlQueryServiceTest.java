@@ -1,6 +1,7 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.withPrecision;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
+import org.tsdl.infrastructure.model.SingularScalarResult;
 import org.tsdl.infrastructure.model.TsdlDataPoints;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 import org.tsdl.infrastructure.model.TsdlPeriodSet;
@@ -720,6 +722,24 @@ class TsdlQueryServiceTest {
       assertThat(periodsWithoutFilter.periods().get(2).start()).isEqualTo(periodsWitFilter.periods().get(2).start());
       assertThat(periodsWithoutFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T09:35:33.164Z"));
       assertThat(periodsWitFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T01:35:33.164Z"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    void queryIntegration_yieldSample(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg(_input) AS myAvg
+          YIELD:
+            sample myAvg
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
+          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(42.84, withPrecision(0.01));
     }
   }
 }

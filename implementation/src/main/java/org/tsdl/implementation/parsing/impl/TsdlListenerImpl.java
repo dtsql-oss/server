@@ -17,6 +17,8 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
@@ -116,8 +118,18 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   @Override
   public void enterYieldDeclaration(TsdlParser.YieldDeclarationContext ctx) {
-    var resultFormat = elementParser.parseResultFormat(ctx.yieldType().getText());
+    var resultFormat = parseResult(ctx.yieldType());
     queryBuilder.result(resultFormat);
+  }
+
+  private YieldStatement parseResult(TsdlParser.YieldTypeContext ctx) {
+    var format = elementParser.parseResultFormat(ctx.getText());
+    if (format != YieldFormat.SAMPLE) {
+      return elementFactory.getResult(format, null);
+    }
+
+    var identifier = requireIdentifier(ctx.identifier(), IdentifierType.SAMPLE);
+    return elementFactory.getResult(format, identifier);
   }
 
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
@@ -212,7 +224,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (declaredIdentifiers.contains(identifier) && identifierMap.containsKey(identifier)) {
       return identifier;
     } else if (!declaredIdentifiers.contains(identifier)) {
-      throw new UnknownIdentifierException(identifier.name());
+      throw new UnknownIdentifierException(identifier.name(), type.name().toLowerCase());
     } else {
       throw new InvalidReferenceException(identifier.name(), type.name().toLowerCase());
     }

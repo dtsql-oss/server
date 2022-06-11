@@ -18,4 +18,4 @@ springdoc:
   writer-with-default-pretty-printer: true
 
 application:
-  version: @project.version@ # read app version from maven property
+  version: '@project.version@' # read app version from maven property

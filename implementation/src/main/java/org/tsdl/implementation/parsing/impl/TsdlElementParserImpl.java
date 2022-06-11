@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import org.tsdl.implementation.model.common.Identifiable;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -37,9 +37,16 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public ResultFormat parseResultFormat(String str) {
+  public YieldFormat parseResultFormat(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
-    return parseEnumMember(ResultFormat.class, str);
+    try {
+      return parseEnumMember(YieldFormat.class, str);
+    } catch (NoSuchElementException e) {
+      if (str.startsWith(YieldFormat.SAMPLE.representation() + " ")) {
+        return YieldFormat.SAMPLE;
+      }
+      throw e;
+    }
   }
 
   @Override

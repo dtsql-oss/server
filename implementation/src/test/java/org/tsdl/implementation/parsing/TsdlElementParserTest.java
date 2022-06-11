@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -55,12 +55,12 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validResultFormatInputs")
-  void parseResultFormat_validRepresentations_ok(String representation, ResultFormat member) {
+  void parseResultFormat_validRepresentations_ok(String representation, YieldFormat member) {
     assertThat(PARSER.parseResultFormat(representation)).isEqualTo(member);
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"ALL periods", "longestperiod", "shortest perioD", "", "      ", "0", "1"})
+  @ValueSource(strings = {"ALL periods", "longestperiod", "all data points", "samples", "shortest perioD", "", "      ", "0", "1"})
   void parseResultFormat_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseResultFormat(representation)).isInstanceOf(NoSuchElementException.class);
   }

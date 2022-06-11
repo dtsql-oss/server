@@ -2,7 +2,7 @@ package org.tsdl.implementation.parsing.stub;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
-import org.tsdl.implementation.model.result.ResultFormat;
+import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -28,10 +28,12 @@ public final class ElementParserDataFactory {
 
   public static Stream<Arguments> validResultFormatInputs() {
     return Stream.of(
-        Arguments.of("all periods", ResultFormat.ALL_PERIODS),
-        Arguments.of("longest period", ResultFormat.LONGEST_PERIOD),
-        Arguments.of("shortest period", ResultFormat.SHORTEST_PERIOD),
-        Arguments.of("data points", ResultFormat.DATA_POINTS)
+        Arguments.of("all periods", YieldFormat.ALL_PERIODS),
+        Arguments.of("longest period", YieldFormat.LONGEST_PERIOD),
+        Arguments.of("shortest period", YieldFormat.SHORTEST_PERIOD),
+        Arguments.of("data points", YieldFormat.DATA_POINTS),
+        Arguments.of("sample", YieldFormat.SAMPLE),
+        Arguments.of("sample myAvg", YieldFormat.SAMPLE)
     );
   }
 

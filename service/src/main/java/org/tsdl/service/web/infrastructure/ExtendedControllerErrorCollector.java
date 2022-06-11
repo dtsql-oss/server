@@ -8,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -38,8 +35,6 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Component
 @Slf4j
-@Primary
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ExtendedControllerErrorCollector extends DefaultErrorAttributes {
 
   @Override
