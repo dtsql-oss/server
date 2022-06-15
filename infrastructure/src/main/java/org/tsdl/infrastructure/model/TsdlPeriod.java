@@ -6,7 +6,7 @@ import java.time.Instant;
  * A result of the evaluation process of a TSDL query that may be part of a {@link TsdlPeriodSet} instance or a standalone result by itself.
  */
 public interface TsdlPeriod extends QueryResult {
-  TsdlPeriod EMPTY = QueryResult.of(null, null, null);
+  TsdlPeriod EMPTY = QueryResult.of(null, null, null, new TsdlLogEvent[0]);
 
   Integer index();
 

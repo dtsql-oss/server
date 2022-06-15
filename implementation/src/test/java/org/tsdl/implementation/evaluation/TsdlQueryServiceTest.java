@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.MultipleScalarResult;
@@ -18,6 +19,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
 import org.tsdl.infrastructure.model.SingularScalarResult;
 import org.tsdl.infrastructure.model.TsdlDataPoints;
+import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 import org.tsdl.infrastructure.model.TsdlPeriodSet;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
@@ -760,6 +762,34 @@ class TsdlQueryServiceTest {
           .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
           .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
           .containsExactly(25.75, 75.52);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"data points", "all periods", "shortest period", "longest period", "sample m1", "sample m2", "samples m1", "samples m2",
+        "samples m1, m2", "samples m2,m1"})
+    void queryIntegration_queryWithEchos_collectsLogMessages(String yield) {
+      var query = """
+          WITH SAMPLES: avg(_input) AS m1 -> echo(3), max(_input) AS m2 -> echo(0)
+          USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
+          CHOOSE: low precedes high
+          YIELD: %s
+          """.formatted(yield);
+
+      var input = List.of(
+          DataPoint.of(Instant.now(), 1),
+          DataPoint.of(Instant.now(), 2),
+          DataPoint.of(Instant.now(), 3)
+      );
+      var result = queryService.query(input, query);
+
+      assertThat(result.logs())
+          .hasSize(2)
+          .extracting(TsdlLogEvent::message)
+          .isEqualTo(List.of(
+              "sample 'm1' of 'avg' aggregator := 2.000",
+              "sample 'm2' of 'max' aggregator := 3"
+          ));
+
     }
   }
 }

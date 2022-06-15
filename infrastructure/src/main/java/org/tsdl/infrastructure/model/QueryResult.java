@@ -15,23 +15,30 @@ public interface QueryResult {
 
   QueryResultType type();
 
-  static TsdlDataPoints of(List<DataPoint> items) {
-    return new TsdlDataPointsImpl(items);
+  List<TsdlLogEvent> logs();
+
+  /**
+   * Postconditon: preserves {@link QueryResult#type()} and data, {@link QueryResult#logs()} is equal to {@code logs}.
+   */
+  QueryResult withLogs(List<TsdlLogEvent> logs);
+
+  static TsdlDataPoints of(List<DataPoint> items, TsdlLogEvent... logs) {
+    return new TsdlDataPointsImpl(items, List.of(logs));
   }
 
-  static TsdlPeriod of(Integer index, Instant start, Instant end) {
-    return new TsdlPeriodImpl(index, start, end);
+  static TsdlPeriod of(Integer index, Instant start, Instant end, TsdlLogEvent... logs) {
+    return new TsdlPeriodImpl(index, start, end, List.of(logs));
   }
 
-  static TsdlPeriodSet of(int totalPeriods, List<TsdlPeriod> periods) {
-    return new TsdlPeriodSetImpl(totalPeriods, periods);
+  static TsdlPeriodSet of(int totalPeriods, List<TsdlPeriod> periods, TsdlLogEvent... logs) {
+    return new TsdlPeriodSetImpl(totalPeriods, periods, List.of(logs));
   }
 
-  static SingularScalarResult of(Double value) {
-    return new SingularScalarResultImpl(value);
+  static SingularScalarResult of(Double value, TsdlLogEvent... logs) {
+    return new SingularScalarResultImpl(value, List.of(logs));
   }
 
-  static MultipleScalarResult of(Double... values) {
-    return new MultipleScalarResultImpl(List.of(values));
+  static MultipleScalarResult of(Double[] values, TsdlLogEvent... logs) {
+    return new MultipleScalarResultImpl(List.of(values), List.of(logs));
   }
 }

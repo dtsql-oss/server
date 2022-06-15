@@ -7,10 +7,6 @@ import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
  * Represents a data point, i.e. an item, in a time series.
  */
 public interface DataPoint {
-  static DataPoint of(Instant timestamp, Object value) {
-    return new TsdlDataPoint(timestamp, value);
-  }
-
   Instant getTimestamp();
 
   Object getValue();
@@ -20,4 +16,8 @@ public interface DataPoint {
   Double asDecimal();
 
   String asText();
+
+  static DataPoint of(Instant timestamp, Object value) {
+    return new TsdlDataPoint(timestamp, value);
+  }
 }

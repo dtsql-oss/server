@@ -28,6 +28,7 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 import org.tsdl.infrastructure.model.TsdlPeriodSet;
 
@@ -47,7 +48,8 @@ public class TsdlQueryService implements QueryService {
 
       var parsedQuery = parser.parseQuery(query);
 
-      final var sampleValues = computeSamples(parsedQuery.samples(), data);
+      final var logs = new ArrayList<TsdlLogEvent>();
+      final var sampleValues = computeSamples(parsedQuery.samples(), data, logs);
       setSampleFilterArgumentValues(parsedQuery, sampleValues);
 
       var relevantDataPoints = parsedQuery.filter().isPresent()
@@ -56,12 +58,15 @@ public class TsdlQueryService implements QueryService {
 
       // TODO optimization potential: if no events are defined, period detection is not necessary
       var detectedPeriods = detectPeriods(relevantDataPoints, parsedQuery);
+      QueryResult result;
       if (parsedQuery.choice().isPresent()) {
         var periods = parsedQuery.choice().get().evaluate(detectedPeriods);
-        return getResult(periods, parsedQuery.result(), relevantDataPoints, sampleValues);
+        result = getResult(periods, parsedQuery.result(), relevantDataPoints, sampleValues);
       } else {
-        return getResult(relevantDataPoints, parsedQuery.result(), sampleValues);
+        result = getResult(relevantDataPoints, parsedQuery.result(), sampleValues);
       }
+
+      return result.withLogs(logs);
     } catch (TsdlEvaluationException e) {
       throw e;
     } catch (Exception e) {
@@ -214,10 +219,10 @@ public class TsdlQueryService implements QueryService {
     eventMarkers.remove(eventId);
   }
 
-  private Map<TsdlIdentifier, Double> computeSamples(List<TsdlSample> samples, List<DataPoint> input) {
+  private Map<TsdlIdentifier, Double> computeSamples(List<TsdlSample> samples, List<DataPoint> input, List<TsdlLogEvent> logs) {
     return samples.stream().collect(Collectors.toMap(
             TsdlSample::identifier,
-            sample -> sample.compute(input)
+            sample -> sample.compute(input, logs)
         )
     );
   }
