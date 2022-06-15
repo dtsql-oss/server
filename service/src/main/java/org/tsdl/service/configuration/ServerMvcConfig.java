@@ -21,7 +21,6 @@ public class ServerMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(loggingRequestInterceptor)
-        .addPathPatterns("/query/*/")
         .excludePathPatterns("/error");
   }
 }

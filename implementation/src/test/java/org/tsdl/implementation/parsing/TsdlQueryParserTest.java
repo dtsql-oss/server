@@ -2,6 +2,7 @@ package org.tsdl.implementation.parsing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
 
 import java.util.List;
 import java.util.function.Function;
@@ -341,7 +342,9 @@ class TsdlQueryParserTest {
           """;
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
-          .isInstanceOf(UnknownIdentifierException.class)
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(UnknownIdentifierException.class)
+          .extracting(Throwable::getCause, THROWABLE)
           .hasMessageContaining("s3");
     }
 
@@ -357,6 +360,8 @@ class TsdlQueryParserTest {
       // depending on whether identifier 'low' is parsed before filter argument 'lt(3.5)' or after,
       // an InvalidReferenceException or UnknownIdentifierException is thrown
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParserException.class)
+          .extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
           .isInstanceOfAny(UnknownIdentifierException.class, InvalidReferenceException.class)
           .hasMessageContaining("low");
     }
@@ -416,7 +421,9 @@ class TsdlQueryParserTest {
           """;
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
-          .isInstanceOf(UnknownIdentifierException.class)
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(UnknownIdentifierException.class)
+          .extracting(Throwable::getCause, THROWABLE)
           .hasMessageContaining("e2");
     }
 
@@ -429,7 +436,9 @@ class TsdlQueryParserTest {
           """;
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
-          .isInstanceOf(InvalidReferenceException.class)
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(InvalidReferenceException.class)
+          .extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
           .hasMessageContainingAll("low", "event");
     }
 
@@ -475,16 +484,20 @@ class TsdlQueryParserTest {
         "WITH SAMPLES: sum(_input) AS mySum, max(_input) AS myMax YIELD: samples mySum, maxi",
     })
     void yieldDeclaration_unknownSamples_throws(String queryString) {
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(UnknownIdentifierException.class);
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(UnknownIdentifierException.class);
     }
 
     @ParameterizedTest
-    @ValueSource(strings ={
+    @ValueSource(strings = {
         "WITH SAMPLES: sum(_input) AS mySum  USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: sample LOW",
         "WITH SAMPLES: sum(_input) AS mySum USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: samples mySum, LOW"
     })
     void yieldDeclaration_invalidSampleTypes_throws(String queryString) {
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(InvalidReferenceException.class);
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(InvalidReferenceException.class);
     }
 
     static class ValidInputProvider implements ArgumentsProvider {
@@ -673,7 +686,9 @@ class TsdlQueryParserTest {
           YIELD: all periods
           """;
 
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(DuplicateIdentifierException.class);
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(DuplicateIdentifierException.class);
     }
 
     @Test
@@ -684,7 +699,9 @@ class TsdlQueryParserTest {
           YIELD: all periods
           """;
 
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(DuplicateIdentifierException.class);
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParserException.class)
+          .hasCauseInstanceOf(DuplicateIdentifierException.class);
     }
 
     @Test

@@ -52,9 +52,7 @@ public class ExtendedControllerErrorCollector extends DefaultErrorAttributes {
     var errorTrace = new LinkedHashMap<Integer, String>();
     errorTrace.put(errorIndex++, errorCause.getMessage());
 
-    //CHECKSTYLE.OFF: MatchXpath - false positive, 'var' cannot be used here (due to 'ex = e.getCause()')
-    Throwable ex = errorCause;
-    //CHECKSTYLE.ON: MatchXpath
+    var ex = errorCause;
     while (ex.getCause() != null) {
       errorTrace.put(errorIndex++, ex.getCause().getMessage());
       ex = ex.getCause();

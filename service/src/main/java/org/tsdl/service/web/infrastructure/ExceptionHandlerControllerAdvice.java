@@ -8,17 +8,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,23 +31,31 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.tsdl.service.web.infrastructure.ValidationFailureControllerAdvice.ValidationErrorsHolder.ValidationError;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.tsdl.implementation.evaluation.TsdlEvaluationException;
+import org.tsdl.service.web.infrastructure.ExceptionHandlerControllerAdvice.ValidationErrorsHolder.ValidationError;
 
 /**
- * Advice for REST controllers that registers exception handlers for when a validation performed by Spring fails. More specifically, this
- * type registers handlers for when an {@link MethodArgumentNotValidException} or {@link ConstraintViolationException} is propagated beyond the
- * scope of a controller. It transforms the validation data (e.g. what fields caused the violation for which reason(s)) into a
- * {@link ValidationErrorsHolder} object which is then sent as response body to the causing request, with status code {@link HttpStatus#BAD_REQUEST}.
+ * Advice for REST controllers that registers exception handlers for when a validation performed by Spring or Hibernate fails or when query evaluation
+ * fails. More specifically, this type registers handlers for when an {@link MethodArgumentNotValidException}, {@link ConstraintViolationException},
+ * or {@link TsdlEvaluationException} is propagated beyond the scope of a controller. It transforms the validation error data (e.g. what fields caused
+ * the violation for which reason(s)) into a {@link ValidationErrorsHolder} object which is then sent as response body to the causing request,
+ * with status code {@link HttpStatus#BAD_REQUEST}. In the case of a query evaluation error, a Spring error dictionary created by
+ * {@link ExtendedControllerErrorCollector#getErrorAttributes(WebRequest, ErrorAttributeOptions)} containing a compact trace of errors is returned.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 @Slf4j
-public class ValidationFailureControllerAdvice {
+public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHandler {
   private final MessageSource messageSource;
+  private final ExtendedControllerErrorCollector errorCollector;
 
   @Autowired
-  public ValidationFailureControllerAdvice(MessageSource messageSource) {
+  public ExceptionHandlerControllerAdvice(MessageSource messageSource, ExtendedControllerErrorCollector errorCollector) {
     this.messageSource = messageSource;
+    this.errorCollector = errorCollector;
   }
 
   /**
@@ -52,11 +65,11 @@ public class ValidationFailureControllerAdvice {
    * @param request the request that triggered the validation advice
    * @return a {@link ValidationErrorsHolder} instance representing information about the validation failure that are relevant to the requester
    */
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ValidationErrorsHolder methodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-    return buildValidationFailureResponse(() -> ex.getBindingResult().getFieldErrors().stream()
+  @NotNull
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(@NotNull MethodArgumentNotValidException ex, @NotNull HttpHeaders headers,
+                                                                @NotNull HttpStatus status, @NotNull WebRequest request) {
+    var errorHolder = buildValidationFailureResponse(() -> ex.getBindingResult().getFieldErrors().stream()
             .map(fieldError -> {
               var errorMessage = messageSource.getMessage(fieldError, Locale.ROOT);
               return new ValidationError(
@@ -65,12 +78,14 @@ public class ValidationFailureControllerAdvice {
                   fieldError.getRejectedValue(),
                   !StringUtils.hasText(errorMessage) ? fieldError.getDefaultMessage() : errorMessage);
             })
-            .toList(), ex,
-        request);
+            .toList(),
+        getPath(request));
+
+    return handleExceptionInternal(ex, errorHolder, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
 
   /**
-   * Validation errors with a {@link Validated} annotation or a JPA provider (e.g. Hibernate)as root cause result in
+   * Validation errors with a {@link Validated} annotation or a JPA provider (e.g. Hibernate) as root cause result in
    * {@link ConstraintViolationException} objects.
    *
    * @param ex      information about the validation failure
@@ -88,8 +103,24 @@ public class ValidationFailureControllerAdvice {
                 violation.getInvalidValue(),
                 violation.getMessage()))
             .toList(),
-        ex,
-        request);
+        request.getRequestURI());
+  }
+
+  /**
+   * Transforms a {@link TsdlEvaluationException} into an error map to be returned by Spring.
+   *
+   * @param request the request which resulted in a query evaluation error
+   * @return a map containing information about the error
+   */
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  @ExceptionHandler(TsdlEvaluationException.class)
+  public Map<String, Object> evaluationException(WebRequest request) {
+    var errorResponse = errorCollector.getErrorAttributes(request, ErrorAttributeOptions.defaults());
+    errorResponse.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+    errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+    errorResponse.putIfAbsent("path", getPath(request));
+    return errorResponse;
   }
 
   /**
@@ -98,25 +129,29 @@ public class ValidationFailureControllerAdvice {
    *
    * @param errorCollector a supplier that returns a collection of {@link ValidationError} instances which constitute the errors represented by
    *                       the {@link ValidationErrorsHolder} instance being created
-   * @param cause          the exception that triggered the validation advice
-   * @param request        the request that triggered the validation advice
+   * @param path           endpoint method path from web application's root name
    * @return a {@link ValidationErrorsHolder} with the current timestamp, a message indicating a validation error and the errors provided
    *     by {@code errorCollector}
    */
-  private ValidationErrorsHolder buildValidationFailureResponse(Supplier<Collection<? extends ValidationError>> errorCollector, Throwable cause,
-                                                                HttpServletRequest request) {
-    var errors = new ValidationErrorsHolder(Instant.now().atZone(ZoneOffset.UTC), request.getRequestURI());
+  private ValidationErrorsHolder buildValidationFailureResponse(Supplier<Collection<? extends ValidationError>> errorCollector, String path) {
+    var errors = new ValidationErrorsHolder(Instant.now().atZone(ZoneOffset.UTC), path);
     errors.setErrors(errorCollector.get());
 
-    log.error("Input validation failed with %d errors: %s".formatted(errors.getValidationErrors().size(), errors), cause);
+    log.error("Input validation failed with %d errors: %s".formatted(errors.getValidationErrors().size(), errors));
     return errors;
+  }
+
+  private String getPath(WebRequest webRequest) {
+    return webRequest instanceof ServletWebRequest servletWebRequest
+        ? servletWebRequest.getRequest().getRequestURI()
+        : "<unknown>";
   }
 
   @Data
   @Schema(description = "Bundles one or more validation errors.")
   static class ValidationErrorsHolder {
-    @Schema(description = "The part of this request's URL from the protocol name up to the query string in the first line of the HTTP request.",
-        example = "/exercise/initial-exercise/23")
+    @Schema(description = "Endpoint method path from web application's root name.",
+        example = "/query")
     private final String path;
 
     @Schema(description = "Number of the HTTP status code induced by the validation errors.", example = "400")
@@ -169,9 +204,9 @@ public class ValidationFailureControllerAdvice {
 
     @Schema(description = "Encapsulates information about a validation error.")
     record ValidationError(
-        @Schema(description = "Representation of the object causing the validation error.", example = "workoutLogCreateDto")
+        @Schema(description = "Representation of the object causing the validation error.", example = "storageDto")
         String rootBean,
-        @Schema(description = "Location of the violating property in the member hierarchy of rootBean.", example = "durationMinutes")
+        @Schema(description = "Location of the violating property in the member hierarchy of rootBean.", example = "name")
         String propertyPath,
         @Schema(description = "Property value that caused the validation error.", example = "0")
         Object invalidValue,
