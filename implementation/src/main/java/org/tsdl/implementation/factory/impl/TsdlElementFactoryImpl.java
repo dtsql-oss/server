@@ -133,8 +133,8 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   }
 
   @Override
-  public YieldStatement getResult(YieldFormat format, TsdlIdentifier identifier) {
+  public YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifiers) {
     Conditions.checkNotNull(Condition.ARGUMENT, format, "Result format must not be null.");
-    return new YieldStatementImpl(format, identifier);
+    return new YieldStatementImpl(format, identifiers);
   }
 }

@@ -1,5 +1,6 @@
 package org.tsdl.implementation.model.result;
 
+import java.util.List;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 
 /**
@@ -8,5 +9,5 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 public interface YieldStatement {
   YieldFormat format();
 
-  TsdlIdentifier sample();
+  List<TsdlIdentifier> samples();
 }

@@ -44,6 +44,8 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     } catch (NoSuchElementException e) {
       if (str.startsWith(YieldFormat.SAMPLE.representation() + " ")) {
         return YieldFormat.SAMPLE;
+      } else if (str.startsWith(YieldFormat.SAMPLE_SET.representation() + " ")) {
+        return YieldFormat.SAMPLE_SET;
       }
       throw e;
     }

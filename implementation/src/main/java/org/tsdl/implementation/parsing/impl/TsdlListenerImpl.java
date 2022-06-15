@@ -4,6 +4,7 @@ package org.tsdl.implementation.parsing.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.tsdl.grammar.TsdlParser;
@@ -124,12 +125,28 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private YieldStatement parseResult(TsdlParser.YieldTypeContext ctx) {
     var format = elementParser.parseResultFormat(ctx.getText());
-    if (format != YieldFormat.SAMPLE) {
+    if (format != YieldFormat.SAMPLE && format != YieldFormat.SAMPLE_SET) {
       return elementFactory.getResult(format, null);
-    }
+    } else if (format == YieldFormat.SAMPLE) {
+      var identifier = requireIdentifier(ctx.identifier(), IdentifierType.SAMPLE);
+      return elementFactory.getResult(format, List.of(identifier));
+    } else {
+      var identifierList = ctx.identifierList();
 
-    var identifier = requireIdentifier(ctx.identifier(), IdentifierType.SAMPLE);
-    return elementFactory.getResult(format, identifier);
+      var identifiers = new ArrayList<TsdlIdentifier>();
+      if (identifierList.identifiers() != null) {
+        var identifiersContext = identifierList.identifiers();
+        var parsedIdentifiers = identifiersContext.identifier().stream().map(i -> requireIdentifier(i, IdentifierType.SAMPLE)).toList();
+        identifiers.addAll(parsedIdentifiers);
+      }
+
+      if (identifierList.identifier() != null) {
+        var lastIdentifier = identifierList.identifier();
+        identifiers.add(requireIdentifier(lastIdentifier, IdentifierType.SAMPLE));
+      }
+
+      return elementFactory.getResult(format, identifiers);
+    }
   }
 
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {

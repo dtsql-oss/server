@@ -39,5 +39,5 @@ public interface TsdlElementFactory {
 
   TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
 
-  YieldStatement getResult(YieldFormat format, TsdlIdentifier identifier);
+  YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifier);
 }

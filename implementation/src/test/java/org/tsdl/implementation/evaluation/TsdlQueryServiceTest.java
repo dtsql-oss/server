@@ -1,7 +1,7 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.withPrecision;
+import static org.assertj.core.api.Assertions.within;
 
 import java.time.Instant;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.infrastructure.model.MultipleScalarResult;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
 import org.tsdl.infrastructure.model.SingularScalarResult;
@@ -739,7 +740,26 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
           .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
-          .isEqualTo(42.84, withPrecision(0.01));
+          .isEqualTo(42.84, within(0.01));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    void queryIntegration_yieldSampleSet(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            min(_input) AS min1,
+            max(_input) AS max2
+          YIELD:
+            samples min1, max2
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
+          .containsExactly(25.75, 75.52);
     }
   }
 }

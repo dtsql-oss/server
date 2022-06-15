@@ -60,7 +60,7 @@ class TsdlElementParserTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"ALL periods", "longestperiod", "all data points", "samples", "shortest perioD", "", "      ", "0", "1"})
+  @ValueSource(strings = {"ALL periods", "longestperiod", "all data points", "sampleset", "samplee", "shortest perioD", "", "      ", "0", "1"})
   void parseResultFormat_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseResultFormat(representation)).isInstanceOf(NoSuchElementException.class);
   }

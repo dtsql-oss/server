@@ -468,15 +468,22 @@ class TsdlQueryParserTest {
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
-    @Test
-    void yieldDeclaration_unknownSample_throws() {
-      var queryString = "YIELD: sample hello1";
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "YIELD: sample hello1",
+        "YIELD: samples hello1",
+        "WITH SAMPLES: sum(_input) AS mySum, max(_input) AS myMax YIELD: samples mySum, maxi",
+    })
+    void yieldDeclaration_unknownSamples_throws(String queryString) {
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(UnknownIdentifierException.class);
     }
 
-    @Test
-    void yieldDeclaration_invalidSampleType_throws() {
-      var queryString = "WITH SAMPLES: sum(_input) AS mySum  USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: sample LOW";
+    @ParameterizedTest
+    @ValueSource(strings ={
+        "WITH SAMPLES: sum(_input) AS mySum  USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: sample LOW",
+        "WITH SAMPLES: sum(_input) AS mySum USING EVENTS: AND(lt(mySum)) AS LOW  YIELD: samples mySum, LOW"
+    })
+    void yieldDeclaration_invalidSampleTypes_throws(String queryString) {
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(InvalidReferenceException.class);
     }
 
@@ -489,7 +496,15 @@ class TsdlQueryParserTest {
             Arguments.of("YIELD: shortest period", ELEMENTS.getResult(YieldFormat.SHORTEST_PERIOD, null)),
             Arguments.of("YIELD: data points", ELEMENTS.getResult(YieldFormat.DATA_POINTS, null)),
             Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: sample identifier1",
-                ELEMENTS.getResult(YieldFormat.SAMPLE, ELEMENTS.getIdentifier("identifier1")))
+                ELEMENTS.getResult(YieldFormat.SAMPLE, List.of(ELEMENTS.getIdentifier("identifier1")))),
+            Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: samples identifier1",
+                ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1")))),
+            Arguments.of("WITH SAMPLES: min(_input) AS identifier1, max(_input) AS identifier2 YIELD: samples identifier1, identifier2",
+                ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1"), ELEMENTS.getIdentifier("identifier2")))),
+            Arguments.of("WITH SAMPLES: min(_input) AS i1, max(_input) AS i2, count(_input) AS i3 YIELD: samples i1, i2, i3",
+                ELEMENTS.getResult(YieldFormat.SAMPLE_SET,
+                    List.of(ELEMENTS.getIdentifier("i1"), ELEMENTS.getIdentifier("i2"), ELEMENTS.getIdentifier("i3"))))
+
         );
 
       }

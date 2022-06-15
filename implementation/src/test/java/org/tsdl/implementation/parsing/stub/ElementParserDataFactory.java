@@ -33,7 +33,10 @@ public final class ElementParserDataFactory {
         Arguments.of("shortest period", YieldFormat.SHORTEST_PERIOD),
         Arguments.of("data points", YieldFormat.DATA_POINTS),
         Arguments.of("sample", YieldFormat.SAMPLE),
-        Arguments.of("sample myAvg", YieldFormat.SAMPLE)
+        Arguments.of("sample myAvg", YieldFormat.SAMPLE),
+        Arguments.of("samples myAvg", YieldFormat.SAMPLE_SET),
+        Arguments.of("samples myAvg, mySum", YieldFormat.SAMPLE_SET),
+        Arguments.of("samples myAvg, mySum,myMin", YieldFormat.SAMPLE_SET)
     );
   }
 

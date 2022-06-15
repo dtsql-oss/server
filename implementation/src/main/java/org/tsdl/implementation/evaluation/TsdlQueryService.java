@@ -75,8 +75,11 @@ public class TsdlQueryService implements QueryService {
     }
 
     if (result.format() == YieldFormat.SAMPLE) {
-      var sampleValue = identifiers.get(result.sample());
+      var sampleValue = identifiers.get(result.samples().get(0));
       return QueryResult.of(sampleValue);
+    } else if (result.format() == YieldFormat.SAMPLE_SET) {
+      var sampleValues = result.samples().stream().map(identifiers::get).toArray(Double[]::new);
+      return QueryResult.of(sampleValues);
     }
 
     // since order preservation is part of the filter contract, we may assume the first element to be the start and the last element to be the end
@@ -113,8 +116,12 @@ public class TsdlQueryService implements QueryService {
         return QueryResult.of(pointsInPeriods);
 
       case SAMPLE:
-        var sampleValue = identifiers.get(result.sample());
+        var sampleValue = identifiers.get(result.samples().get(0));
         return QueryResult.of(sampleValue);
+
+      case SAMPLE_SET:
+        var sampleValues = result.samples().stream().map(identifiers::get).toArray(Double[]::new);
+        return QueryResult.of(sampleValues);
 
       default:
         throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);

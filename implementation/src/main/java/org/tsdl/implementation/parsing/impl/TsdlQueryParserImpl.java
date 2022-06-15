@@ -39,7 +39,11 @@ public class TsdlQueryParserImpl implements TsdlQueryParser {
 
       return tsdlListener.getQuery();
     } catch (TsdlParserException e) {
-      throw e;
+      if (e.getClass().equals(TsdlParserException.class)) {
+        throw e;
+      } else {
+        throw new TsdlParserException("Parsing query string failed.", e);
+      }
     } catch (Exception e) {
       throw new TsdlParserException("Parsing query string failed.", e);
     }

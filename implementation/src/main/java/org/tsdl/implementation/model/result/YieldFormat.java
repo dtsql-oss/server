@@ -10,7 +10,8 @@ public enum YieldFormat implements Identifiable {
   LONGEST_PERIOD("longest period"),
   SHORTEST_PERIOD("shortest period"),
   DATA_POINTS("data points"),
-  SAMPLE("sample");
+  SAMPLE("sample"),
+  SAMPLE_SET("samples");
 
   private final String representation;
 
