@@ -1,11 +1,14 @@
 package org.tsdl.testutil.visualization.api;
 
-import org.tsdl.testutil.visualization.impl.JFreeChartTimeSeriesTestVisualizer;
+import org.tsdl.testutil.visualization.impl.JfreeChartTimeSeriesTestVisualizer;
 
+/**
+ * Provides functionality for visualizing time series data.
+ */
 public interface TimeSeriesTestVisualizer {
-    boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration);
+  static TimeSeriesTestVisualizer instance() {
+    return new JfreeChartTimeSeriesTestVisualizer();
+  }
 
-    static TimeSeriesTestVisualizer INSTANCE() {
-        return new JFreeChartTimeSeriesTestVisualizer();
-    }
+  boolean visualizeBlocking(TsdlTestInfo testInformation, TsdlTestVisualization visualizationConfiguration);
 }

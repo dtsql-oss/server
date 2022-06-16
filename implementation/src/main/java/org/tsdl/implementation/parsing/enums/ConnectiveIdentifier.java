@@ -2,16 +2,19 @@ package org.tsdl.implementation.parsing.enums;
 
 import org.tsdl.implementation.model.common.Identifiable;
 
+/**
+ * A connective identifier.
+ */
 public enum ConnectiveIdentifier implements Identifiable {
-    AND("AND"), OR("OR");
+  AND("AND"), OR("OR");
 
-    private final String representation;
+  private final String representation;
 
-    ConnectiveIdentifier(String representation) {
-        this.representation = representation;
-    }
+  ConnectiveIdentifier(String representation) {
+    this.representation = representation;
+  }
 
-    public String representation() {
-        return representation;
-    }
+  public String representation() {
+    return representation;
+  }
 }

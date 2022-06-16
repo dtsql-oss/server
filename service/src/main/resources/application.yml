@@ -16,3 +16,6 @@ springdoc:
     operations-sorter: alpha
   writer-with-order-by-keys: true
   writer-with-default-pretty-printer: true
+
+application:
+  version: '@project.version@' # read app version from maven property

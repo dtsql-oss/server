@@ -17,6 +17,8 @@ YIELD_ALL_PERIODS  :  'all periods'  ;
 YIELD_LONGEST_PERIOD  :  'longest period'  ;
 YIELD_SHORTEST_PERIOD  :  'shortest period'  ;
 YIELD_DATA_POINTS  :  'data points'  ;
+YIELD_SAMPLE  :  'sample'  ;
+YIELD_SAMPLE_SET :  'samples'  ;
 
 CONNECTIVE_NOT  :  'NOT'  ;
 CONNECTIVE_AND  :  'AND'  ;
@@ -49,6 +51,9 @@ FLOAT
 
 AS  :  'AS'  ;
 
+ECHO_ARROW  :  '->'  ;
+ECHO_LABEL  :  'echo'  ;
+
 TEMPORAL_PRECEDES  :  'precedes'  ;
 TEMPORAL_FOLLOWS  :  'follows'  ;
 
@@ -56,10 +61,15 @@ AGGREGATOR_AVG  :  'avg'  ;
 AGGREGATOR_MAX  :  'max'  ;
 AGGREGATOR_MIN  :  'min'  ;
 AGGREGATOR_SUM  :  'sum'  ;
+AGGREGATOR_COUNT  :  'count'  ;
 INPUT_VARIABLE  :  '_input'  ;
 
 IDENTIFIER
   :  IDENTIFIER_FIRST_CHARACTER IDENTIFIER_PART_CHARACTER*
+  ;
+
+ECHO_ARGUMENT
+  :  (IDENTIFIER_PART_CHARACTER)+
   ;
 
 fragment IDENTIFIER_FIRST_CHARACTER  :  LETTER_CHARACTER  ;

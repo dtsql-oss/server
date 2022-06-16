@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="TestDataCreator" type="Application" factoryName="Application" nameIsGenerated="true">
+  <configuration default="false" name="TestDataCreator" type="Application" factoryName="Application" singleton="false">
     <option name="MAIN_CLASS_NAME" value="org.tsdl.testutil.creation.TestDataCreator" />
     <module name="test-util" />
     <extension name="coverage">

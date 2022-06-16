@@ -2,16 +2,19 @@ package org.tsdl.implementation.parsing.enums;
 
 import org.tsdl.implementation.model.common.Identifiable;
 
+/**
+ * An aggregator.
+ */
 public enum AggregatorType implements Identifiable {
-    AVERAGE("avg"), MAXIMUM("max"), MINIMUM("min"), SUM("sum");
+  AVERAGE("avg"), MAXIMUM("max"), MINIMUM("min"), SUM("sum"), COUNT("count");
 
-    private final String representation;
+  private final String representation;
 
-    AggregatorType(String representation) {
-        this.representation = representation;
-    }
+  AggregatorType(String representation) {
+    this.representation = representation;
+  }
 
-    public String representation() {
-        return representation;
-    }
+  public String representation() {
+    return representation;
+  }
 }

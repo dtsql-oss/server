@@ -16,21 +16,21 @@ import org.tsdl.storage.influxdb.InfluxDbStorageService;
 
 @Configuration
 public class BeanConfiguration {
-    public static final String INFLUXDB_STORAGE_BEAN = "storage.influxdb";
-    public static final String CSV_STORAGE_BEAN = "storage.csv";
+  public static final String INFLUXDB_STORAGE_BEAN = "storage.influxdb";
+  public static final String CSV_STORAGE_BEAN = "storage.csv";
 
-    @Bean(CSV_STORAGE_BEAN)
-    TsdlStorage<CsvRow, CsvStorageConfiguration> csvStorageService() {
-        return new TsdlStorage<>(new CsvStorageService(), CsvStorageConfiguration::new, CsvStorageProperty.class);
-    }
+  @Bean(CSV_STORAGE_BEAN)
+  TsdlStorage<CsvRow, CsvStorageConfiguration> csvStorageService() {
+    return new TsdlStorage<>(new CsvStorageService(), CsvStorageConfiguration::new, CsvStorageProperty.class);
+  }
 
-    @Bean(INFLUXDB_STORAGE_BEAN)
-    TsdlStorage<FluxTable, InfluxDbStorageConfiguration> influxDbStorageService() {
-        return new TsdlStorage<>(new InfluxDbStorageService(), InfluxDbStorageConfiguration::new, InfluxDbStorageProperty.class);
-    }
+  @Bean(INFLUXDB_STORAGE_BEAN)
+  TsdlStorage<FluxTable, InfluxDbStorageConfiguration> influxDbStorageService() {
+    return new TsdlStorage<>(new InfluxDbStorageService(), InfluxDbStorageConfiguration::new, InfluxDbStorageProperty.class);
+  }
 
-    @Bean
-    QueryService queryService() {
-        return new TsdlQueryService();
-    }
+  @Bean
+  QueryService queryService() {
+    return new TsdlQueryService();
+  }
 }
