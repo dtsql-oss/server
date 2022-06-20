@@ -22,6 +22,12 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
   // influx uses rfc3339 timestamps (https://docs.influxdata.com/flux/v0.x/data-types/basic/time/#time-syntax)
   private static final DateTimeFormatter INFLUX_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
+  public static final String INITIALIZE_PROPERTY_REQUIRED = "'%s' property ('%s') is required to initialize the InfluxDB storage service.";
+  public static final String STORE_PROPERTY_REQUIRED = "'%s' property ('%s') is required to store data with the InfluxDB storage service.";
+  public static final String LOAD_PROPERTY_REQUIRED = "'%s' property ('%s') is required to load data with the InfluxDB storage service.";
+  public static final String TRANSFORMATION_PROPERTY_REQUIRED =
+      "'%s' property ('%s') is required to transform data loaded by the InfluxDB storage service into data points.";
+
   private static final String LOAD_RANGE_QUERY_TEMPLATE = """
       from(bucket: "%s")
         |> range(start: time(v: "%s"), stop: time(v: "%s"))
@@ -33,18 +39,10 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
 
   @Override
   public void initialize(InfluxDbStorageConfiguration serviceConfiguration) {
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        serviceConfiguration.isPropertySet(InfluxDbStorageProperty.URL),
-        "'%s' property ('%s') is required to initialize InfluxDB storage service.",
-        InfluxDbStorageProperty.URL.name(), InfluxDbStorageProperty.URL.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        serviceConfiguration.isPropertySet(InfluxDbStorageProperty.TOKEN),
-        "'%s' property is ('%s') required to initialize InfluxDB storage service.",
-        InfluxDbStorageProperty.TOKEN.name(), InfluxDbStorageProperty.TOKEN.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        serviceConfiguration.isPropertySet(InfluxDbStorageProperty.ORGANIZATION),
-        "'%s' property ('%s') is required to initialize InfluxDB storage service.",
-        InfluxDbStorageProperty.ORGANIZATION.name(), InfluxDbStorageProperty.ORGANIZATION.identifier());
+    Conditions.checkNotNull(Condition.ARGUMENT, serviceConfiguration, "The service configuration must not be null.");
+    requireProperty(serviceConfiguration, InfluxDbStorageProperty.URL, INITIALIZE_PROPERTY_REQUIRED);
+    requireProperty(serviceConfiguration, InfluxDbStorageProperty.TOKEN, INITIALIZE_PROPERTY_REQUIRED);
+    requireProperty(serviceConfiguration, InfluxDbStorageProperty.ORGANIZATION, INITIALIZE_PROPERTY_REQUIRED);
 
     initializeInternal(serviceConfiguration);
   }
@@ -55,13 +53,10 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
   }
 
   @Override
-  public void store(InfluxDbStorageConfiguration persistConfiguration) {
+  public void store(List<DataPoint> data, InfluxDbStorageConfiguration persistConfiguration) {
     Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
     Conditions.checkNotNull(Condition.ARGUMENT, persistConfiguration, "The persist configuration must not be null.");
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        persistConfiguration.isPropertySet(InfluxDbStorageProperty.BUCKET),
-        "'%s' property ('%s') is required to store data with the InfluxDB storage service.",
-        InfluxDbStorageProperty.BUCKET.name(), InfluxDbStorageProperty.BUCKET.identifier());
+    requireProperty(persistConfiguration, InfluxDbStorageProperty.BUCKET, STORE_PROPERTY_REQUIRED);
 
     throw new UnsupportedOperationException("Not implemented yet");
   }
@@ -100,10 +95,7 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
   public List<DataPoint> transform(List<FluxTable> loadedData, InfluxDbStorageConfiguration transformationConfiguration) {
     Conditions.checkNotNull(Condition.ARGUMENT, transformationConfiguration, "The transformation configuration must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, loadedData, "Data to transform must not be null.");
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        transformationConfiguration.isPropertySet(InfluxDbStorageProperty.TABLE_INDEX),
-        "'%s' property is required to transform data loaded by the InfluxDB storage service into data points.",
-        InfluxDbStorageProperty.TABLE_INDEX.name(), InfluxDbStorageProperty.TABLE_INDEX.identifier());
+    requireProperty(transformationConfiguration, InfluxDbStorageProperty.TABLE_INDEX, TRANSFORMATION_PROPERTY_REQUIRED);
 
     var tableIndex = transformationConfiguration.getProperty(InfluxDbStorageProperty.TABLE_INDEX, Integer.class);
     if (tableIndex == -1) {
@@ -146,5 +138,12 @@ public final class InfluxDbStorageService implements StorageService<FluxTable, I
                 Double.valueOf(Objects.requireNonNull(dataRecord.getValue()).toString())
             )
         );
+  }
+
+  private void requireProperty(InfluxDbStorageConfiguration config, InfluxDbStorageProperty property, String messageTemplate) {
+    Conditions.checkIsTrue(Condition.ARGUMENT,
+        config.isPropertySet(property),
+        messageTemplate,
+        property.name(), property.identifier());
   }
 }

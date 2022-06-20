@@ -7,12 +7,12 @@ import org.tsdl.infrastructure.api.StorageProperty;
  */
 public enum CsvStorageProperty implements StorageProperty {
   /**
-   * Used by load.
+   * Used by load, store.
    */
   FILE_PATH("filePath", String.class),
 
   /**
-   * Used by load.
+   * Used by load, store.
    */
   FIELD_SEPARATOR("fieldSeparator", Character.class),
 
@@ -22,7 +22,7 @@ public enum CsvStorageProperty implements StorageProperty {
   TIME_COLUMN("timeColumn", Integer.class),
 
   /**
-   * Used by transform.
+   * Used by transform, store.
    */
   TIME_FORMAT("timeFormat", String.class),
 
@@ -39,7 +39,27 @@ public enum CsvStorageProperty implements StorageProperty {
    * Specifies the number of rows to skip before the actual data starts.
    * </p>
    */
-  SKIP_HEADERS("skipHeaders", Integer.class);
+  SKIP_HEADERS("skipHeaders", Integer.class),
+
+  /*
+   * Used by store.
+   */
+  APPEND("append", Boolean.class),
+
+  /**
+   * Used by store.
+   */
+  TIME_COLUMN_LABEL("timeColumnLabel", String.class),
+
+  /*
+   * Used by store.
+   */
+  VALUE_COLUMN_LABEL("valueColumnLabel", String.class),
+
+  /**
+   * Used by store.
+   */
+  INCLUDE_HEADERS("timeColumnLabel", Boolean.class);
 
   private final String identifier;
 

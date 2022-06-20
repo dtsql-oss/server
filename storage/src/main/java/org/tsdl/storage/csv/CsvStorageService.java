@@ -2,8 +2,13 @@ package org.tsdl.storage.csv;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.LineDelimiter;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 import java.io.IOException;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +23,8 @@ import org.tsdl.infrastructure.model.DataPoint;
  * An implementation of {@link StorageService} for a storage mechanism targeting CSV files.
  */
 public final class CsvStorageService implements StorageService<CsvRow, CsvStorageConfiguration> {
+  public static final String STORE_PROPERTY_REQUIRED = "'%s' property ('%s') is required to store data with the CSV storage service.";
+  public static final String LOAD_PROPERTY_REQUIRED = "'%s' property ('%s') is required to load data with the CSV storage service.";
   public static final String TRANSFORMATION_PROPERTY_REQUIRED =
       "'%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.";
 
@@ -32,25 +39,52 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
   }
 
   @Override
-  public void store(CsvStorageConfiguration persistConfiguration) {
+  public void store(List<DataPoint> data, CsvStorageConfiguration persistConfiguration) throws IOException {
     Conditions.checkIsTrue(Condition.STATE, isInitialized(), "InfluxDB service has not been initialized yet. Call initialize() beforehand.");
     Conditions.checkNotNull(Condition.ARGUMENT, persistConfiguration, "The persist configuration must not be null.");
+    requireProperty(persistConfiguration, CsvStorageProperty.FILE_PATH, STORE_PROPERTY_REQUIRED);
+    requireProperty(persistConfiguration, CsvStorageProperty.FIELD_SEPARATOR, STORE_PROPERTY_REQUIRED);
+    requireProperty(persistConfiguration, CsvStorageProperty.TIME_FORMAT, STORE_PROPERTY_REQUIRED);
+    requireProperty(persistConfiguration, CsvStorageProperty.APPEND, STORE_PROPERTY_REQUIRED);
+    requireProperty(persistConfiguration, CsvStorageProperty.INCLUDE_HEADERS, STORE_PROPERTY_REQUIRED);
 
-    throw new UnsupportedOperationException("Not implemented yet");
+    var includeHeaders = persistConfiguration.getProperty(CsvStorageProperty.INCLUDE_HEADERS, Boolean.class);
+    if (includeHeaders) {
+      requireProperty(persistConfiguration, CsvStorageProperty.TIME_COLUMN_LABEL,
+          "Since headers are included, '%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.");
+      requireProperty(persistConfiguration, CsvStorageProperty.VALUE_COLUMN_LABEL,
+          "Since headers are included, '%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.");
+    }
+
+    var formatter = DateTimeFormatter
+        .ofPattern(persistConfiguration.getProperty(CsvStorageProperty.TIME_FORMAT, String.class))
+        .withZone(ZoneOffset.UTC);
+
+    var filePath = persistConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
+    var fieldSeparator = persistConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
+    var append = persistConfiguration.getProperty(CsvStorageProperty.APPEND, Boolean.class);
+
+    try (var csvWriter = createWriter(filePath, fieldSeparator, append)) {
+      if (includeHeaders) {
+        csvWriter.writeRow(
+            persistConfiguration.getProperty(CsvStorageProperty.TIME_COLUMN_LABEL, String.class),
+            persistConfiguration.getProperty(CsvStorageProperty.VALUE_COLUMN_LABEL, String.class)
+        );
+      }
+
+      for (DataPoint dp : data) {
+        var timeString = formatter.format(dp.getTimestamp());
+        csvWriter.writeRow(timeString, dp.asText());
+      }
+    }
   }
 
   @Override
   public List<CsvRow> load(CsvStorageConfiguration lookupConfiguration) throws IOException {
     Conditions.checkIsTrue(Condition.STATE, isInitialized(), "CSV service has not been initialized yet. Call initialize() beforehand.");
     Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        lookupConfiguration.isPropertySet(CsvStorageProperty.FILE_PATH),
-        "'%s' property ('%s') is required to load data with the CSV storage service.",
-        CsvStorageProperty.FILE_PATH.name(), CsvStorageProperty.FILE_PATH.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        lookupConfiguration.isPropertySet(CsvStorageProperty.FIELD_SEPARATOR),
-        "'%s' property ('%s') is required to load data with the CSV storage service.",
-        CsvStorageProperty.FIELD_SEPARATOR.name(), CsvStorageProperty.FIELD_SEPARATOR.identifier());
+    requireProperty(lookupConfiguration, CsvStorageProperty.FILE_PATH, LOAD_PROPERTY_REQUIRED);
+    requireProperty(lookupConfiguration, CsvStorageProperty.FIELD_SEPARATOR, LOAD_PROPERTY_REQUIRED);
 
     var filePath = lookupConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
     var fieldSeparator = lookupConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
@@ -63,22 +97,10 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
   public List<DataPoint> transform(List<CsvRow> loadedData, CsvStorageConfiguration transformationConfiguration) {
     Conditions.checkNotNull(Condition.ARGUMENT, transformationConfiguration, "The transformation configuration must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, loadedData, "Data to transform must not be null.");
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        transformationConfiguration.isPropertySet(CsvStorageProperty.VALUE_COLUMN),
-        TRANSFORMATION_PROPERTY_REQUIRED,
-        CsvStorageProperty.VALUE_COLUMN.name(), CsvStorageProperty.VALUE_COLUMN.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_COLUMN),
-        TRANSFORMATION_PROPERTY_REQUIRED,
-        CsvStorageProperty.TIME_COLUMN.name(), CsvStorageProperty.TIME_COLUMN.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        transformationConfiguration.isPropertySet(CsvStorageProperty.TIME_FORMAT),
-        TRANSFORMATION_PROPERTY_REQUIRED,
-        CsvStorageProperty.TIME_FORMAT.name(), CsvStorageProperty.TIME_FORMAT.identifier());
-    Conditions.checkIsTrue(Condition.ARGUMENT,
-        transformationConfiguration.isPropertySet(CsvStorageProperty.SKIP_HEADERS),
-        TRANSFORMATION_PROPERTY_REQUIRED,
-        CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
+    requireProperty(transformationConfiguration, CsvStorageProperty.VALUE_COLUMN, TRANSFORMATION_PROPERTY_REQUIRED);
+    requireProperty(transformationConfiguration, CsvStorageProperty.TIME_COLUMN, TRANSFORMATION_PROPERTY_REQUIRED);
+    requireProperty(transformationConfiguration, CsvStorageProperty.TIME_FORMAT, TRANSFORMATION_PROPERTY_REQUIRED);
+    requireProperty(transformationConfiguration, CsvStorageProperty.SKIP_HEADERS, TRANSFORMATION_PROPERTY_REQUIRED);
 
     var skipHeaders = transformationConfiguration.getProperty(CsvStorageProperty.SKIP_HEADERS, Integer.class);
     Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT,
@@ -118,5 +140,25 @@ public final class CsvStorageService implements StorageService<CsvRow, CsvStorag
     return CsvReader.builder()
         .fieldSeparator(fieldSeparator)
         .build(Path.of(filePath));
+  }
+
+  @NotNull
+  CsvWriter createWriter(String filePath, Character fieldSeparator, boolean append) throws IOException {
+    var options = append
+        ? new OpenOption[] {StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND}
+        : new OpenOption[] {StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
+    return CsvWriter.builder()
+        .fieldSeparator(fieldSeparator)
+        .quoteCharacter('"')
+        .quoteStrategy(QuoteStrategy.REQUIRED)
+        .lineDelimiter(LineDelimiter.PLATFORM)
+        .build(Path.of(filePath), options);
+  }
+
+  private void requireProperty(CsvStorageConfiguration config, CsvStorageProperty property, String messageTemplate) {
+    Conditions.checkIsTrue(Condition.ARGUMENT,
+        config.isPropertySet(property),
+        messageTemplate,
+        property.name(), property.identifier());
   }
 }

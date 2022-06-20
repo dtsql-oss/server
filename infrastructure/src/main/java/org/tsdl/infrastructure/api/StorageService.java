@@ -11,12 +11,12 @@ import org.tsdl.infrastructure.model.DataPoint;
  * @param <U> configuration compatible with this {@link StorageService} implementation
  */
 public interface StorageService<T, U extends StorageServiceConfiguration> extends AutoCloseable {
-  // can be  general setup specific to the storage (e.g. connect to database, check I/O availability, ...)
+  // can be general setup specific to the storage (e.g. connect to database, check I/O availability, ...)
   void initialize(U serviceConfiguration);
 
   boolean isInitialized();
 
-  void store(U persistConfiguration) throws IOException;
+  void store(List<DataPoint> data, U persistConfiguration) throws IOException;
 
   List<T> load(U lookupConfiguration) throws IOException;
 
