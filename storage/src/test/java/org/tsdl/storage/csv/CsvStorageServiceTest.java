@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.storage.TsdlStorageException;
 
 @Slf4j
 class CsvStorageServiceTest {
@@ -123,6 +124,39 @@ class CsvStorageServiceTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.storage.csv.stub.CsvStorageTestDataFactory#threeDataPoints")
+  void store_writeTwiceWithAppendSecondTime_fileContainsOnlySecondContent(List<DataPoint> data) throws IOException {
+    var file = testStoreSuccess(data, new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
+            CsvStorageProperty.FIELD_SEPARATOR, ';',
+            CsvStorageProperty.TIME_FORMAT, "yyyy-MM-dd HH:mm:ss",
+            CsvStorageProperty.APPEND, false,
+            CsvStorageProperty.INCLUDE_HEADERS, true,
+            CsvStorageProperty.TIME_COLUMN_LABEL, "time",
+            CsvStorageProperty.VALUE_COLUMN_LABEL, "value"
+        )),
+        false,
+        """
+            time;value
+            2018-02-20 09:25:04;8394.283846
+            2019-12-02 16:27:19;-98347383.0
+            2021-07-30 23:12:54;363.2
+            """);
+
+    testStoreSuccess(file, data, new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
+            CsvStorageProperty.FIELD_SEPARATOR, ';',
+            CsvStorageProperty.TIME_FORMAT, "yyyy-MM-dd HH:mm:ss",
+            CsvStorageProperty.APPEND, false,
+            CsvStorageProperty.INCLUDE_HEADERS, false
+        )),
+        true,
+        """
+            2018-02-20 09:25:04;8394.283846
+            2019-12-02 16:27:19;-98347383.0
+            2021-07-30 23:12:54;363.2
+            """);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.storage.csv.stub.CsvStorageTestDataFactory#threeDataPoints")
   void store_appendWithoutExistingFile_succeeds(List<DataPoint> data) throws IOException {
     testStoreSuccess(data, new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
             CsvStorageProperty.FIELD_SEPARATOR, ';',
@@ -149,18 +183,20 @@ class CsvStorageServiceTest {
             CsvStorageProperty.APPEND, true,
             CsvStorageProperty.INCLUDE_HEADERS, true
         )),
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
   @Test
   void store_invalidTimeFormat_throws() {
     testStoreFailure(List.of(), new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
-        CsvStorageProperty.FILE_PATH, "./some/path",
-        CsvStorageProperty.FIELD_SEPARATOR, ';',
+            CsvStorageProperty.FILE_PATH, "./some/path",
+            CsvStorageProperty.FIELD_SEPARATOR, ';',
             CsvStorageProperty.TIME_FORMAT, "invalid format",
             CsvStorageProperty.APPEND, true,
             CsvStorageProperty.INCLUDE_HEADERS, false
         )),
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
@@ -211,6 +247,7 @@ class CsvStorageServiceTest {
         serviceConfig,
         lookupConfig,
         transformationConfig,
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
@@ -234,16 +271,18 @@ class CsvStorageServiceTest {
         serviceConfig,
         lookupConfig,
         transformationConfig,
+        TsdlStorageException.class,
         DateTimeParseException.class);
   }
 
   private void testStoreFailure(List<DataPoint> data, CsvStorageConfiguration serviceConfig, CsvStorageConfiguration persistConfig,
-                                Class<? extends Throwable> expectedException) {
+                                Class<? extends Throwable> expectedException, Class<? extends Throwable> cause) {
     var service = new CsvStorageService();
     service.initialize(serviceConfig);
 
     assertThatThrownBy(() -> service.store(data, persistConfig))
-        .isInstanceOf(expectedException);
+        .isInstanceOf(expectedException)
+        .hasCauseInstanceOf(cause);
   }
 
   private Path testStoreSuccess(List<DataPoint> data, CsvStorageConfiguration serviceConfig, CsvStorageConfiguration persistConfig,
@@ -289,13 +328,14 @@ class CsvStorageServiceTest {
 
   private void testLoadAndTransformFailure(List<List<Object>> persistedData, CsvStorageConfiguration serviceConfig,
                                            CsvStorageConfiguration lookupConfig, CsvStorageConfiguration transformationConfig,
-                                           Class<? extends Throwable> expectedException) {
+                                           Class<? extends Throwable> expectedException, Class<? extends Throwable> cause) {
     assertThatThrownBy(() -> executeLoadTransformTest(persistedData,
         serviceConfig,
         lookupConfig,
         transformationConfig,
         false)
-    ).isInstanceOf(expectedException);
+    ).isInstanceOf(expectedException)
+        .hasCauseInstanceOf(cause);
   }
 
   private List<DataPoint> executeLoadTransformTest(List<List<Object>> persistedData, CsvStorageConfiguration serviceConfig,

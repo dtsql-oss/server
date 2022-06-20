@@ -46,8 +46,12 @@ public class ExtendedControllerErrorCollector extends DefaultErrorAttributes {
   @Override
   public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
     var errorAttributes = super.getErrorAttributes(webRequest, options);
-
     var errorCause = getError(webRequest);
+
+    if (errorCause == null) {
+      return errorAttributes;
+    }
+
     var errorIndex = 0;
     var errorTrace = new LinkedHashMap<Integer, String>();
     errorTrace.put(errorIndex++, errorCause.getMessage());

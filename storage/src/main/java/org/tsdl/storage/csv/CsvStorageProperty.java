@@ -59,7 +59,7 @@ public enum CsvStorageProperty implements StorageProperty {
   /**
    * Used by store.
    */
-  INCLUDE_HEADERS("timeColumnLabel", Boolean.class);
+  INCLUDE_HEADERS("includeHeaders", Boolean.class);
 
   private final String identifier;
 

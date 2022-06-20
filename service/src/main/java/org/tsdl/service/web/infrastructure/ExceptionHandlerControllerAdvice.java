@@ -36,6 +36,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.tsdl.implementation.evaluation.TsdlEvaluationException;
 import org.tsdl.service.web.infrastructure.ExceptionHandlerControllerAdvice.ValidationErrorsHolder.ValidationError;
+import org.tsdl.storage.TsdlStorageException;
 
 /**
  * Advice for REST controllers that registers exception handlers for when a validation performed by Spring or Hibernate fails or when query evaluation
@@ -114,7 +115,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
    */
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  @ExceptionHandler(TsdlEvaluationException.class)
+  @ExceptionHandler({TsdlEvaluationException.class, TsdlStorageException.class})
   public Map<String, Object> evaluationException(WebRequest request) {
     var errorResponse = errorCollector.getErrorAttributes(request, ErrorAttributeOptions.defaults());
     errorResponse.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());

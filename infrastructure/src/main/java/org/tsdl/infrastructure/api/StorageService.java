@@ -1,6 +1,5 @@
 package org.tsdl.infrastructure.api;
 
-import java.io.IOException;
 import java.util.List;
 import org.tsdl.infrastructure.model.DataPoint;
 
@@ -16,9 +15,9 @@ public interface StorageService<T, U extends StorageServiceConfiguration> extend
 
   boolean isInitialized();
 
-  void store(List<DataPoint> data, U persistConfiguration) throws IOException;
+  void store(List<DataPoint> data, U persistConfiguration);
 
-  List<T> load(U lookupConfiguration) throws IOException;
+  List<T> load(U lookupConfiguration);
 
   List<DataPoint> transform(List<T> loadedData, U transformationConfiguration);
 }
