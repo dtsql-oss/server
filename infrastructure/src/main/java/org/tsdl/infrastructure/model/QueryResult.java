@@ -1,6 +1,7 @@
 package org.tsdl.infrastructure.model;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import org.tsdl.infrastructure.model.impl.MultipleScalarResultImpl;
 import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
@@ -21,6 +22,13 @@ public interface QueryResult {
    * Postconditon: preserves {@link QueryResult#type()} and data, {@link QueryResult#logs()} is equal to {@code logs}.
    */
   QueryResult withLogs(List<TsdlLogEvent> logs);
+
+  /**
+   * Postconditon: preserves {@link QueryResult#type()} and data, {@link QueryResult#logs()} is equal to {@code logs}.
+   */
+  default QueryResult withLogs(TsdlLogEvent... logs) {
+    return withLogs(Arrays.stream(logs).toList());
+  }
 
   static TsdlDataPoints of(List<DataPoint> items, TsdlLogEvent... logs) {
     return new TsdlDataPointsImpl(items, List.of(logs));

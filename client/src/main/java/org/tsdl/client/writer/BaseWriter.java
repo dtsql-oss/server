@@ -4,6 +4,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
@@ -23,7 +24,7 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
 /**
  * Encapsulates common functionality for {@link QueryResultWriter} implementations.
  */
-public abstract class BaseWriter implements QueryResultWriter {
+public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpecification> implements QueryResultWriter {
   private static final DecimalFormat VALUE_FORMATTER;
 
   static {
@@ -36,6 +37,20 @@ public abstract class BaseWriter implements QueryResultWriter {
     VALUE_FORMATTER.setGroupingUsed(false);
   }
 
+  @SuppressWarnings("unchecked") // type erasure - type compatibility is ensured by verifyTypes()
+  @Override
+  public void write(QueryResult result, QueryClientSpecification specification) {
+    safeWriteOperation(() -> {
+      verifyTypes(result, specification);
+      Conditions.checkNotNull(Condition.ARGUMENT, result, "Result must not be null.");
+      Conditions.checkNotNull(Condition.ARGUMENT, specification, "Specification must not be null.");
+
+      writeInternal((T) result, (U) specification);
+    });
+  }
+
+  protected abstract void writeInternal(T result, U specification) throws IOException;
+
   protected String format(Double value) {
     return VALUE_FORMATTER.format(value);
   }
@@ -44,7 +59,7 @@ public abstract class BaseWriter implements QueryResultWriter {
 
   abstract Class<? extends QueryClientSpecification> specificationClass();
 
-  protected void verifyTypes(QueryResult result, QueryClientSpecification specification) {
+  private void verifyTypes(QueryResult result, QueryClientSpecification specification) {
     Conditions.checkIsTrue(Condition.ARGUMENT, resultClass().isAssignableFrom(result.getClass()),
         "Result type must be compatible with '%s', but is '%s'.", resultClass().getName(), result.getClass().getName());
     Conditions.checkIsTrue(Condition.ARGUMENT, specificationClass().isAssignableFrom(specification.getClass()),
@@ -59,7 +74,7 @@ public abstract class BaseWriter implements QueryResultWriter {
         .commentCharacter('#')
         .quoteStrategy(QuoteStrategy.REQUIRED)
         .lineDelimiter(LineDelimiter.PLATFORM)
-        .build(Path.of(filePath), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+        .build(Path.of(filePath), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
   }
 
   protected void writeDiscriminatorComment(CsvWriter writer, QueryResult result) {

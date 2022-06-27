@@ -1,8 +1,10 @@
 package org.tsdl.client;
 
+import org.tsdl.client.reader.BaseReader;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.dto.QueryResultDto;
+import org.tsdl.infrastructure.model.QueryResult;
 
 /**
  * A {@link TsdlClient} which serializes responses obtained from the TSDL service into CSV files, to be used later on again.
@@ -17,5 +19,13 @@ public class CsvSerializingTsdlClient extends BaseTsdlClient<CsvSerializingQuery
     writer.write(serverResponse.getResult(), querySpecification);
 
     return new CsvSerializingTsdlClientResult();
+  }
+
+  @Override
+  public QueryResult query(String filePath) {
+    var resultType = BaseReader.peekType(filePath);
+    var reader = QueryResultReaderFactory.getCsvWriter(resultType);
+
+    return reader.read(filePath);
   }
 }

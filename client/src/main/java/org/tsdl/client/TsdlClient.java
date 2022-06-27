@@ -1,5 +1,7 @@
 package org.tsdl.client;
 
+import org.tsdl.infrastructure.model.QueryResult;
+
 /**
  * Represents a client for the TSDL API.
  *
@@ -7,4 +9,6 @@ package org.tsdl.client;
  */
 public interface TsdlClient<T extends QueryClientSpecification> {
   QueryClientResult query(T querySpecification);
+
+  QueryResult query(String filePath);
 }

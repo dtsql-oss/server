@@ -6,6 +6,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -146,7 +147,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
   CsvReader createReader(String filePath, Character fieldSeparator) throws IOException {
     return CsvReader.builder()
         .fieldSeparator(fieldSeparator)
-        .build(Path.of(filePath));
+        .build(Path.of(filePath), StandardCharsets.UTF_8);
   }
 
   @NotNull
@@ -159,7 +160,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
         .quoteCharacter('"')
         .quoteStrategy(QuoteStrategy.REQUIRED)
         .lineDelimiter(LineDelimiter.PLATFORM)
-        .build(Path.of(filePath), options);
+        .build(Path.of(filePath), StandardCharsets.UTF_8, options);
   }
 
   private void requireProperty(CsvStorageConfiguration config, CsvStorageProperty property, String messageTemplate) {

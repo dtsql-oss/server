@@ -1,34 +1,26 @@
 package org.tsdl.client.writer;
 
+import java.io.IOException;
 import org.tsdl.client.CsvSerializingQueryClientSpecification;
 import org.tsdl.client.QueryClientSpecification;
 import org.tsdl.client.QueryResultWriter;
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.SingularScalarResult;
 
 /**
  * A CSV {@link QueryResultWriter} for {@link SingularScalarResult} results.
  */
-public class ScalarWriter extends BaseWriter {
+public class ScalarWriter extends BaseWriter<SingularScalarResult, CsvSerializingQueryClientSpecification> {
   @Override
-  public void write(QueryResult result, QueryClientSpecification specification) {
-    safeWriteOperation(() -> {
-      verifyTypes(result, specification);
+  protected void writeInternal(SingularScalarResult result, CsvSerializingQueryClientSpecification specification) throws IOException {
+    try (var csvWriter = createWriter(specification.targetFile())) {
+      writeDiscriminatorComment(csvWriter, result);
 
-      Conditions.checkNotNull(Condition.ARGUMENT, result, "Result must not be null.");
-      Conditions.checkNotNull(Condition.ARGUMENT, specification, "Specification must not be null.");
+      csvWriter.writeRow("value");
+      csvWriter.writeRow(format(result.value()));
 
-      try (var csvWriter = createWriter(((CsvSerializingQueryClientSpecification) specification).targetFile())) {
-        writeDiscriminatorComment(csvWriter, result);
-
-        csvWriter.writeRow("value");
-        csvWriter.writeRow(format(((SingularScalarResult) result).value()));
-
-        writeLogs(csvWriter, result.logs());
-      }
-    });
+      writeLogs(csvWriter, result.logs());
+    }
   }
 
   @Override
