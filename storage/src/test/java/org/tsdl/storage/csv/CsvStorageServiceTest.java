@@ -221,9 +221,9 @@ class CsvStorageServiceTest {
         lookupConfig,
         transformationConfig,
         List.of(
-            DataPoint.of(Instant.now(), "value1"),
-            DataPoint.of(Instant.now(), "value2"),
-            DataPoint.of(Instant.now(), "value3")
+            DataPoint.of(Instant.now(), 1.0),
+            DataPoint.of(Instant.now(), 2.0),
+            DataPoint.of(Instant.now(), 3.5)
         ),
         true);
   }

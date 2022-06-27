@@ -75,7 +75,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
         }
 
         for (DataPoint dp : data) {
-          var timeString = formatter.format(dp.getTimestamp());
+          var timeString = formatter.format(dp.timestamp());
           csvWriter.writeRow(timeString, dp.asText());
         }
       }
@@ -132,7 +132,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
             var dateTime = row.getField(timeIndex);
             var value = row.getField(valueIndex);
 
-            return DataPoint.of(Instant.from(formatter.parse(dateTime)), value);
+            return DataPoint.of(Instant.from(formatter.parse(dateTime)), Double.valueOf(value));
           }).toList();
     });
   }

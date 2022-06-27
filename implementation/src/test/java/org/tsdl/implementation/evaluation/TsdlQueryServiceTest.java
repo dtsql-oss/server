@@ -177,7 +177,7 @@ class TsdlQueryServiceTest {
           .isEqualTo(
               QueryResult.of(
                   dps.stream()
-                      .filter(dp -> dp.getTimestamp().isAfter(Instant.parse("2022-12-15T02:36:48.000Z")))
+                      .filter(dp -> dp.timestamp().isAfter(Instant.parse("2022-12-15T02:36:48.000Z")))
                       .toList()
               )
           );
@@ -776,9 +776,9 @@ class TsdlQueryServiceTest {
           """.formatted(yield);
 
       var input = List.of(
-          DataPoint.of(Instant.now(), 1),
-          DataPoint.of(Instant.now(), 2),
-          DataPoint.of(Instant.now(), 3)
+          DataPoint.of(Instant.now(), 1.),
+          DataPoint.of(Instant.now(), 2.),
+          DataPoint.of(Instant.now(), 3.)
       );
       var result = queryService.query(input, query);
 

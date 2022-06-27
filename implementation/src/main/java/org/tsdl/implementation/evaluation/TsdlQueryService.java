@@ -88,8 +88,8 @@ public class TsdlQueryService implements QueryService {
     }
 
     // since order preservation is part of the filter contract, we may assume the first element to be the start and the last element to be the end
-    var periodStart = dataPoints.get(0).getTimestamp();
-    var periodEnd = dataPoints.get(dataPoints.size() - 1).getTimestamp();
+    var periodStart = dataPoints.get(0).timestamp();
+    var periodEnd = dataPoints.get(dataPoints.size() - 1).timestamp();
     var period = QueryResult.of(0, periodStart, periodEnd);
 
     if (result.format() == YieldFormat.LONGEST_PERIOD || result.format() == YieldFormat.SHORTEST_PERIOD) {
@@ -116,7 +116,7 @@ public class TsdlQueryService implements QueryService {
 
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
-            .filter(dp -> containsDataPoint(periods.periods(), dp.getTimestamp()))
+            .filter(dp -> containsDataPoint(periods.periods(), dp.timestamp()))
             .toList();
         return QueryResult.of(pointsInPeriods);
 
@@ -191,11 +191,11 @@ public class TsdlQueryService implements QueryService {
 
         if (isLastDataPoint) {
           // if the end of the data is reached, the period must end, too
-          finalizePeriod(detectedPeriods, eventMarkers, eventId, currentDataPoint.getTimestamp());
+          finalizePeriod(detectedPeriods, eventMarkers, eventId, currentDataPoint.timestamp());
         }
       } else {
         // new period starts
-        eventMarkers.put(eventId, currentDataPoint.getTimestamp());
+        eventMarkers.put(eventId, currentDataPoint.timestamp());
       }
 
     } else {
@@ -205,7 +205,7 @@ public class TsdlQueryService implements QueryService {
       if (eventMarkers.containsKey(eventId)) {
         // period ended
         Conditions.checkNotNull(Condition.ARGUMENT, previousDataPoint, "When closing a period, there must be a previous data point.");
-        finalizePeriod(detectedPeriods, eventMarkers, eventId, previousDataPoint.getTimestamp());
+        finalizePeriod(detectedPeriods, eventMarkers, eventId, previousDataPoint.timestamp());
       } else {
         // nothing to do - still no open period
       }

@@ -20,7 +20,7 @@ public class AverageAggregatorImpl implements AverageAggregator {
     log.debug("Calculating sample (arithmetic mean) over {} data points.", dataPoints.size());
 
     avg = dataPoints.stream()
-        .mapToDouble(DataPoint::asDecimal)
+        .mapToDouble(DataPoint::value)
         .average()
         .orElse(0.0);
 

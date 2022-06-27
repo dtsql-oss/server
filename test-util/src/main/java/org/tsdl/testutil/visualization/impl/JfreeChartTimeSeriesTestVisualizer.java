@@ -87,7 +87,7 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
 
       var newSeries = new TimeSeries(String.format("Series%d", i));
       for (var dataPoint : series) {
-        newSeries.add(dataPointFromTimestamp(dataPoint.getTimestamp()), dataPoint.asDecimal());
+        newSeries.add(dataPointFromTimestamp(dataPoint.timestamp()), dataPoint.value());
       }
 
       dataset.addSeries(newSeries);

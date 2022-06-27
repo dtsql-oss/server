@@ -14,7 +14,7 @@ import org.tsdl.infrastructure.model.DataPoint;
  * @param timestamp date-time component of the instance
  * @param value value component of the instance
  */
-public record TsdlDataPoint(Instant timestamp, Object value) implements DataPoint {
+public record TsdlDataPoint(Instant timestamp, Double value) implements DataPoint {
   private static final DecimalFormat VALUE_FORMATTER;
 
   static {
@@ -30,16 +30,6 @@ public record TsdlDataPoint(Instant timestamp, Object value) implements DataPoin
   public TsdlDataPoint {
     Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Value must not be null.");
-  }
-
-  @Override
-  public Instant getTimestamp() {
-    return timestamp();
-  }
-
-  @Override
-  public Object getValue() {
-    return value();
   }
 
   public Long asInteger() {

@@ -21,9 +21,9 @@ public final class CsvStorageTestDataFactory {
   public static Stream<Arguments> threeCsvRows() {
     return Stream.of(
         Arguments.of(List.of(
-                List.of(23, "value1", formatInstant(Instant.now())),
-                List.of(24, "value2", formatInstant(Instant.now())),
-                List.of(25, "value3", formatInstant(Instant.now()))
+                List.of(23, 1.0, formatInstant(Instant.now())),
+                List.of(24, 2.0, formatInstant(Instant.now())),
+                List.of(25, 3.5, formatInstant(Instant.now()))
             )
         )
     );

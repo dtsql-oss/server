@@ -20,7 +20,7 @@ public class MinimumAggregatorImpl implements MinimumAggregator {
     log.debug("Calculating sample (minimum) over {} data points", dataPoints.size());
 
     min = dataPoints.stream()
-        .mapToDouble(DataPoint::asDecimal)
+        .mapToDouble(DataPoint::value)
         .min()
         .orElse(0.0);
 

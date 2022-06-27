@@ -1,4 +1,4 @@
-package org.tsdl.service.dto;
+package org.tsdl.infrastructure.dto;
 
 import java.util.Map;
 import lombok.Data;

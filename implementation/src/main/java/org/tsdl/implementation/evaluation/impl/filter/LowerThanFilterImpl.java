@@ -17,9 +17,9 @@ public record LowerThanFilterImpl(TsdlFilterArgument threshold) implements Lower
   @Override
   public boolean evaluate(DataPoint dataPoint) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, dataPoint.getValue(), "Data point value must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, dataPoint.value(), "Data point value must not be null.");
     Conditions.checkNotNull(Condition.STATE, threshold, "Threshold must not be null.");
 
-    return dataPoint.asDecimal() < threshold.value();
+    return dataPoint.value() < threshold.value();
   }
 }

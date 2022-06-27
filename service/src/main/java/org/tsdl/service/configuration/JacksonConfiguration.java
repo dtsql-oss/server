@@ -31,7 +31,7 @@ public class JacksonConfiguration {
             new SimpleModule("CUSTOM_DESERIALIZERS")
                 .addDeserializer(DataPoint.class, new DataPointDeserializer())
         )
-        .timeZone(TimeZone.getTimeZone(ZoneOffset.UTC)) // serialize ZonedDateTime in primaryTimeZone
+        .timeZone(TimeZone.getTimeZone(ZoneOffset.UTC))
         .build();
   }
 

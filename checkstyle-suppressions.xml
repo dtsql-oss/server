@@ -22,6 +22,8 @@
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]formatting[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]client[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]client[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
 
     <!-- exception classes tend to have some unused members, which is fine -->
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]exception" checks="MissingJavadocType|MissingJavadocMethod"/>
@@ -32,4 +34,5 @@
     <suppress files="org[\\/]tsdl[\\/]service[\\/]mapper" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]service[\\/]dto" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]service[\\/]configuration" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]infrastructure[\\/]dto" checks="MissingJavadocType|MissingJavadocMethod"/>
 </suppressions>
