@@ -98,6 +98,11 @@ class BaseTsdlClientTest {
     }
 
     @Override
+    Class<QueryClientSpecification> configClass() {
+      return QueryClientSpecification.class;
+    }
+
+    @Override
     public QueryResult query(String filePath) {
       throw new UnsupportedOperationException("This class subtype solely serves as means to instantiate the otherwise abstract BaseTsdlClient.");
     }

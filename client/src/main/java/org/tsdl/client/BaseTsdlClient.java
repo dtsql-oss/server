@@ -18,18 +18,24 @@ import org.tsdl.infrastructure.dto.QueryResultDto;
  * @param <T> type of {@link QueryClientSpecification} supported by the respective implementation
  */
 @Slf4j
-public abstract class BaseTsdlClient<T extends QueryClientSpecification> implements TsdlClient<T> {
+public abstract class BaseTsdlClient<T extends QueryClientSpecification> implements TsdlClient {
   private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
   private final OkHttpClient client = new OkHttpClient();
 
   abstract QueryClientResult query(T querySpecification, QueryResultDto serverResponse);
 
+  abstract Class<T> configClass();
+
+  @SuppressWarnings("unchecked") // type erasure - type compatibility ensured by 'checkIsTrue' call
   @Override
-  public QueryClientResult query(T querySpecification) {
+  public QueryClientResult query(QueryClientSpecification querySpecification) {
     try {
+      Conditions.checkIsTrue(Condition.ARGUMENT, configClass().isAssignableFrom(querySpecification.getClass()),
+          "Result type must be compatible with '%s', but is '%s'.", configClass().getName(), querySpecification.getClass().getName());
+
       var serviceResponse = query(querySpecification.serverUrl(), querySpecification.query());
-      return query(querySpecification, serviceResponse);
+      return query((T) querySpecification, serviceResponse);
     } catch (Exception e) {
       throw new TsdlClientException("An error occurred during consuming the TSDL Query API.");
     }

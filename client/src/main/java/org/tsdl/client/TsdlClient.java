@@ -7,8 +7,8 @@ import org.tsdl.infrastructure.model.QueryResult;
  *
  * @param <T> implementation-dependent configuration/specification to be used when performing TSDL requests and handling responses
  */
-public interface TsdlClient<T extends QueryClientSpecification> {
-  QueryClientResult query(T querySpecification);
+public interface TsdlClient {
+  QueryClientResult query(QueryClientSpecification querySpecification);
 
   QueryResult query(String filePath);
 }
