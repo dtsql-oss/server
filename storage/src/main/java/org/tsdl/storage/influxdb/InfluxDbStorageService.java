@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.tsdl.infrastructure.api.StorageService;
 import org.tsdl.infrastructure.common.Condition;
@@ -29,10 +30,8 @@ public final class InfluxDbStorageService extends BaseStorageService implements 
   public static final String TRANSFORMATION_PROPERTY_REQUIRED =
       "'%s' property ('%s') is required to transform data loaded by the InfluxDB storage service into data points.";
 
-  private static final String LOAD_RANGE_QUERY_TEMPLATE = """
-      from(bucket: "%s")
-        |> range(start: time(v: "%s"), stop: time(v: "%s"))
-      """;
+  private static final String LOAD_RANGE_QUERY_TEMPLATE = "from(bucket: \"%s\")\n"
+      + "        |> range(start: time(v: \"%s\"), stop: time(v: \"%s\"))";
 
   InfluxDBClient dbClient;
 
@@ -91,7 +90,7 @@ public final class InfluxDbStorageService extends BaseStorageService implements 
         var bucket = lookupConfiguration.getProperty(InfluxDbStorageProperty.BUCKET, String.class);
         var from = INFLUX_TIME_FORMATTER.format(lookupConfiguration.getProperty(InfluxDbStorageProperty.LOAD_FROM, Instant.class));
         var to = INFLUX_TIME_FORMATTER.format(lookupConfiguration.getProperty(InfluxDbStorageProperty.LOAD_UNTIL, Instant.class));
-        query = LOAD_RANGE_QUERY_TEMPLATE.formatted(bucket, from, to);
+        query = String.format(LOAD_RANGE_QUERY_TEMPLATE, bucket, from, to);
       }
 
       return queryApi.query(query);
@@ -109,7 +108,7 @@ public final class InfluxDbStorageService extends BaseStorageService implements 
       if (tableIndex == -1) {
         return loadedData.stream()
             .flatMap(this::transformInfluxDbRecords)
-            .toList();
+            .collect(Collectors.toList());
       } else {
         Conditions.checkValidIndex(Condition.ARGUMENT,
             loadedData,
@@ -117,7 +116,7 @@ public final class InfluxDbStorageService extends BaseStorageService implements 
             "Index of table to transform into data points must be within range (0..%s).",
             loadedData.size() - 1);
         return transformInfluxDbRecords(loadedData.get(tableIndex))
-            .toList();
+            .collect(Collectors.toList());
       }
     });
   }

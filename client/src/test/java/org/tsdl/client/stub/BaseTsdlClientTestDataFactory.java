@@ -17,30 +17,28 @@ public final class BaseTsdlClientTestDataFactory {
   public static Stream<Arguments> query_serviceReturnsDataPoints_deserializesCorrectly() {
     return Stream.of(
         Arguments.of(
-            """
-                {
-                  "result" : {
-                    "items" : [ {
-                      "timestamp" : "2022-12-15T01:21:48Z",
-                      "value" : "37.0"
-                    }, {
-                      "timestamp" : "2022-12-15T01:36:48Z",
-                      "value" : "41.0"
-                    }, {
-                      "timestamp" : "2022-12-15T01:51:48Z",
-                      "value" : "45.0"
-                    } ],
-                    "logs" : [ {
-                      "dateTime" : "2022-06-26T13:12:22.067587Z",
-                      "message" : "sample 'mean1' of 'avg' aggregator := 151.030"
-                    }, {
-                      "dateTime" : "2022-06-26T13:12:22.068586400Z",
-                      "message" : "sample 'max1' of 'max' aggregator := 335.0"
-                    } ]
-                  },
-                  "type" : "DATA_POINTS"
-                }
-                """,
+            "{\n"
+                + "\"result\" : {\n"
+                + "\"items\" : [ {\n"
+                + "\"timestamp\" : \"2022-12-15T01:21:48Z\",\n"
+                + "\"value\" : \"37.0\"\n"
+                + "}, {\n"
+                + "\"timestamp\" : \"2022-12-15T01:36:48Z\",\n"
+                + "\"value\" : \"41.0\"\n"
+                + "}, {\n"
+                + "\"timestamp\" : \"2022-12-15T01:51:48Z\",\n"
+                + "\"value\" : \"45.0\"\n"
+                + "} ],\n"
+                + "\"logs\" : [ {\n"
+                + "\"dateTime\" : \"2022-06-26T13:12:22.067587Z\",\n"
+                + "\"message\" : \"sample 'mean1' of 'avg' aggregator := 151.030\"\n"
+                + "}, {\n"
+                + "\"dateTime\" : \"2022-06-26T13:12:22.068586400Z\",\n"
+                + "\"message\" : \"sample 'max1' of 'max' aggregator := 335.0\"\n"
+                + "} ]\n"
+                + "},\n"
+                + "\"type\" : \"DATA_POINTS\"\n"
+                + "}",
             dto(QueryResult.of(
                 List.of(
                     dp("2022-12-15T01:21:48Z", 37.0),
@@ -51,24 +49,23 @@ public final class BaseTsdlClientTestDataFactory {
                 ev("2022-06-26T13:12:22.068586400Z", "sample 'max1' of 'max' aggregator := 335.0")
             ))
         ),
-        Arguments.of("""
-                {
-                  "result" : {
-                    "items" : [ {
-                      "timestamp" : "2022-12-15T01:21:48Z",
-                      "value" : "37.0"
-                    }, {
-                      "timestamp" : "2022-12-15T01:36:48Z",
-                      "value" : "41.0"
-                    }, {
-                      "timestamp" : "2022-12-15T01:51:48Z",
-                      "value" : "45.0"
-                    } ],
-                    "logs" : [ ]
-                  },
-                  "type" : "DATA_POINTS"
-                }
-                """,
+        Arguments.of(
+            "{\n"
+                + "\"result\" : {\n"
+                + "\"items\" : [ {\n"
+                + "\"timestamp\" : \"2022-12-15T01:21:48Z\",\n"
+                + "\"value\" : \"37.0\"\n"
+                + "}, {\n"
+                + "\"timestamp\" : \"2022-12-15T01:36:48Z\",\n"
+                + "\"value\" : \"41.0\"\n"
+                + "}, {\n"
+                + "\"timestamp\" : \"2022-12-15T01:51:48Z\",\n"
+                + "\"value\" : \"45.0\"\n"
+                + "} ],\n"
+                + "\"logs\" : [ ]\n"
+                + "},\n"
+                + "\"type\" : \"DATA_POINTS\"\n"
+                + "}",
             dto(QueryResult.of(
                 List.of(
                     dp("2022-12-15T01:21:48Z", 37.0),
@@ -83,38 +80,35 @@ public final class BaseTsdlClientTestDataFactory {
   public static Stream<Arguments> query_serviceReturnsPeriod_deserializesCorrectly() {
     return Stream.of(
         Arguments.of(
-            """
-                {
-                          "result" : {
-                               "empty" : false,
-                               "end" : "2022-12-15T09:21:48Z",
-                               "start": "2022-12-15T01:21:48Z",
-                               "index" : 0,
-                               "logs" : [ ]
-                               },
-                          "type" : "PERIOD"
-                        }
-                """,
+            "{\n"
+                + "\"result\" : {\n"
+                + " \"empty\" : false,\n"
+                + " \"end\" : \"2022-12-15T09:21:48Z\",\n"
+                + " \"start\": \"2022-12-15T01:21:48Z\",\n"
+                + " \"index\" : 0,\n"
+                + " \"logs\" : [ ]\n"
+                + " },\n"
+                + "\"type\" : \"PERIOD\"\n"
+                + "}",
             dto(
                 QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")
                 )
             )
         ),
-        Arguments.of("""
-                {
-                         "result" : {
-                              "empty" : false,
-                              "end" : "2022-12-15T09:21:48Z",
-                              "start": "2022-12-15T01:21:48Z",
-                              "index" : 0,
-                              "logs" : [ {
-                                "dateTime" : "2022-06-26T14:10:01.117410600Z",
-                                "message" : "sample 'mean1' of 'avg' aggregator := 151.0"
-                              } ]
-                              },
-                         "type" : "PERIOD"
-                       }
-                """,
+        Arguments.of(
+            "{\n"
+                + " \"result\" : {\n"
+                + "\"empty\" : false,\n"
+                + "\"end\" : \"2022-12-15T09:21:48Z\",\n"
+                + "\"start\": \"2022-12-15T01:21:48Z\",\n"
+                + "\"index\" : 0,\n"
+                + "\"logs\" : [ {\n"
+                + "\"dateTime\" : \"2022-06-26T14:10:01.117410600Z\",\n"
+                + "\"message\" : \"sample 'mean1' of 'avg' aggregator := 151.0\"\n"
+                + "} ]\n"
+                + "},\n"
+                + " \"type\" : \"PERIOD\"\n"
+                + " }",
             dto(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z"),
                 ev("2022-06-26T14:10:01.117410600Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             ))
@@ -125,23 +119,21 @@ public final class BaseTsdlClientTestDataFactory {
   public static Stream<Arguments> query_serviceReturnsPeriodSet_deserializesCorrectly() {
     return Stream.of(
         Arguments.of(
-            """
-                {
-                          "result" : {
-                            "empty" : false,
-                            "logs" : [ ],
-                            "periods" : [ {
-                              "empty" : false,
-                              "end" : "2022-12-15T09:21:48Z",
-                              "logs": [],
-                              "index" : 0,
-                              "start" : "2022-12-15T01:21:48Z"
-                            } ],
-                            "totalPeriods" : 1
-                          },
-                          "type" : "PERIOD_SET"
-                        }
-                """,
+            "{\n"
+                + "\"result\" : {\n"
+                + "\"empty\" : false,\n"
+                + "\"logs\" : [ ],\n"
+                + "\"periods\" : [ {\n"
+                + "\"empty\" : false,\n"
+                + "\"end\" : \"2022-12-15T09:21:48Z\",\n"
+                + "\"logs\": [],\n"
+                + "\"index\" : 0,\n"
+                + "\"start\" : \"2022-12-15T01:21:48Z\"\n"
+                + "} ],\n"
+                + "\"totalPeriods\" : 1\n"
+                + "},\n"
+                + "\"type\" : \"PERIOD_SET\"\n"
+                + "}",
             dto(QueryResult.of(
                 1,
                 List.of(
@@ -149,26 +141,25 @@ public final class BaseTsdlClientTestDataFactory {
                     ))
             ))
         ),
-        Arguments.of("""
-                {
-                         "result" : {
-                           "empty" : false,
-                           "logs" : [ {
-                             "dateTime" : "2022-06-26T14:01:55.525990200Z",
-                             "message" : "sample 'mean1' of 'avg' aggregator := 151.0"
-                           } ],
-                           "periods" : [ {
-                             "empty" : false,
-                             "end" : "2022-12-15T09:21:48Z",
-                             "index" : 0,
-                             "logs" : [ ],
-                             "start" : "2022-12-15T01:21:48Z"
-                           } ],
-                           "totalPeriods" : 1
-                         },
-                         "type" : "PERIOD_SET"
-                       }
-                """,
+        Arguments.of(
+            "{\n"
+                + " \"result\" : {\n"
+                + " \"empty\" : false,\n"
+                + " \"logs\" : [ {\n"
+                + " \"dateTime\" : \"2022-06-26T14:01:55.525990200Z\",\n"
+                + " \"message\" : \"sample 'mean1' of 'avg' aggregator := 151.0\"\n"
+                + " } ],\n"
+                + " \"periods\" : [ {\n"
+                + " \"empty\" : false,\n"
+                + " \"end\" : \"2022-12-15T09:21:48Z\",\n"
+                + " \"index\" : 0,\n"
+                + " \"logs\" : [ ],\n"
+                + " \"start\" : \"2022-12-15T01:21:48Z\"\n"
+                + " } ],\n"
+                + " \"totalPeriods\" : 1\n"
+                + " },\n"
+                + " \"type\" : \"PERIOD_SET\"\n"
+                + " }",
             dto(QueryResult.of(
                 1,
                 List.of(
@@ -183,29 +174,26 @@ public final class BaseTsdlClientTestDataFactory {
   public static Stream<Arguments> query_serviceReturnsScalar_deserializesCorrectly() {
     return Stream.of(
         Arguments.of(
-            """
-                {
-                          "result" : {
-                                "logs" : [ ],
-                                "value" : 151.03030303030303
-                              },
-                          "type" : "SCALAR"
-                        }
-                """,
+            "{\n"
+                + "\"result\" : {\n"
+                + "\"logs\" : [ ],\n"
+                + "\"value\" : 151.03030303030303\n"
+                + "},\n"
+                + "\"type\" : \"SCALAR\"\n"
+                + "}",
             dto(QueryResult.of(151.03030303030303))
         ),
-        Arguments.of("""
-                {
-                         "result" : {
-                              "logs" : [ {
-                                "dateTime" : "2022-06-26T14:14:11.548995900Z",
-                                "message" : "sample 'mean1' of 'avg' aggregator := 151.0"
-                              } ],
-                              "value" : 151.03030303030303
-                            },
-                         "type" : "SCALAR"
-                       }
-                """,
+        Arguments.of(
+            "{\n"
+                + " \"result\" : {\n"
+                + "\"logs\" : [ {\n"
+                + "\"dateTime\" : \"2022-06-26T14:14:11.548995900Z\",\n"
+                + "\"message\" : \"sample 'mean1' of 'avg' aggregator := 151.0\"\n"
+                + "} ],\n"
+                + "\"value\" : 151.03030303030303\n"
+                + "},\n"
+                + " \"type\" : \"SCALAR\"\n"
+                + " }",
             dto(QueryResult.of(151.03030303030303,
                 ev("2022-06-26T14:14:11.548995900Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             ))
@@ -216,29 +204,26 @@ public final class BaseTsdlClientTestDataFactory {
   public static Stream<Arguments> query_serviceReturnsScalarList_deserializesCorrectly() {
     return Stream.of(
         Arguments.of(
-            """
-                {
-                          "result" : {
-                                         "logs" : [ ],
-                                         "values" : [ 151.03030303030303, -77.0 ]
-                                       },
-                          "type": "SCALAR_LIST"
-                }
-                """,
+            "{\n"
+                + "\"result\" : {\n"
+                + " \"logs\" : [ ],\n"
+                + " \"values\" : [ 151.03030303030303, -77.0 ]\n"
+                + " },\n"
+                + "\"type\": \"SCALAR_LIST\"\n"
+                + "}",
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.0}))
         ),
-        Arguments.of("""
-                {
-                         "result" : {
-                                 "logs" : [ {
-                                   "dateTime" : "2022-06-26T14:19:25.731197800Z",
-                                   "message" : "sample 'mean1' of 'avg' aggregator := 151.0"
-                                 } ],
-                                 "values" : [ 151.03030303030303, -77.0 ]
-                               },
-                         "type" : "SCALAR_LIST"
-                       }
-                """,
+        Arguments.of(
+            "{\n"
+                + " \"result\" : {\n"
+                + " \"logs\" : [ {\n"
+                + " \"dateTime\" : \"2022-06-26T14:19:25.731197800Z\",\n"
+                + " \"message\" : \"sample 'mean1' of 'avg' aggregator := 151.0\"\n"
+                + " } ],\n"
+                + " \"values\" : [ 151.03030303030303, -77.0 ]\n"
+                + " },\n"
+                + " \"type\" : \"SCALAR_LIST\"\n"
+                + " }",
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.},
                 ev("2022-06-26T14:19:25.731197800Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             ))

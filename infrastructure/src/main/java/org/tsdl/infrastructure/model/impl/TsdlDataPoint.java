@@ -4,17 +4,26 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.util.Locale;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
  * Default implementation of {@link DataPoint}.
- *
- * @param timestamp date-time component of the instance
- * @param value value component of the instance
  */
-public record TsdlDataPoint(Instant timestamp, Double value) implements DataPoint {
+@Jacksonized
+@Builder
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+public final class TsdlDataPoint implements DataPoint {
   private static final DecimalFormat VALUE_FORMATTER;
 
   static {
@@ -27,9 +36,14 @@ public record TsdlDataPoint(Instant timestamp, Double value) implements DataPoin
     VALUE_FORMATTER.setGroupingUsed(false);
   }
 
-  public TsdlDataPoint {
+  private final Instant timestamp;
+  private final Double value;
+
+  public TsdlDataPoint(Instant timestamp, Double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Value must not be null.");
+    this.timestamp = timestamp;
+    this.value = value;
   }
 
   public Long asInteger() {

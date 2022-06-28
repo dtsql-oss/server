@@ -59,12 +59,10 @@ class TsdlQueryParserTest {
   class SampleDeclaration {
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
     @ParameterizedTest
-    @ArgumentsSource(SamplesArgumentsProvider.class)
+    @ArgumentsSource(SampleDeclarationSamplesArgumentsProvider.class)
     void sampleDeclaration_knownAggregatorFunctionsWithoutEcho(String aggregator, Class<? extends TsdlSample> clazz) {
-      var queryString = """
-          WITH SAMPLES: %s(_input) AS s1
-          YIELD: all periods
-          """.formatted(aggregator);
+      var queryString = String.format("WITH SAMPLES: %s(_input) AS s1\n"
+          + "          YIELD: all periods", aggregator);
 
       var query = PARSER.parseQuery(queryString);
 
@@ -80,12 +78,10 @@ class TsdlQueryParserTest {
 
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
     @ParameterizedTest
-    @ArgumentsSource(SamplesArgumentsProvider.class)
+    @ArgumentsSource(SampleDeclarationSamplesArgumentsProvider.class)
     void sampleDeclaration_knownAggregatorFunctionsWithEcho(String aggregator, Class<? extends TsdlSample> clazz) {
-      var queryString = """
-          WITH SAMPLES: %s(_input) AS s1->echo(9)
-          YIELD: all periods
-          """.formatted(aggregator);
+      var queryString = String.format("WITH SAMPLES: %s(_input) AS s1->echo(9)\n"
+          + "          YIELD: all periods", aggregator);
 
       var query = PARSER.parseQuery(queryString);
 
@@ -104,12 +100,10 @@ class TsdlQueryParserTest {
 
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
     @ParameterizedTest
-    @ArgumentsSource(SamplesArgumentsProvider.class)
+    @ArgumentsSource(SampleDeclarationSamplesArgumentsProvider.class)
     void sampleDeclaration_knownAggregatorFunctionsWithInvalidEchoArgument_throws(String aggregator) {
-      var queryString = """
-          WITH SAMPLES: %s(_input) AS s1 -> echo(NaN)
-          YIELD: all periods
-          """.formatted(aggregator);
+      var queryString = String.format("WITH SAMPLES: %s(_input) AS s1 -> echo(NaN)\n"
+          + "          YIELD: all periods", aggregator);
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
@@ -117,25 +111,10 @@ class TsdlQueryParserTest {
     @ParameterizedTest
     @ValueSource(strings = {"_", "_s1", "sö", "", "123", "1s"})
     void sampleDeclaration_invalidIdentifier_throws(String identifier) {
-      var queryString = """
-          WITH SAMPLES: avg(_input) AS %s
-          YIELD: all periods
-          """.formatted(identifier);
+      var queryString = String.format("WITH SAMPLES: avg(_input) AS %s\n"
+          + "          YIELD: all periods", identifier);
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
-    }
-
-    static class SamplesArgumentsProvider implements ArgumentsProvider {
-      @Override
-      public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-        return Stream.of(
-            Arguments.of("avg", AverageAggregator.class),
-            Arguments.of("max", MaximumAggregator.class),
-            Arguments.of("min", MinimumAggregator.class),
-            Arguments.of("sum", SumAggregator.class),
-            Arguments.of("count", CountAggregator.class)
-        );
-      }
     }
   }
 
@@ -145,11 +124,9 @@ class TsdlQueryParserTest {
 
     @Test
     void filterDeclaration_conjunctiveFilterWithOneArgument() {
-      var queryString = """
-          FILTER:
-            AND(gt(23.4))
-          YIELD: data points
-          """;
+      var queryString = "FILTER:\n"
+          + "            AND(gt(23.4))\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -168,11 +145,9 @@ class TsdlQueryParserTest {
 
     @Test
     void filterDeclaration_disjunctiveFilterWithOneArgument() {
-      var queryString = """
-          FILTER:
-            OR(lt(-2.3))
-          YIELD: data points
-          """;
+      var queryString = "FILTER:\n"
+          + "            OR(lt(-2.3))\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -188,11 +163,9 @@ class TsdlQueryParserTest {
 
     @Test
     void filterDeclaration_negatedFilter() {
-      var queryString = """
-          FILTER:
-            OR(NOT(lt(25)))
-          YIELD: data points
-          """;
+      var queryString = "FILTER:\n"
+          + "            OR(NOT(lt(25)))\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -209,15 +182,13 @@ class TsdlQueryParserTest {
 
     @Test
     void filterDeclaration_multipleArguments() {
-      var queryString = """
-          FILTER:
-            OR(
-                NOT(lt(25.1)),       gt(3.4),
-                NOT(gt(1000)),
-                lt(-3.4447)
-              )
-          YIELD: data points
-          """;
+      var queryString = "FILTER:\n"
+          + "            OR(\n"
+          + "                NOT(lt(25.1)),       gt(3.4),\n"
+          + "                NOT(gt(1000)),\n"
+          + "                lt(-3.4447)\n"
+          + "              )\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -256,13 +227,11 @@ class TsdlQueryParserTest {
 
     @Test
     void filterDeclaration_sampleAsArgument() {
-      var queryString = """
-          WITH SAMPLES:
-            avg(_input) AS average
-          FILTER:
-            AND(gt(average))
-          YIELD: data points
-          """;
+      var queryString = "WITH SAMPLES:\n"
+          + "            avg(_input) AS average\n"
+          + "          FILTER:\n"
+          + "            AND(gt(average))\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -283,10 +252,8 @@ class TsdlQueryParserTest {
   class EventDeclaration {
     @Test
     void eventDeclaration_valid() {
-      var queryString = """
-          USING EVENTS: AND(lt(2)) AS high, OR(gt(-3.2)) AS low
-          YIELD: all periods
-          """;
+      var queryString = "USING EVENTS: AND(lt(2)) AS high, OR(gt(-3.2)) AS low\n"
+          + "          YIELD: all periods";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -302,11 +269,9 @@ class TsdlQueryParserTest {
 
     @Test
     void eventDeclaration_validWithSample() {
-      var queryString = """
-          WITH SAMPLES: avg(_input) AS s3
-          USING EVENTS: OR(gt(-3.2)) AS low, AND(lt(s3)) AS sampledHigh
-          YIELD: all periods
-          """;
+      var queryString = "WITH SAMPLES: avg(_input) AS s3\n"
+          + "          USING EVENTS: OR(gt(-3.2)) AS low, AND(lt(s3)) AS sampledHigh\n"
+          + "          YIELD: all periods";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -326,20 +291,16 @@ class TsdlQueryParserTest {
 
     @Test
     void eventDeclaration_invalidIdentifier_throws() {
-      var queryString = """
-          USING EVENTS: AND(lt(2)) AS 1high,
-          YIELD: all periods
-          """;
+      var queryString = "USING EVENTS: AND(lt(2)) AS 1high,\n"
+          + "          YIELD: all periods";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
     @Test
     void eventDeclaration_unknownSample_throws() {
-      var queryString = """
-          USING EVENTS: AND(lt(s3)) AS high
-          YIELD: all periods
-          """;
+      var queryString = "USING EVENTS: AND(lt(s3)) AS high\n"
+          + "          YIELD: all periods";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParserException.class)
@@ -351,11 +312,9 @@ class TsdlQueryParserTest {
     @Test
     void eventDeclaration_invalidSampleReference_throws() {
       Assertions.setMaxStackTraceElementsDisplayed(10);
-      var queryString = """
-          USING EVENTS: AND(lt(3.5)) AS low, OR(gt(low)) AS high
-          CHOOSE: low precedes high
-          YIELD: all periods
-          """;
+      var queryString = "USING EVENTS: AND(lt(3.5)) AS low, OR(gt(low)) AS high\n"
+          + "          CHOOSE: low precedes high\n"
+          + "          YIELD: all periods";
 
       // depending on whether identifier 'low' is parsed before filter argument 'lt(3.5)' or after,
       // an InvalidReferenceException or UnknownIdentifierException is thrown
@@ -372,12 +331,10 @@ class TsdlQueryParserTest {
   class ChooseDeclaration {
     @Test
     void chooseDeclaration_precedes() {
-      var queryString = """
-          USING EVENTS: AND(lt(3)) AS e1,
-                        OR(gt(5)) AS e2
-          CHOOSE: e1 precedes e2
-          YIELD: data points
-          """;
+      var queryString = "USING EVENTS: AND(lt(3)) AS e1,\n"
+          + "                        OR(gt(5)) AS e2\n"
+          + "          CHOOSE: e1 precedes e2\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -393,12 +350,10 @@ class TsdlQueryParserTest {
 
     @Test
     void chooseDeclaration_follows() {
-      var queryString = """
-          USING EVENTS: AND(lt(3)) AS e1,
-                        OR(gt(5)) AS e2
-          CHOOSE: e2 follows e1
-          YIELD: data points
-          """;
+      var queryString = "USING EVENTS: AND(lt(3)) AS e1,\n"
+          + "                        OR(gt(5)) AS e2\n"
+          + "          CHOOSE: e2 follows e1\n"
+          + "          YIELD: data points";
 
       var query = PARSER.parseQuery(queryString);
 
@@ -414,11 +369,9 @@ class TsdlQueryParserTest {
 
     @Test
     void chooseDeclaration_unknownEvent_throws() {
-      var queryString = """
-          USING EVENTS: AND(lt(3)) AS e1
-          CHOOSE: e1 follows e2
-          YIELD: data points
-          """;
+      var queryString = "USING EVENTS: AND(lt(3)) AS e1\n"
+          + "          CHOOSE: e1 follows e2\n"
+          + "          YIELD: data points";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParserException.class)
@@ -429,11 +382,9 @@ class TsdlQueryParserTest {
 
     @Test
     void chooseDeclaration_invalidEventReference_throws() {
-      var queryString = """
-          WITH SAMPLES: min(_input) AS low, max(_input) AS high
-          CHOOSE: low precedes high
-          YIELD: all periods
-          """;
+      var queryString = "WITH SAMPLES: min(_input) AS low, max(_input) AS high\n"
+          + "          CHOOSE: low precedes high\n"
+          + "          YIELD: all periods";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParserException.class)
@@ -444,12 +395,10 @@ class TsdlQueryParserTest {
 
     @Test
     void chooseDeclaration_multipleStatements_throws() {
-      var queryString = """
-          USING EVENTS: AND(lt(3)) AS e1,
-                        OR(gt(5)) AS e2
-          CHOOSE: e1 precedes e2, e2 follows e1
-          YIELD: data points
-          """;
+      var queryString = "USING EVENTS: AND(lt(3)) AS e1,\n"
+          + "                        OR(gt(5)) AS e2\n"
+          + "          CHOOSE: e1 precedes e2, e2 follows e1\n"
+          + "          YIELD: data points";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
@@ -459,7 +408,7 @@ class TsdlQueryParserTest {
   @DisplayName("yield declaration tests")
   class YieldDeclaration {
     // @MethodSource does not work very well in @Nested class => @ArgumentsSource wih ArgumentsProvider as alternative
-    @ArgumentsSource(ValidInputProvider.class)
+    @ArgumentsSource(YieldDeclarationValidInputProvider.class)
     @ParameterizedTest
     void yieldDeclaration_validRepresentations_parsed(String queryString, YieldStatement result) {
       var query = PARSER.parseQuery(queryString);
@@ -473,7 +422,7 @@ class TsdlQueryParserTest {
         "sample ", "sample", "sample   ", "sample 123", "sample 1up"
     })
     void yieldDeclaration_invalidRepresentations_throws(String representation) {
-      var queryString = "YIELD: %s".formatted(representation);
+      var queryString = String.format("YIELD: %s", representation);
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParserException.class);
     }
 
@@ -499,55 +448,30 @@ class TsdlQueryParserTest {
           .isInstanceOf(TsdlParserException.class)
           .hasCauseInstanceOf(InvalidReferenceException.class);
     }
-
-    static class ValidInputProvider implements ArgumentsProvider {
-      @Override
-      public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-        return Stream.of(
-            Arguments.of("YIELD: all periods", ELEMENTS.getResult(YieldFormat.ALL_PERIODS, null)),
-            Arguments.of("YIELD: longest period", ELEMENTS.getResult(YieldFormat.LONGEST_PERIOD, null)),
-            Arguments.of("YIELD: shortest period", ELEMENTS.getResult(YieldFormat.SHORTEST_PERIOD, null)),
-            Arguments.of("YIELD: data points", ELEMENTS.getResult(YieldFormat.DATA_POINTS, null)),
-            Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: sample identifier1",
-                ELEMENTS.getResult(YieldFormat.SAMPLE, List.of(ELEMENTS.getIdentifier("identifier1")))),
-            Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: samples identifier1",
-                ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1")))),
-            Arguments.of("WITH SAMPLES: min(_input) AS identifier1, max(_input) AS identifier2 YIELD: samples identifier1, identifier2",
-                ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1"), ELEMENTS.getIdentifier("identifier2")))),
-            Arguments.of("WITH SAMPLES: min(_input) AS i1, max(_input) AS i2, count(_input) AS i3 YIELD: samples i1, i2, i3",
-                ELEMENTS.getResult(YieldFormat.SAMPLE_SET,
-                    List.of(ELEMENTS.getIdentifier("i1"), ELEMENTS.getIdentifier("i2"), ELEMENTS.getIdentifier("i3"))))
-
-        );
-
-      }
-    }
   }
 
   @Nested
   @DisplayName("integration tests")
   class Integration {
-    private static final String FULL_FEATURE_QUERY = """
-        WITH SAMPLES:
-          avg(_input) AS s1,
-          max(_input) AS s2,
-          min(_input) AS s3,
-          sum(_input) AS s4
-
-        FILTER:
-          AND(gt(s2), NOT(lt(3.5)))
-
-        USING EVENTS:
-          AND(lt(3.5)) AS low,
-          OR(NOT(gt(7))) AS high,
-          AND(gt(s2)) AS mid
-
-        CHOOSE:
-          low precedes high
-
-        YIELD:
-          all periods
-        """;
+    private static final String FULL_FEATURE_QUERY = "WITH SAMPLES:\n"
+        + "          avg(_input) AS s1,\n"
+        + "          max(_input) AS s2,\n"
+        + "          min(_input) AS s3,\n"
+        + "          sum(_input) AS s4\n"
+        + "\n"
+        + "        FILTER:\n"
+        + "          AND(gt(s2), NOT(lt(3.5)))\n"
+        + "\n"
+        + "        USING EVENTS:\n"
+        + "          AND(lt(3.5)) AS low,\n"
+        + "          OR(NOT(gt(7))) AS high,\n"
+        + "          AND(gt(s2)) AS mid\n"
+        + "\n"
+        + "        CHOOSE:\n"
+        + "          low precedes high\n"
+        + "\n"
+        + "        YIELD:\n"
+        + "          all periods";
 
     @ValueSource(strings = FULL_FEATURE_QUERY)
     @ParameterizedTest
@@ -681,10 +605,8 @@ class TsdlQueryParserTest {
 
     @Test
     void integration_duplicateIdentifierDeclarationInSameGroup_throws() {
-      var queryString = """
-          WITH SAMPLES: avg(_input) AS s1, max(_input) AS s1
-          YIELD: all periods
-          """;
+      var queryString = "WITH SAMPLES: avg(_input) AS s1, max(_input) AS s1\n"
+          + "          YIELD: all periods";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParserException.class)
@@ -693,11 +615,9 @@ class TsdlQueryParserTest {
 
     @Test
     void integration_duplicateIdentifierDeclarationInSeparateGroup_throws() {
-      var queryString = """
-          WITH SAMPLES: avg(_input) AS s1
-          USING EVENTS: AND(lt(3.5)) AS s1
-          YIELD: all periods
-          """;
+      var queryString = "WITH SAMPLES: avg(_input) AS s1\n"
+          + "          USING EVENTS: AND(lt(3.5)) AS s1\n"
+          + "          YIELD: all periods";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParserException.class)
@@ -717,4 +637,42 @@ class TsdlQueryParserTest {
       assertThat(query.result()).isNotNull();
     }
   }
+
+
+  static class YieldDeclarationValidInputProvider implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+      return Stream.of(
+          Arguments.of("YIELD: all periods", ELEMENTS.getResult(YieldFormat.ALL_PERIODS, null)),
+          Arguments.of("YIELD: longest period", ELEMENTS.getResult(YieldFormat.LONGEST_PERIOD, null)),
+          Arguments.of("YIELD: shortest period", ELEMENTS.getResult(YieldFormat.SHORTEST_PERIOD, null)),
+          Arguments.of("YIELD: data points", ELEMENTS.getResult(YieldFormat.DATA_POINTS, null)),
+          Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: sample identifier1",
+              ELEMENTS.getResult(YieldFormat.SAMPLE, List.of(ELEMENTS.getIdentifier("identifier1")))),
+          Arguments.of("WITH SAMPLES: min(_input) AS identifier1 YIELD: samples identifier1",
+              ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1")))),
+          Arguments.of("WITH SAMPLES: min(_input) AS identifier1, max(_input) AS identifier2 YIELD: samples identifier1, identifier2",
+              ELEMENTS.getResult(YieldFormat.SAMPLE_SET, List.of(ELEMENTS.getIdentifier("identifier1"), ELEMENTS.getIdentifier("identifier2")))),
+          Arguments.of("WITH SAMPLES: min(_input) AS i1, max(_input) AS i2, count(_input) AS i3 YIELD: samples i1, i2, i3",
+              ELEMENTS.getResult(YieldFormat.SAMPLE_SET,
+                  List.of(ELEMENTS.getIdentifier("i1"), ELEMENTS.getIdentifier("i2"), ELEMENTS.getIdentifier("i3"))))
+
+      );
+
+    }
+  }
+
+  static class SampleDeclarationSamplesArgumentsProvider implements ArgumentsProvider {
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+      return Stream.of(
+          Arguments.of("avg", AverageAggregator.class),
+          Arguments.of("max", MaximumAggregator.class),
+          Arguments.of("min", MinimumAggregator.class),
+          Arguments.of("sum", SumAggregator.class),
+          Arguments.of("count", CountAggregator.class)
+      );
+    }
+  }
+
 }

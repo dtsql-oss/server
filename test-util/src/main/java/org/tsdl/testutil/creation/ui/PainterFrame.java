@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -121,7 +122,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
         .mapToObj(points::get)
         .sorted(Comparator.comparingDouble(Point::getX))
         .filter(distinctByKey(Point::getX))
-        .toList();
+        .collect(Collectors.toList());
 
     var lowestDate = referenceDate != null ? referenceDate : randomInstantBetween(
         Instant.now().minus(5L * 12 * 30, ChronoUnit.DAYS), // 5 years
@@ -131,11 +132,14 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     Conditions.checkContains(Condition.ARGUMENT, List.of("Java", "CSV"), type, "Unknown output type '%s'", type);
 
     var summaryStatistics = lst.stream().mapToDouble(Point::getY).summaryStatistics();
-    return switch (type) {
-      case "CSV" -> serializeCsv(lst, lowestDate, summaryStatistics);
-      case "Java" -> serializeJava(lst, lowestDate, summaryStatistics);
-      default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
-    };
+    switch (type) {
+      case "CSV":
+        return serializeCsv(lst, lowestDate, summaryStatistics);
+      case "Java":
+        return serializeJava(lst, lowestDate, summaryStatistics);
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
+    }
   }
 
   //CHECKSTYLE.OFF: MissingJavadocMethod - No documentation for external interface method needed.
@@ -194,7 +198,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
           .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
           .append(", ")
           .append(point.getY())
-          .append(")%s%n".formatted(trailingComma));
+          .append(String.format(")%s%n", trailingComma));
     }
     output.append(")");
     return output.toString();

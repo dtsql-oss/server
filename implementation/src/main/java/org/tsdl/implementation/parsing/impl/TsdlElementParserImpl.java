@@ -77,7 +77,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     var parsedNumber = decimalFormat.parse(str, parsePosition);
     if (parsePosition.getIndex() != str.length()) {
       throw new TsdlParserException("Parsing number failed.",
-          new ParseException("Failed to parse entire string: '%s' at index %d.".formatted(str, parsePosition.getIndex()),
+          new ParseException(String.format("Failed to parse entire string: '%s' at index %d.", str, parsePosition.getIndex()),
               parsePosition.getIndex()));
     }
 
@@ -99,7 +99,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
       return dbl.intValue();
     }
 
-    throw new TsdlParserException("Expected double '%s' to be an integer.".formatted(dbl));
+    throw new TsdlParserException(String.format("Expected double '%s' to be an integer.", dbl));
   }
 
   private <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
@@ -114,6 +114,6 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   private NoSuchElementException noSuchElementException(String type, String str) {
-    return new NoSuchElementException("There is no '%s' member with representation '%s'.".formatted(type, str));
+    return new NoSuchElementException(String.format("There is no '%s' member with representation '%s'.", type, str));
   }
 }

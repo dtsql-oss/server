@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,12 +44,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.VALUE_COLUMN_LABEL, "value"
         )),
         true,
-        """
-            time;value
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "time;value\n2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
   }
 
   @ParameterizedTest
@@ -61,11 +57,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.INCLUDE_HEADERS, false
         )),
         true,
-        """
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
   }
 
   @ParameterizedTest
@@ -78,11 +70,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.INCLUDE_HEADERS, false
         )),
         true,
-        """
-            "2018-02-20 09:25:04" 8394.283846
-            "2019-12-02 16:27:19" -98347383.0
-            "2021-07-30 23:12:54" 363.2
-            """);
+        "\"2018-02-20 09:25:04\" 8394.283846\n\"2019-12-02 16:27:19\" -98347383.0\n\"2021-07-30 23:12:54\" 363.2\n");
   }
 
   @ParameterizedTest
@@ -97,12 +85,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.VALUE_COLUMN_LABEL, "value"
         )),
         false,
-        """
-            time;value
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "time;value\n2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
 
     testStoreSuccess(file, data, new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
             CsvStorageProperty.FIELD_SEPARATOR, ';',
@@ -111,15 +94,13 @@ class CsvStorageServiceTest {
             CsvStorageProperty.INCLUDE_HEADERS, false
         )),
         true,
-        """
-            time;value
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "time;value\n"
+            + "2018-02-20 09:25:04;8394.283846\n"
+            + "2019-12-02 16:27:19;-98347383.0\n"
+            + "2021-07-30 23:12:54;363.2\n"
+            + "2018-02-20 09:25:04;8394.283846\n"
+            + "2019-12-02 16:27:19;-98347383.0\n"
+            + "2021-07-30 23:12:54;363.2\n");
   }
 
   @ParameterizedTest
@@ -134,12 +115,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.VALUE_COLUMN_LABEL, "value"
         )),
         false,
-        """
-            time;value
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "time;value\n2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
 
     testStoreSuccess(file, data, new CsvStorageConfiguration(), new CsvStorageConfiguration(Map.of(
             CsvStorageProperty.FIELD_SEPARATOR, ';',
@@ -148,11 +124,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.INCLUDE_HEADERS, false
         )),
         true,
-        """
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
   }
 
   @ParameterizedTest
@@ -167,12 +139,7 @@ class CsvStorageServiceTest {
             CsvStorageProperty.VALUE_COLUMN_LABEL, "value"
         )),
         true,
-        """
-            time;value
-            2018-02-20 09:25:04;8394.283846
-            2019-12-02 16:27:19;-98347383.0
-            2021-07-30 23:12:54;363.2
-            """);
+        "time;value\n2018-02-20 09:25:04;8394.283846\n2019-12-02 16:27:19;-98347383.0\n2021-07-30 23:12:54;363.2\n");
   }
 
   @Test
@@ -379,7 +346,7 @@ class CsvStorageServiceTest {
       var newRow = mock(CsvRow.class);
 
       when(newRow.getFields())
-          .thenAnswer(i -> persistedData.stream().map(Object::toString).toList());
+          .thenAnswer(i -> persistedData.stream().map(Object::toString).collect(Collectors.toList()));
 
       when(newRow.getField(anyInt()))
           .thenAnswer(i -> {

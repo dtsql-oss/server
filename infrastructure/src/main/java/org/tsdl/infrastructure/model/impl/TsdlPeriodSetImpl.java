@@ -1,6 +1,12 @@
 package org.tsdl.infrastructure.model.impl;
 
 import java.util.List;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.QueryResult;
@@ -11,11 +17,27 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
 /**
  * Default implementation of the {@link TsdlPeriodSet} interface.
  */
-public record TsdlPeriodSetImpl(int totalPeriods, List<TsdlPeriod> periods, List<TsdlLogEvent> logs) implements TsdlPeriodSet {
-  public TsdlPeriodSetImpl {
+@Jacksonized
+@Builder
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+public final class TsdlPeriodSetImpl implements TsdlPeriodSet {
+  private final int totalPeriods;
+  private final List<TsdlPeriod> periods;
+  private final List<TsdlLogEvent> logs;
+
+  /**
+   * Initializes a {@link TsdlPeriodSetImpl} instance.
+   */
+  public TsdlPeriodSetImpl(int totalPeriods, List<TsdlPeriod> periods, List<TsdlLogEvent> logs) {
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Period list must not be null.");
     Conditions.checkEquals(Condition.ARGUMENT, totalPeriods, periods.size(), "Argument 'totalPeriods' must be equal to the size of 'periods'.");
     Conditions.checkNotNull(Condition.ARGUMENT, logs, "Logs must not be null.");
+    this.totalPeriods = totalPeriods;
+    this.periods = periods;
+    this.logs = logs;
   }
 
   @Override

@@ -22,15 +22,15 @@ public class CsvSerializingTsdlClient extends BaseTsdlClient<CsvSerializingQuery
   }
 
   @Override
-  Class<CsvSerializingQueryClientSpecification> configClass() {
-    return CsvSerializingQueryClientSpecification.class;
-  }
-
-  @Override
   public QueryResult query(String filePath) {
     var resultType = BaseReader.peekType(filePath);
     var reader = QueryResultReaderFactory.getCsvWriter(resultType);
 
     return reader.read(filePath);
+  }
+
+  @Override
+  Class<CsvSerializingQueryClientSpecification> configClass() {
+    return CsvSerializingQueryClientSpecification.class;
   }
 }
