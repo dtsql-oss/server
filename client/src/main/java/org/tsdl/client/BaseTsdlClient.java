@@ -23,9 +23,9 @@ public abstract class BaseTsdlClient<T extends QueryClientSpecification> impleme
 
   private final OkHttpClient client = new OkHttpClient();
 
-  abstract QueryClientResult query(T querySpecification, QueryResultDto serverResponse);
-
   abstract Class<T> configClass();
+
+  abstract QueryClientResult query(T querySpecification, QueryResultDto serverResponse);
 
   @SuppressWarnings("unchecked") // type erasure - type compatibility ensured by 'checkIsTrue' call
   @Override
@@ -53,7 +53,7 @@ public abstract class BaseTsdlClient<T extends QueryClientSpecification> impleme
       if (!response.isSuccessful()) {
         log.error("TSDL Query failed: {}", response.body() != null ? Objects.requireNonNull(response.body()).string() : "unknown reason");
         throw new IOException(
-            "Unexpected HTTP Status Code at '%s': %s".formatted(response.request().url(), response.code())
+            String.format("Unexpected HTTP Status Code at '%s': %s", response.request().url(), response.code())
         );
       }
 

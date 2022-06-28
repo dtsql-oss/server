@@ -120,10 +120,14 @@ public final class Conditions {
     return exception(condition, String.format(messageTemplate, messageArguments));
   }
 
-  public static RuntimeException exception(Condition condition, String message) {
-    return switch (condition) {
-      case STATE -> new IllegalStateException(message);
-      case ARGUMENT -> new IllegalArgumentException(message);
-    };
+  private static RuntimeException exception(Condition condition, String message) {
+    switch (condition) {
+      case STATE:
+        return new IllegalStateException(message);
+      case ARGUMENT:
+        return new IllegalArgumentException(message);
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown condition '%s'", condition);
+    }
   }
 }

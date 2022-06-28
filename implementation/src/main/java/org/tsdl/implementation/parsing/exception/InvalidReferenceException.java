@@ -17,6 +17,6 @@ public class InvalidReferenceException extends TsdlParserException {
   }
 
   private static String formatMessage(String identifierName, String requiredPurpose) {
-    return MESSAGE_TEMPLATE.formatted(identifierName, requiredPurpose);
+    return String.format(MESSAGE_TEMPLATE, identifierName, requiredPurpose);
   }
 }

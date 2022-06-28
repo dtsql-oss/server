@@ -21,7 +21,7 @@ class BaseTsdlClientTest {
   static void setUp() throws IOException {
     mockWebServer = new MockWebServer();
     mockWebServer.start();
-    baseUrl = "http://localhost:%s".formatted(mockWebServer.getPort());
+    baseUrl = String.format("http://localhost:%s", mockWebServer.getPort());
   }
 
   @AfterAll
@@ -98,13 +98,13 @@ class BaseTsdlClientTest {
     }
 
     @Override
-    Class<QueryClientSpecification> configClass() {
-      return QueryClientSpecification.class;
+    public QueryResult query(String filePath) {
+      throw new UnsupportedOperationException("This class subtype solely serves as means to instantiate the otherwise abstract BaseTsdlClient.");
     }
 
     @Override
-    public QueryResult query(String filePath) {
-      throw new UnsupportedOperationException("This class subtype solely serves as means to instantiate the otherwise abstract BaseTsdlClient.");
+    Class<QueryClientSpecification> configClass() {
+      return QueryClientSpecification.class;
     }
   }
 }

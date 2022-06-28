@@ -39,7 +39,7 @@ public class ExtendedControllerErrorCollector extends DefaultErrorAttributes {
 
   @Override
   public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-    log.error("Resolving exception at %s %s".formatted(request.getMethod(), request.getRequestURI()), ex);
+    log.error(String.format("Resolving exception at %s %s", request.getMethod(), request.getRequestURI()), ex);
     return super.resolveException(request, response, handler, ex);
   }
 

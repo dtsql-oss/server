@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.within;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,15 +41,7 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinition(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(80)) AS low,
-            OR(gt(80.0)) AS high
-          CHOOSE:
-            low precedes high
-          YIELD:
-            all periods
-          """;
+      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nCHOOSE:\nlow precedes high\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -70,17 +63,15 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_lowFollowsHighSampleEventDefinition(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-            avg(_input) AS myAvg
-          USING EVENTS:
-            AND(lt(myAvg)) AS low,
-            AND(gt(myAvg)) AS high
-          CHOOSE:
-            low follows high
-          YIELD:
-            all periods
-          """;
+      var query = "WITH SAMPLES:\n"
+          + "            avg(_input) AS myAvg\n"
+          + "          USING EVENTS:\n"
+          + "            AND(lt(myAvg)) AS low,\n"
+          + "            AND(gt(myAvg)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            low follows high\n"
+          + "          YIELD:\n"
+          + "            all periods";
 
       var result = queryService.query(dps, query);
 
@@ -106,15 +97,13 @@ class TsdlQueryServiceTest {
     })
     @TsdlTestVisualization(renderPointShape = false)
     void queryChooseEvents_lowPrecedesHigh_returnsShortestPeriod(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(60)) AS low,
-            OR(gt(60)) AS high
-          CHOOSE:
-            low precedes high
-          YIELD:
-            shortest period
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(60)) AS low,\n"
+          + "            OR(gt(60)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            low precedes high\n"
+          + "          YIELD:\n"
+          + "            shortest period";
 
       var result = queryService.query(dps, query);
 
@@ -132,17 +121,15 @@ class TsdlQueryServiceTest {
     })
     @TsdlTestVisualization(renderPointShape = false)
     void queryChooseEvents_lowFollowsHigh_returnsLongestPeriod(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-            avg(_input) AS myAvg
-          USING EVENTS:
-            AND(lt(myAvg)) AS low,
-            OR(gt(myAvg)) AS high
-          CHOOSE:
-            low follows high
-          YIELD:
-            longest period
-          """;
+      var query = "WITH SAMPLES:\n"
+          + "            avg(_input) AS myAvg\n"
+          + "          USING EVENTS:\n"
+          + "            AND(lt(myAvg)) AS low,\n"
+          + "            OR(gt(myAvg)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            low follows high\n"
+          + "          YIELD:\n"
+          + "            longest period";
 
       var result = queryService.query(dps, query);
 
@@ -159,15 +146,13 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_highPrecedesLow_returnsAllMatchingDataPoints(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(80)) AS low,
-            OR(gt(80)) AS high
-          CHOOSE:
-            high precedes low
-          YIELD:
-            data points
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(80)) AS low,\n"
+          + "            OR(gt(80)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            data points";
 
       var result = queryService.query(dps, query);
 
@@ -178,7 +163,7 @@ class TsdlQueryServiceTest {
               QueryResult.of(
                   dps.stream()
                       .filter(dp -> dp.timestamp().isAfter(Instant.parse("2022-12-15T02:36:48.000Z")))
-                      .toList()
+                      .collect(Collectors.toList())
               )
           );
     }
@@ -188,15 +173,13 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_impossibleAllPeriodsChoice_emptyPeriodSet(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(-1000)) AS low,
-            OR(gt(2000)) AS high
-          CHOOSE:
-            high precedes low
-          YIELD:
-            all periods
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(-1000)) AS low,\n"
+          + "            OR(gt(2000)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            all periods";
 
       var result = queryService.query(dps, query);
 
@@ -212,15 +195,13 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_impossibleLongestPeriodChoice_returnsEmptyPeriod(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(-1000)) AS low,
-            OR(gt(2000)) AS high
-          CHOOSE:
-            high precedes low
-          YIELD:
-            longest period
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(-1000)) AS low,\n"
+          + "            OR(gt(2000)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            longest period";
 
       var result = queryService.query(dps, query);
 
@@ -237,15 +218,13 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_impossibleShortestPeriodChoice_returnsEmptyPeriod(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(-1000)) AS low,
-            OR(gt(2000)) AS high
-          CHOOSE:
-            high precedes low
-          YIELD:
-            shortest period
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(-1000)) AS low,\n"
+          + "            OR(gt(2000)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            shortest period";
 
       var result = queryService.query(dps, query);
 
@@ -261,15 +240,13 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_impossibleDataPointsChoice_returnsEmptyList(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(lt(-1000)) AS low,
-            OR(gt(2000)) AS high
-          CHOOSE:
-            high precedes low
-          YIELD:
-            data points
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(lt(-1000)) AS low,\n"
+          + "            OR(gt(2000)) AS high\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            data points";
 
       var result = queryService.query(dps, query);
 
@@ -286,15 +263,13 @@ class TsdlQueryServiceTest {
     })
     @TsdlTestVisualization(renderPointShape = false)
     void queryChooseEvents_choiceBetweenFiltersWithDifferentThresholds(List<DataPoint> dps) {
-      var query = """
-          USING EVENTS:
-            AND(gt(220)) AS high,
-            AND(lt(-20)) AS low
-          CHOOSE:
-            high precedes low
-          YIELD:
-            all periods
-          """;
+      var query = "USING EVENTS:\n"
+          + "            AND(gt(220)) AS high,\n"
+          + "            AND(lt(-20)) AS low\n"
+          + "          CHOOSE:\n"
+          + "            high precedes low\n"
+          + "          YIELD:\n"
+          + "            all periods";
 
       var result = queryService.query(dps, query);
 
@@ -323,11 +298,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_lt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            AND(lt(27.25))
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            AND(lt(27.25))\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0));
 
@@ -343,11 +316,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_ltSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER: AND(lt(myAvg))
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER: AND(lt(myAvg))\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
 
@@ -364,11 +335,9 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            AND(gt(27.24))
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            AND(gt(27.24))\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(1), dataPoints.get(2));
 
@@ -385,11 +354,9 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gtSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER: AND(gt(myAvg))
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER: AND(gt(myAvg))\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(2));
 
@@ -405,11 +372,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtAndLt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            AND( gt(25.75), lt(75) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            AND( gt(25.75), lt(75) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(1));
 
@@ -425,12 +390,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtAndLtSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            AND( gt(myAvg), lt(76) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            AND( gt(myAvg), lt(76) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(2));
 
@@ -446,11 +409,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtOrLt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            OR( gt(75), lt(26) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            OR( gt(75), lt(26) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(2));
 
@@ -466,12 +427,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtOrLtSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            OR( gt(myAvg), lt(21) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            OR( gt(myAvg), lt(21) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(2));
 
@@ -487,11 +446,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            AND( gt(25.75), NOT(lt(28)) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            AND( gt(25.75), NOT(lt(28)) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(2));
 
@@ -507,12 +464,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLtSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            AND( gt(25), NOT(lt(myAvg)) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            AND( gt(25), NOT(lt(myAvg)) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(2));
 
@@ -528,11 +483,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_notGtOrLt(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            OR( NOT(gt(27.25)), lt(26) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            OR( NOT(gt(27.25)), lt(26) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
 
@@ -548,12 +501,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_notGtOrLtSample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            OR( NOT(gt(myAvg)), lt(27) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            OR( NOT(gt(myAvg)), lt(27) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
 
@@ -569,11 +520,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_impossibleQuery(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            AND( gt(100), lt(100) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            AND( gt(100), lt(100) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of();
 
@@ -589,12 +538,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_impossibleQuerySample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            AND( gt(myAvg), lt(myAvg) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            AND( gt(myAvg), lt(myAvg) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of();
 
@@ -610,11 +557,9 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_trivialQuery(List<DataPoint> dataPoints) {
-      var query = """
-          FILTER:
-            OR( gt(100), lt(100) )
-          YIELD: data points
-          """;
+      var query = "FILTER:\n"
+          + "            OR( gt(100), lt(100) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
 
@@ -630,12 +575,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryFilter_trivialQuerySample(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS myAvg
-          FILTER:
-            OR( gt(myAvg), lt(myAvg) )
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS myAvg\n"
+          + "          FILTER:\n"
+          + "            OR( gt(myAvg), lt(myAvg) )\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
 
@@ -655,10 +598,8 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryIntegration_queryWithOnlySampleDeclarations_returnsAllDataPoints(List<DataPoint> dataPoints) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS s1, min(_input) AS s2, max(_input) AS s3, sum(_input) AS s4
-          YIELD: data points
-          """;
+      var query = "WITH SAMPLES: avg(_input) AS s1, min(_input) AS s2, max(_input) AS s3, sum(_input) AS s4\n"
+          + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
 
@@ -693,11 +634,9 @@ class TsdlQueryServiceTest {
     })
     @TsdlTestVisualization(renderPointShape = false)
     void queryIntegration_filterBeforeEventChoiceCutsOffPeriodCorrectly(List<DataPoint> dps) {
-      var queryWithoutFilter = """
-          USING EVENTS: AND(lt(170)) AS low, AND(gt(170)) AS high
-          CHOOSE: low follows high
-          YIELD: all periods
-          """;
+      var queryWithoutFilter = "USING EVENTS: AND(lt(170)) AS low, AND(gt(170)) AS high\n"
+          + "          CHOOSE: low follows high\n"
+          + "          YIELD: all periods";
       var queryWithFilter = "FILTER: AND(NOT(lt(130)))\n" + queryWithoutFilter;
 
       var resultWithoutFilter = queryService.query(dps, queryWithoutFilter);
@@ -730,12 +669,10 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryIntegration_yieldSample(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-            avg(_input) AS myAvg
-          YIELD:
-            sample myAvg
-          """;
+      var query = "WITH SAMPLES:\n"
+          + "            avg(_input) AS myAvg\n"
+          + "          YIELD:\n"
+          + "            sample myAvg";
 
       var result = queryService.query(dps, query);
 
@@ -748,13 +685,11 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
     void queryIntegration_yieldSampleSet(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-            min(_input) AS min1,
-            max(_input) AS max2
-          YIELD:
-            samples min1, max2
-          """;
+      var query = "WITH SAMPLES:\n"
+          + "            min(_input) AS min1,\n"
+          + "            max(_input) AS max2\n"
+          + "          YIELD:\n"
+          + "            samples min1, max2";
 
       var result = queryService.query(dps, query);
 
@@ -768,12 +703,10 @@ class TsdlQueryServiceTest {
     @ValueSource(strings = {"data points", "all periods", "shortest period", "longest period", "sample m1", "sample m2", "samples m1", "samples m2",
         "samples m1, m2", "samples m2,m1"})
     void queryIntegration_queryWithEchos_collectsLogMessages(String yield) {
-      var query = """
-          WITH SAMPLES: avg(_input) AS m1 -> echo(3), max(_input) AS m2 -> echo(0)
-          USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
-          CHOOSE: low precedes high
-          YIELD: %s
-          """.formatted(yield);
+      var query = String.format("WITH SAMPLES: avg(_input) AS m1 -> echo(3), max(_input) AS m2 -> echo(0)\n"
+          + "          USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high\n"
+          + "          CHOOSE: low precedes high\n"
+          + "          YIELD: %s", yield);
 
       var input = List.of(
           DataPoint.of(Instant.now(), 1.),

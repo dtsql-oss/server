@@ -1,6 +1,11 @@
 package org.tsdl.implementation.evaluation.impl.connective;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.connective.AndConnective;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
@@ -12,9 +17,16 @@ import org.tsdl.infrastructure.model.DataPoint;
  * Default implementation of {@link AndConnective}.
  */
 @Slf4j
-public record AndConnectiveImpl(List<SinglePointFilter> filters) implements AndConnective {
-  public AndConnectiveImpl {
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+public final class AndConnectiveImpl implements AndConnective {
+  private final List<SinglePointFilter> filters;
+
+  public AndConnectiveImpl(List<SinglePointFilter> filters) {
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters of 'and' connective must not be null.");
+    this.filters = filters;
   }
 
   @Override
@@ -30,7 +42,7 @@ public record AndConnectiveImpl(List<SinglePointFilter> filters) implements AndC
 
     var filteredList = data.stream()
         .filter(this::isSatisfied)
-        .toList();
+        .collect(Collectors.toList());
 
     log.debug("After evaluating 'and' connective, {} data points are remaining.", filteredList.size());
     return filteredList;

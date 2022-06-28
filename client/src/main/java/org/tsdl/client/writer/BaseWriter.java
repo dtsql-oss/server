@@ -79,7 +79,7 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
 
   protected void writeDiscriminatorComment(CsvWriter writer, QueryResult result) {
     writer.writeComment("TSDL Query Result");
-    writer.writeComment("TYPE=%s".formatted(result.type().name()));
+    writer.writeComment(String.format("TYPE=%s", result.type().name()));
   }
 
   protected void writeLogs(CsvWriter writer, List<TsdlLogEvent> events) {

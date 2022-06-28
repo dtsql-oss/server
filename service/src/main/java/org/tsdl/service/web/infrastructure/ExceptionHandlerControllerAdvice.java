@@ -10,10 +10,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +83,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
                   fieldError.getRejectedValue(),
                   !StringUtils.hasText(errorMessage) ? fieldError.getDefaultMessage() : errorMessage);
             })
-            .toList(),
+            .collect(Collectors.toList()),
         getPath(request));
 
     return handleExceptionInternal(ex, errorHolder, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -103,7 +107,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
                 violation.getPropertyPath().toString(),
                 violation.getInvalidValue(),
                 violation.getMessage()))
-            .toList(),
+            .collect(Collectors.toList()),
         request.getRequestURI());
   }
 
@@ -138,13 +142,13 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
     var errors = new ValidationErrorsHolder(Instant.now().atZone(ZoneOffset.UTC), path);
     errors.setErrors(errorCollector.get());
 
-    log.error("Input validation failed with %d errors: %s".formatted(errors.getValidationErrors().size(), errors));
+    log.error(String.format("Input validation failed with %d errors: %s", errors.getValidationErrors().size(), errors));
     return errors;
   }
 
   private String getPath(WebRequest webRequest) {
-    return webRequest instanceof ServletWebRequest servletWebRequest
-        ? servletWebRequest.getRequest().getRequestURI()
+    return webRequest instanceof ServletWebRequest
+        ? ((ServletWebRequest) webRequest).getRequest().getRequestURI()
         : "<unknown>";
   }
 
@@ -188,7 +192,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
 
     @Override
     public String toString() {
-      return "{%s}".formatted(getValidationErrorsRepresentation());
+      return String.format("{%s}", getValidationErrorsRepresentation());
     }
 
     private String getValidationErrorsRepresentation() {
@@ -204,15 +208,21 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
     }
 
     @Schema(description = "Encapsulates information about a validation error.")
-    record ValidationError(
-        @Schema(description = "Representation of the object causing the validation error.", example = "storageDto")
-        String rootBean,
-        @Schema(description = "Location of the violating property in the member hierarchy of rootBean.", example = "name")
-        String propertyPath,
-        @Schema(description = "Property value that caused the validation error.", example = "0")
-        Object invalidValue,
-        @Schema(description = "Description of the validation error.", example = "must be greater than 0")
-        String message) {
+    @Getter
+    @Accessors(fluent = true)
+    @AllArgsConstructor
+    static class ValidationError {
+      @Schema(description = "Representation of the object causing the validation error.", example = "storageDto")
+      private String rootBean;
+
+      @Schema(description = "Location of the violating property in the member hierarchy of rootBean.", example = "name")
+      private String propertyPath;
+
+      @Schema(description = "Property value that caused the validation error.", example = "0")
+      private Object invalidValue;
+
+      @Schema(description = "Description of the validation error.", example = "must be greater than 0")
+      private String message;
     }
   }
 }

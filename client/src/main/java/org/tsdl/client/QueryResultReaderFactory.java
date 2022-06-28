@@ -5,6 +5,8 @@ import org.tsdl.client.reader.PeriodReader;
 import org.tsdl.client.reader.PeriodSetReader;
 import org.tsdl.client.reader.ScalarListReader;
 import org.tsdl.client.reader.ScalarReader;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
 
@@ -21,12 +23,19 @@ public final class QueryResultReaderFactory {
    * @param type the {@link QueryResultType} determining the concrete {@link QueryResultReader} implementation to be constructed
    */
   public static QueryResultReader getCsvWriter(QueryResultType type) {
-    return switch (type) {
-      case DATA_POINTS -> new DataPointsReader();
-      case PERIOD_SET -> new PeriodSetReader();
-      case PERIOD -> new PeriodReader();
-      case SCALAR -> new ScalarReader();
-      case SCALAR_LIST -> new ScalarListReader();
-    };
+    switch (type) {
+      case DATA_POINTS:
+        return new DataPointsReader();
+      case PERIOD_SET:
+        return new PeriodSetReader();
+      case PERIOD:
+        return new PeriodReader();
+      case SCALAR:
+        return new ScalarReader();
+      case SCALAR_LIST:
+        return new ScalarListReader();
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown query result type '%s'", type);
+    }
   }
 }

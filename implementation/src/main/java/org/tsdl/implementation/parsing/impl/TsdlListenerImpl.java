@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.tsdl.grammar.TsdlParser;
 import org.tsdl.grammar.TsdlParserBaseListener;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
@@ -25,6 +26,8 @@ import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 
 // TODO: use visitor instead of listener?
 
@@ -62,7 +65,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var parsedSamples = new ArrayList<TsdlSample>(); // not reusing declaredSamples.values() because that does not preserve insertion order
 
     if (aggregatorList.aggregators() != null) {
-      var samples = aggregatorList.aggregators().aggregatorDeclaration().stream().map(this::parseSample).toList();
+      var samples = aggregatorList.aggregators().aggregatorDeclaration().stream().map(this::parseSample).collect(Collectors.toList());
       samples.forEach(sample -> {
         declaredSamples.put(sample.identifier(), sample);
         parsedSamples.add(sample);
@@ -84,7 +87,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var parsedEvents = new ArrayList<TsdlEvent>(); // not reusing declaredEvents.values() because that does not preserve insertion order
 
     if (eventList.events() != null) {
-      var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).toList();
+      var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).collect(Collectors.toList());
       events.forEach(event -> {
         declaredEvents.put(event.identifier(), event);
         parsedEvents.add(event);
@@ -136,7 +139,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       var identifiers = new ArrayList<TsdlIdentifier>();
       if (identifierList.identifiers() != null) {
         var identifiersContext = identifierList.identifiers();
-        var parsedIdentifiers = identifiersContext.identifier().stream().map(i -> requireIdentifier(i, IdentifierType.SAMPLE)).toList();
+        var parsedIdentifiers = identifiersContext.identifier().stream()
+            .map(i -> requireIdentifier(i, IdentifierType.SAMPLE))
+            .collect(Collectors.toList());
         identifiers.addAll(parsedIdentifiers);
       }
 
@@ -189,7 +194,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var parsedFilters = new ArrayList<SinglePointFilter>();
     if (filterList.singlePointFilters() != null) {
       var filtersContext = filterList.singlePointFilters();
-      var firstFilters = filtersContext.singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).toList();
+      var firstFilters = filtersContext.singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).collect(Collectors.toList());
       parsedFilters.addAll(firstFilters);
     }
 
@@ -233,10 +238,17 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private TsdlIdentifier requireIdentifier(TsdlParser.IdentifierContext ctx, IdentifierType type) {
     var identifier = parseIdentifier(ctx);
-    var identifierMap = switch (type) {
-      case EVENT -> declaredEvents;
-      case SAMPLE -> declaredSamples;
-    };
+    Map<TsdlIdentifier, ?> identifierMap;
+    switch (type) {
+      case EVENT:
+        identifierMap = declaredEvents;
+        break;
+      case SAMPLE:
+        identifierMap = declaredSamples;
+        break;
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown identifier type '%s'", type);
+    }
 
     if (declaredIdentifiers.contains(identifier) && identifierMap.containsKey(identifier)) {
       return identifier;
