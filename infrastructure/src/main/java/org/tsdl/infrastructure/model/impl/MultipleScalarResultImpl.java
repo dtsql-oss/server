@@ -2,9 +2,7 @@ package org.tsdl.infrastructure.model.impl;
 
 import java.util.List;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -18,13 +16,11 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class MultipleScalarResultImpl implements MultipleScalarResult {
-  private final List<Double> values;
-  private final List<TsdlLogEvent> logs;
+public class MultipleScalarResultImpl implements MultipleScalarResult {
+  List<Double> values;
+  List<TsdlLogEvent> logs;
 
   public MultipleScalarResultImpl(List<Double> values, List<TsdlLogEvent> logs) {
     Conditions.checkNotNull(Condition.ARGUMENT, values, "Values must not be null.");

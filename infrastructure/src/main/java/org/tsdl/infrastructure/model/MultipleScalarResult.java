@@ -1,5 +1,6 @@
 package org.tsdl.infrastructure.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
 import org.tsdl.infrastructure.model.impl.MultipleScalarResultImpl;
@@ -9,6 +10,7 @@ import org.tsdl.infrastructure.model.impl.MultipleScalarResultImpl;
  */
 @JsonDeserialize(as = MultipleScalarResultImpl.class)
 public interface MultipleScalarResult extends QueryResult {
+  @JsonProperty
   List<Double> values();
 
   @Override

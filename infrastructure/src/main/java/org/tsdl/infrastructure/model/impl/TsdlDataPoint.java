@@ -5,9 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.util.Locale;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -19,11 +17,9 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class TsdlDataPoint implements DataPoint {
+public class TsdlDataPoint implements DataPoint {
   private static final DecimalFormat VALUE_FORMATTER;
 
   static {
@@ -36,8 +32,8 @@ public final class TsdlDataPoint implements DataPoint {
     VALUE_FORMATTER.setGroupingUsed(false);
   }
 
-  private final Instant timestamp;
-  private final Double value;
+  Instant timestamp;
+  Double value;
 
   public TsdlDataPoint(Instant timestamp, Double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");
@@ -48,10 +44,6 @@ public final class TsdlDataPoint implements DataPoint {
 
   public Long asInteger() {
     return Long.valueOf(value.toString());
-  }
-
-  public Double asDecimal() {
-    return Double.valueOf(value.toString());
   }
 
   public String asText() {

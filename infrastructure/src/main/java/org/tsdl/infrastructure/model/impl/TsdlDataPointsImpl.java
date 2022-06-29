@@ -2,9 +2,7 @@ package org.tsdl.infrastructure.model.impl;
 
 import java.util.List;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -20,13 +18,11 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class TsdlDataPointsImpl implements TsdlDataPoints {
-  private final List<DataPoint> items;
-  private final List<TsdlLogEvent> logs;
+public class TsdlDataPointsImpl implements TsdlDataPoints {
+  List<DataPoint> items;
+  List<TsdlLogEvent> logs;
 
   public TsdlDataPointsImpl(List<DataPoint> items, List<TsdlLogEvent> logs) {
     Conditions.checkNotNull(Condition.ARGUMENT, items, "Items must not be null.");

@@ -2,9 +2,7 @@ package org.tsdl.infrastructure.model.impl;
 
 import java.time.Instant;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -16,13 +14,11 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class TsdlLogEventImpl implements TsdlLogEvent {
-  private final Instant dateTime;
-  private final String message;
+public class TsdlLogEventImpl implements TsdlLogEvent {
+  Instant dateTime;
+  String message;
 
   public TsdlLogEventImpl(Instant dateTime, String message) {
     Conditions.checkNotNull(Condition.ARGUMENT, dateTime, "Instant of log event must not be null.");

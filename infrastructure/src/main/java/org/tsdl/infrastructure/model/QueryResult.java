@@ -1,5 +1,6 @@
 package org.tsdl.infrastructure.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +16,10 @@ import org.tsdl.infrastructure.model.impl.TsdlPeriodSetImpl;
  */
 public interface QueryResult {
 
+  @JsonProperty
   QueryResultType type();
 
+  @JsonProperty
   List<TsdlLogEvent> logs();
 
   /**

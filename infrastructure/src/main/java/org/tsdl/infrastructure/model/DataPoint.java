@@ -1,5 +1,6 @@
 package org.tsdl.infrastructure.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.time.Instant;
 import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
@@ -9,8 +10,10 @@ import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
  */
 @JsonDeserialize(as = TsdlDataPoint.class)
 public interface DataPoint {
+  @JsonProperty
   Instant timestamp();
 
+  @JsonProperty
   Double value();
 
   Long asInteger();

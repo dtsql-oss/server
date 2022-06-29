@@ -3,9 +3,7 @@ package org.tsdl.infrastructure.model.impl;
 import java.time.Instant;
 import java.util.List;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -19,15 +17,13 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class TsdlPeriodImpl implements TsdlPeriod {
-  private final Integer index;
-  private final Instant start;
-  private final Instant end;
-  private final List<TsdlLogEvent> logs;
+public class TsdlPeriodImpl implements TsdlPeriod {
+  Integer index;
+  Instant start;
+  Instant end;
+  List<TsdlLogEvent> logs;
 
   /**
    * Create an {@link TsdlPeriodSetImpl} instance. Either all parameters have to be null (being equivalent to {@link TsdlPeriod#EMPTY}, or

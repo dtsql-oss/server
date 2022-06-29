@@ -2,9 +2,7 @@ package org.tsdl.infrastructure.model.impl;
 
 import java.util.List;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
@@ -19,14 +17,12 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
  */
 @Jacksonized
 @Builder
-@Getter
+@Value
 @Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class TsdlPeriodSetImpl implements TsdlPeriodSet {
-  private final int totalPeriods;
-  private final List<TsdlPeriod> periods;
-  private final List<TsdlLogEvent> logs;
+public class TsdlPeriodSetImpl implements TsdlPeriodSet {
+  int totalPeriods;
+  List<TsdlPeriod> periods;
+  List<TsdlLogEvent> logs;
 
   /**
    * Initializes a {@link TsdlPeriodSetImpl} instance.

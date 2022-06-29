@@ -1,5 +1,6 @@
 package org.tsdl.infrastructure.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
 import org.tsdl.infrastructure.model.impl.TsdlDataPointsImpl;
@@ -9,6 +10,7 @@ import org.tsdl.infrastructure.model.impl.TsdlDataPointsImpl;
  */
 @JsonDeserialize(as = TsdlDataPointsImpl.class)
 public interface TsdlDataPoints extends QueryResult {
+  @JsonProperty
   List<DataPoint> items();
 
   @Override
