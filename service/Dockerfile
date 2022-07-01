@@ -9,7 +9,7 @@ COPY storage/pom.xml storage/
 COPY infrastructure/pom.xml infrastructure/
 COPY implementation/pom.xml implementation/
 COPY test-util/pom.xml test-util/
-COPY client/pom.xml test-util/
+COPY client/pom.xml client/
 
 RUN mvn -B dependency:go-offline
 
