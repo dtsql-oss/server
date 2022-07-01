@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.IOException;
-import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tsdl.infrastructure.api.QueryService;
-import org.tsdl.infrastructure.api.StorageServiceConfiguration;
-import org.tsdl.service.dto.QueryDto;
-import org.tsdl.service.dto.QueryResultDto;
-import org.tsdl.service.exception.UnknownStorageException;
+import org.tsdl.infrastructure.dto.QueryDto;
+import org.tsdl.infrastructure.dto.QueryResultDto;
+import org.tsdl.service.exception.ServiceResolutionException;
 import org.tsdl.service.mapper.QueryResultMapper;
 import org.tsdl.service.mapper.StorageServiceConfigurationMapper;
-import org.tsdl.service.model.TsdlStorage;
 import org.tsdl.service.service.StorageResolverService;
 
 @RestController
@@ -29,9 +25,8 @@ import org.tsdl.service.service.StorageResolverService;
 @Tag(name = "TSDL Query", description = "Endpoint exposing TSDL query services for generic storage implementations.")
 @Validated
 @Slf4j
-public class QueryController {
+public class QueryController extends BaseController {
   private final StorageResolverService storageServiceResolver;
-  private final StorageServiceConfigurationMapper storageServiceConfigurationMapper;
   private final QueryResultMapper queryResultMapper;
 
   private final QueryService queryService;
@@ -39,8 +34,8 @@ public class QueryController {
   @Autowired
   public QueryController(StorageResolverService storageServiceResolver, StorageServiceConfigurationMapper storageServiceConfigurationMapper,
                          QueryResultMapper queryResultMapper, QueryService queryService) {
+    super(storageServiceConfigurationMapper);
     this.storageServiceResolver = storageServiceResolver;
-    this.storageServiceConfigurationMapper = storageServiceConfigurationMapper;
     this.queryResultMapper = queryResultMapper;
     this.queryService = queryService;
   }
@@ -48,9 +43,10 @@ public class QueryController {
   @PostMapping
   @Operation(summary = "Execute query over configurable storage provider.")
   @ApiResponse(responseCode = "200", description = "Query was executed successfully.")
+  @ApiResponse(responseCode = "400", description = "Specified storage is not supported.")
   public QueryResultDto query(@Valid @RequestBody
-                           @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                           QueryDto querySpecification) throws UnknownStorageException, IOException {
+                              @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
+                              QueryDto querySpecification) throws ServiceResolutionException {
     log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
     log.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
     log.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
@@ -69,9 +65,5 @@ public class QueryController {
 
     var queryResult = queryService.query(dataPoints, querySpecification.getTsdlQuery());
     return queryResultMapper.entityToDto(queryResult);
-  }
-
-  private StorageServiceConfiguration mapConfig(Map<String, Object> properties, TsdlStorage<Object, StorageServiceConfiguration> targetStorage) {
-    return storageServiceConfigurationMapper.mapToConfiguration(properties, targetStorage.configurationSupplier(), targetStorage.propertyClass());
   }
 }

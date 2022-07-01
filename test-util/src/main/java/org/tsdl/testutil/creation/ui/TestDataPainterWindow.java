@@ -94,7 +94,7 @@ public class TestDataPainterWindow extends JFrame {
       var outputType = Objects.requireNonNull(cmbOutput.getSelectedItem()).toString();
 
       var instantUserInput = JOptionPane.showInputDialog(this,
-          "Enter date-time of first data point ('%s').%nEmpty or invalid input leads to a random date-time being picked.".formatted(
+          String.format("Enter date-time of first data point ('%s').%nEmpty or invalid input leads to a random date-time being picked.",
               PainterFrame.INSTANT_PATTERN),
           PainterFrame.INSTANT_FORMATTER.format(Instant.now())
       );
@@ -107,7 +107,7 @@ public class TestDataPainterWindow extends JFrame {
 
       var output = painter.getOutput(outputType, referenceDate);
       setClipboardText(output);
-      JOptionPane.showMessageDialog(this, "%s output has been copied to the clipboard.".formatted(outputType));
+      JOptionPane.showMessageDialog(this, String.format("%s output has been copied to the clipboard.", outputType));
     });
 
     var footerPanel = new JPanel(new GridLayout(1, 2));

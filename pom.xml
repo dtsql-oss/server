@@ -17,6 +17,7 @@
         <module>implementation</module>
         <module>storage</module>
         <module>test-util</module>
+        <module>client</module>
     </modules>
 
     <build>
@@ -91,12 +92,17 @@
                 <artifactId>test-util</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>client</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
         <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
-        <java.version>17</java.version>
+        <java.version>11</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
@@ -110,7 +116,9 @@
         <logback.version>1.2.11</logback.version>
         <lombok.version>1.18.24</lombok.version>
         <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-        <checkstyle.version>10.3</checkstyle.version>
+        <checkstyle.version>10.3.1</checkstyle.version>
+        <jackson.version>2.13.3</jackson.version>
+        <fastcsv.version>2.2.0</fastcsv.version>
         <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
 

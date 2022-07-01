@@ -1,7 +1,10 @@
 package org.tsdl.infrastructure.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.tsdl.infrastructure.model.impl.MultipleScalarResultImpl;
 import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
 import org.tsdl.infrastructure.model.impl.TsdlDataPointsImpl;
@@ -13,14 +16,23 @@ import org.tsdl.infrastructure.model.impl.TsdlPeriodSetImpl;
  */
 public interface QueryResult {
 
+  @JsonProperty
   QueryResultType type();
 
+  @JsonProperty
   List<TsdlLogEvent> logs();
 
   /**
    * Postconditon: preserves {@link QueryResult#type()} and data, {@link QueryResult#logs()} is equal to {@code logs}.
    */
   QueryResult withLogs(List<TsdlLogEvent> logs);
+
+  /**
+   * Postconditon: preserves {@link QueryResult#type()} and data, {@link QueryResult#logs()} is equal to {@code logs}.
+   */
+  default QueryResult withLogs(TsdlLogEvent... logs) {
+    return withLogs(Arrays.stream(logs).collect(Collectors.toList()));
+  }
 
   static TsdlDataPoints of(List<DataPoint> items, TsdlLogEvent... logs) {
     return new TsdlDataPointsImpl(items, List.of(logs));

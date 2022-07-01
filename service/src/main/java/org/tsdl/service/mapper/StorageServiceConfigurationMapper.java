@@ -10,6 +10,7 @@ import org.tsdl.infrastructure.api.StorageProperty;
 import org.tsdl.infrastructure.api.StorageServiceConfiguration;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.service.exception.ServiceResolutionException;
 
 @Mapper
 public abstract class StorageServiceConfigurationMapper {
@@ -32,19 +33,23 @@ public abstract class StorageServiceConfigurationMapper {
 
   public StorageServiceConfiguration mapToConfiguration(Map<String, Object> properties,
                                                         Supplier<StorageServiceConfiguration> configurationSupplier,
-                                                        Class<? extends Enum<?>> propertyClass) {
-    var serviceConfiguration = configurationSupplier.get();
+                                                        Class<? extends Enum<?>> propertyClass) throws ServiceResolutionException {
+    try {
+      var serviceConfiguration = configurationSupplier.get();
 
-    if (properties == null) {
+      if (properties == null) {
+        return serviceConfiguration;
+      }
+
+      for (var mapping : properties.entrySet()) {
+        var property = StorageProperty.fromIdentifier(mapping.getKey(), propertyClass);
+        var typeConformValue = retrieveValue(property, mapping.getValue());
+        serviceConfiguration.setProperty(property, typeConformValue);
+      }
       return serviceConfiguration;
+    } catch (Exception e) {
+      throw new ServiceResolutionException("Could not map storage configuration.", e);
     }
-
-    for (var mapping : properties.entrySet()) {
-      var property = StorageProperty.fromIdentifier(mapping.getKey(), propertyClass);
-      var typeConformValue = retrieveValue(property, mapping.getValue());
-      serviceConfiguration.setProperty(property, typeConformValue);
-    }
-    return serviceConfiguration;
   }
 
   private Object retrieveValue(StorageProperty property, Object value) {

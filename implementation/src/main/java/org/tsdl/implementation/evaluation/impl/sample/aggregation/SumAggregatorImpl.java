@@ -20,7 +20,7 @@ public class SumAggregatorImpl implements SumAggregator {
     log.debug("Calculating sample (sum) over {} data points", dataPoints.size());
 
     sum = dataPoints.stream()
-        .mapToDouble(DataPoint::asDecimal)
+        .mapToDouble(DataPoint::value)
         .sum();
 
     log.debug("Calculated sample (sum) to be {}.", sum);

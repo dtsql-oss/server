@@ -20,7 +20,7 @@ public class MaximumAggregatorImpl implements MaximumAggregator {
     log.debug("Calculating sample (maximum) over {} data points", dataPoints.size());
 
     max = dataPoints.stream()
-        .mapToDouble(DataPoint::asDecimal)
+        .mapToDouble(DataPoint::value)
         .max()
         .orElse(0.0);
 

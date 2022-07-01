@@ -38,7 +38,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
   public String format(TsdlSample obj) {
     Conditions.checkNotNull(Condition.ARGUMENT, obj, "Sample to format must not be null.");
 
-    var format = "0" + (decimalPlaces > 0 ? ".%s".formatted("0".repeat(decimalPlaces)) : "");
+    var format = "0" + (decimalPlaces > 0 ? String.format(".%s", "0".repeat(decimalPlaces)) : "");
     var decimalFormat = new DecimalFormat(format);
     var symbols = new DecimalFormatSymbols(Locale.US);
     symbols.setDecimalSeparator('.');
@@ -49,7 +49,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     var aggregatorFunction = obj.aggregator().type().representation();
     var value = obj.aggregator().value();
 
-    return "sample '%s' of '%s' aggregator := %s".formatted(sampleName, aggregatorFunction, decimalFormat.format(value));
+    return String.format("sample '%s' of '%s' aggregator := %s", sampleName, aggregatorFunction, decimalFormat.format(value));
   }
 
   @Override

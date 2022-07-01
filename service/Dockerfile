@@ -1,5 +1,5 @@
 # build stage
-FROM maven:3-openjdk-18 AS dependencies
+FROM maven:3-openjdk-11 AS dependencies
 
 WORKDIR /src
 
@@ -9,6 +9,7 @@ COPY storage/pom.xml storage/
 COPY infrastructure/pom.xml infrastructure/
 COPY implementation/pom.xml implementation/
 COPY test-util/pom.xml test-util/
+COPY client/pom.xml test-util/
 
 RUN mvn -B dependency:go-offline
 
@@ -19,7 +20,7 @@ COPY . /src
 RUN mvn -Dcheckstyle.skip -DskipTests -DcreateChecksum=true clean package
 
 # production stage
-FROM openjdk:18 as release
+FROM openjdk:11 as release
 
 COPY --from=build /src/service/target/service-*.jar /service-app.jar
 

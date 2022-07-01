@@ -21,6 +21,7 @@ import java.util.Map;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.infrastructure.model.DataPoint;
+import org.tsdl.storage.TsdlStorageException;
 
 class InfluxDbStorageServiceTest {
 
@@ -136,6 +137,7 @@ class InfluxDbStorageServiceTest {
         serviceConfig,
         lookupConfig,
         transformationConfig,
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
@@ -161,6 +163,7 @@ class InfluxDbStorageServiceTest {
         serviceConfig,
         lookupConfig,
         transformationConfig,
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
@@ -183,6 +186,7 @@ class InfluxDbStorageServiceTest {
         serviceConfig,
         lookupConfig,
         transformationConfig,
+        TsdlStorageException.class,
         IllegalArgumentException.class);
   }
 
@@ -195,13 +199,14 @@ class InfluxDbStorageServiceTest {
 
   private void testLoadAndTransformFailure(List<List<List<Object>>> persistedData, InfluxDbStorageConfiguration serviceConfig,
                                            InfluxDbStorageConfiguration lookupConfig, InfluxDbStorageConfiguration transformationConfig,
-                                           Class<? extends Throwable> expectedException) {
+                                           Class<? extends Throwable> expectedException, Class<? extends Throwable> cause) {
     assertThatThrownBy(() -> executeLoadAndTransformTest(persistedData,
         serviceConfig,
         lookupConfig,
         transformationConfig,
         false)
-    ).isInstanceOf(expectedException);
+    ).isInstanceOf(expectedException)
+        .hasCauseInstanceOf(cause);
   }
 
   private List<DataPoint> executeLoadAndTransformTest(List<List<List<Object>>> persistedData, InfluxDbStorageConfiguration serviceConfig,

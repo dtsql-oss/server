@@ -1,7 +1,6 @@
 package org.tsdl.implementation.factory.impl;
 
 import java.util.List;
-import java.util.Optional;
 import org.tsdl.implementation.evaluation.impl.choice.relation.FollowsOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
@@ -32,6 +31,7 @@ import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -53,10 +53,14 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   public SinglePointFilter getFilter(FilterType type, TsdlFilterArgument argument) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of filter must not be null.");
-    return switch (type) {
-      case GT -> new GreaterThanFilterImpl(argument);
-      case LT -> new LowerThanFilterImpl(argument);
-    };
+    switch (type) {
+      case GT:
+        return new GreaterThanFilterImpl(argument);
+      case LT:
+        return new LowerThanFilterImpl(argument);
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown filter type '%s'", type);
+    }
   }
 
   @Override
@@ -69,10 +73,14 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   public SinglePointFilterConnective getConnective(ConnectiveIdentifier identifier, List<SinglePointFilter> filters) {
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for connective must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters for connective must not be null.");
-    return switch (identifier) {
-      case AND -> new AndConnectiveImpl(filters);
-      case OR -> new OrConnectiveImpl(filters);
-    };
+    switch (identifier) {
+      case AND:
+        return new AndConnectiveImpl(filters);
+      case OR:
+        return new OrConnectiveImpl(filters);
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown connective identifier type '%s'", identifier);
+    }
   }
 
   @Override
@@ -98,18 +106,31 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
           "If no output formatter is attached to a sample, there must not be any formatting arguments.");
     }
 
-    var aggregator = switch (type) {
-      case AVERAGE -> new AverageAggregatorImpl();
-      case MAXIMUM -> new MaximumAggregatorImpl();
-      case MINIMUM -> new MinimumAggregatorImpl();
-      case SUM -> new SumAggregatorImpl();
-      case COUNT -> new CountAggregatorImpl();
-    };
+    TsdlAggregator aggregator;
+    switch (type) {
+      case AVERAGE:
+        aggregator = new AverageAggregatorImpl();
+        break;
+      case MAXIMUM:
+        aggregator = new MaximumAggregatorImpl();
+        break;
+      case MINIMUM:
+        aggregator = new MinimumAggregatorImpl();
+        break;
+      case SUM:
+        aggregator = new SumAggregatorImpl();
+        break;
+      case COUNT:
+        aggregator = new CountAggregatorImpl();
+        break;
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown aggregator type '%s'", type);
+    }
 
     return new TsdlSampleImpl(
         aggregator,
         identifier,
-        includeFormatter ? Optional.of(new TsdlSampleOutputFormatter(formatterArgs)) : Optional.empty()
+        includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null
     );
   }
 
@@ -126,10 +147,14 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
     Conditions.checkNotNull(Condition.ARGUMENT, operands, "Operands of temporal relation must not be null.");
     Conditions.checkSizeExactly(Condition.ARGUMENT, operands, 2, "Only binary temporal operators are supported at the moment.");
 
-    return switch (type) {
-      case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1));
-      case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1));
-    };
+    switch (type) {
+      case FOLLOWS:
+        return new FollowsOperatorImpl(operands.get(0), operands.get(1));
+      case PRECEDES:
+        return new PrecedesOperatorImpl(operands.get(0), operands.get(1));
+      default:
+        throw Conditions.exception(Condition.ARGUMENT, "Unknown temporal relation type '%s'", type);
+    }
   }
 
   @Override

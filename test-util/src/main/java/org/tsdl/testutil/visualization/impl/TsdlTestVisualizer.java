@@ -87,7 +87,7 @@ public class TsdlTestVisualizer implements InvocationInterceptor {
   private List<List<DataPoint>> extractTimeSeriesArguments(List<Object> arguments) {
     var dataPointArguments = new ArrayList<List<DataPoint>>();
     for (var argument : arguments) {
-      if (argument instanceof List<?> listArgument && !listArgument.isEmpty() && listArgument.get(0) instanceof DataPoint) {
+      if (argument instanceof List<?> && !((List<?>) argument).isEmpty() && ((List<?>) argument).get(0) instanceof DataPoint) {
         dataPointArguments.add((List<DataPoint>) argument);
       }
     }

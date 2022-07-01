@@ -25,9 +25,9 @@ public class StorageResolverServiceImpl implements StorageResolverService {
   @Override
   @SuppressWarnings("unchecked") // unchecked operation required due to type erasure
   public TsdlStorage<Object, StorageServiceConfiguration> resolve(String storageIdentifier) throws UnknownStorageException {
-    var storageBeanReference = STORAGE_BEAN_NAME_TEMPLATE.formatted(storageIdentifier);
+    var storageBeanReference = String.format(STORAGE_BEAN_NAME_TEMPLATE, storageIdentifier);
     if (!storageServices.containsKey(storageBeanReference)) {
-      throw new UnknownStorageException("Storage '%s' is not supported".formatted(storageIdentifier));
+      throw new UnknownStorageException(String.format("Storage '%s' is not supported", storageIdentifier));
     }
     return (TsdlStorage<Object, StorageServiceConfiguration>) storageServices.get(storageBeanReference);
   }
