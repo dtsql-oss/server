@@ -1,9 +1,9 @@
 package org.tsdl.client.impl.csv.writer;
 
 import java.io.IOException;
-import org.tsdl.client.impl.csv.CsvSerializingQueryClientSpecification;
 import org.tsdl.client.api.QueryClientSpecification;
 import org.tsdl.client.api.QueryResultWriter;
+import org.tsdl.client.impl.csv.CsvSerializingQueryClientSpecification;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 

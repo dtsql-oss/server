@@ -1,10 +1,10 @@
 package org.tsdl.client.impl.csv;
 
 import org.tsdl.client.api.QueryClientResult;
-import org.tsdl.client.util.QueryResultReaderFactory;
-import org.tsdl.client.util.QueryResultWriterFactory;
 import org.tsdl.client.api.TsdlClient;
 import org.tsdl.client.impl.csv.reader.BaseReader;
+import org.tsdl.client.util.QueryResultReaderFactory;
+import org.tsdl.client.util.QueryResultWriterFactory;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.dto.QueryResultDto;

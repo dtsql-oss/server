@@ -13,6 +13,9 @@ import org.tsdl.infrastructure.common.DataPointDeserializer;
 import org.tsdl.infrastructure.dto.QueryResultDto;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Provides utility objects and methods to be used across the client library.
+ */
 public final class ClientCommons {
   private ClientCommons() {
   }
