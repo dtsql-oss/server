@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.tsdl.infrastructure.model.DataPoint;
-import org.tsdl.service.mapper.DataPointDeserializer;
+import org.tsdl.infrastructure.common.DataPointDeserializer;
 
 @Configuration
 public class JacksonConfiguration {
