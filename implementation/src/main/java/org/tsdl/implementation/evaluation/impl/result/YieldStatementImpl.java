@@ -35,7 +35,7 @@ public final class YieldStatementImpl implements YieldStatement {
     } else if (format == YieldFormat.SAMPLE_SET) {
       Conditions.checkNotNull(Condition.ARGUMENT, samples,
           "If result format is '%s', then the sample must not be null.", YieldFormat.SAMPLE_SET.representation());
-      Conditions.checkIsTrue(Condition.ARGUMENT, samples.size() > 0,
+      Conditions.checkIsGreaterThan(Condition.ARGUMENT, samples.size(), 0,
           "If result format is '%s', then there must be at least one sample", YieldFormat.SAMPLE_SET.representation());
     } else {
       Conditions.checkIsTrue(Condition.ARGUMENT, samples == null,

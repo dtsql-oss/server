@@ -18,13 +18,11 @@ public class PeriodSetReader extends BaseReader<TsdlPeriodSet> {
       var events = splitCsvRead(
           csvReader,
           3,
-          row -> {
-            periods.add(QueryResult.of(
-                Integer.valueOf(row.getField(0)),
-                Instant.parse(row.getField(2)),
-                Instant.parse(row.getField(3))
-            ));
-          }
+          row -> periods.add(QueryResult.of(
+              Integer.valueOf(row.getField(0)),
+              Instant.parse(row.getField(2)),
+              Instant.parse(row.getField(3))
+          ))
       );
 
       return QueryResult.of(periods.size(), periods, events);

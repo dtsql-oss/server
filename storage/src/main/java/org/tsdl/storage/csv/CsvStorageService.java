@@ -53,7 +53,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
       requireProperty(persistConfiguration, CsvStorageProperty.INCLUDE_HEADERS, STORE_PROPERTY_REQUIRED);
 
       var includeHeaders = persistConfiguration.getProperty(CsvStorageProperty.INCLUDE_HEADERS, Boolean.class);
-      if (includeHeaders) {
+      if (Boolean.TRUE.equals(includeHeaders)) {
         requireProperty(persistConfiguration, CsvStorageProperty.TIME_COLUMN_LABEL,
             "Since headers are included, '%s' property ('%s') is required to transform data loaded by the CSV storage service into data points.");
         requireProperty(persistConfiguration, CsvStorageProperty.VALUE_COLUMN_LABEL,
@@ -69,7 +69,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
       var append = persistConfiguration.getProperty(CsvStorageProperty.APPEND, Boolean.class);
 
       try (var csvWriter = createWriter(filePath, fieldSeparator, append)) {
-        if (includeHeaders) {
+        if (Boolean.TRUE.equals(includeHeaders)) {
           csvWriter.writeRow(
               persistConfiguration.getProperty(CsvStorageProperty.TIME_COLUMN_LABEL, String.class),
               persistConfiguration.getProperty(CsvStorageProperty.VALUE_COLUMN_LABEL, String.class)
