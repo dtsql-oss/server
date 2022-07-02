@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.List;
-import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.client.api.QueryClientSpecification;
 import org.tsdl.client.api.QueryResultWriter;
@@ -18,24 +15,15 @@ import org.tsdl.client.util.TsdlClientException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.common.ThrowingRunnable;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.QueryResultType;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
 /**
  * Encapsulates common functionality for {@link QueryResultWriter} implementations.
  */
 public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpecification> implements QueryResultWriter {
-  private static final DecimalFormat VALUE_FORMATTER;
-
-  static {
-    // Double has a limited precision of 53 bits as per IEEE754, which amounts to roughly 16 decimal digits. Therefore, 16 significant decimal places
-    // after a mandatory one should be enough (https://en.wikipedia.org/wiki/Floating-point_arithmetic#IEEE_754:_floating_point_in_modern_computers).
-    VALUE_FORMATTER = new DecimalFormat("0.0################");
-    var symbols = new DecimalFormatSymbols(Locale.US);
-    symbols.setDecimalSeparator('.');
-    VALUE_FORMATTER.setDecimalFormatSymbols(symbols);
-    VALUE_FORMATTER.setGroupingUsed(false);
-  }
 
   @SuppressWarnings("unchecked") // type erasure - type compatibility is ensured by verifyTypes()
   @Override
@@ -51,8 +39,8 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
 
   protected abstract void writeInternal(T result, U specification) throws IOException;
 
-  protected String format(Double value) {
-    return VALUE_FORMATTER.format(value);
+  protected String formatNumber(Double value) {
+    return TsdlUtil.formatNumber(value);
   }
 
   abstract Class<? extends QueryResult> resultClass();
@@ -67,7 +55,7 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
   }
 
   @NotNull
-  protected CsvWriter createWriter(String filePath) throws IOException {
+  protected static CsvWriter createWriter(String filePath) throws IOException {
     return CsvWriter.builder()
         .fieldSeparator(';')
         .quoteCharacter('"')
@@ -77,9 +65,9 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
         .build(Path.of(filePath), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
   }
 
-  protected void writeDiscriminatorComment(CsvWriter writer, QueryResult result) {
+  protected static void writeDiscriminatorComment(CsvWriter writer, QueryResultType type) {
     writer.writeComment("TSDL Query Result");
-    writer.writeComment(String.format("TYPE=%s", result.type().name()));
+    writer.writeComment(String.format("TYPE=%s", type.name()));
   }
 
   protected void writeLogs(CsvWriter writer, List<TsdlLogEvent> events) {

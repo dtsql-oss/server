@@ -14,7 +14,7 @@ public class PeriodSetWriter extends BaseWriter<TsdlPeriodSet, CsvSerializingQue
   @Override
   protected void writeInternal(TsdlPeriodSet result, CsvSerializingQueryClientSpecification specification) throws IOException {
     try (var csvWriter = createWriter(specification.targetFile())) {
-      writeDiscriminatorComment(csvWriter, result);
+      writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("index", "empty", "start", "end");
       for (var periods : result.periods()) {

@@ -1,17 +1,15 @@
 package org.tsdl.client.impl.csv.reader;
 
+import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.client.api.QueryResultReader;
@@ -21,6 +19,7 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.common.ThrowingConsumer;
 import org.tsdl.infrastructure.common.ThrowingSupplier;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
@@ -29,18 +28,6 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
  * Encapsulates common functionality for {@link QueryResultReader} implementations.
  */
 public abstract class BaseReader<T extends QueryResult> implements QueryResultReader {
-  private static final DecimalFormat VALUE_FORMATTER;
-
-  static {
-    // Double has a limited precision of 53 bits as per IEEE754, which amounts to roughly 16 decimal digits. Therefore, 16 significant decimal places
-    // after a mandatory one should be enough (https://en.wikipedia.org/wiki/Floating-point_arithmetic#IEEE_754:_floating_point_in_modern_computers).
-    VALUE_FORMATTER = new DecimalFormat("0.0################");
-    var symbols = new DecimalFormatSymbols(Locale.US);
-    symbols.setDecimalSeparator('.');
-    VALUE_FORMATTER.setDecimalFormatSymbols(symbols);
-    VALUE_FORMATTER.setGroupingUsed(false);
-  }
-
   @Override
   public T read(String filePath) {
     return safeReadOperation(() -> readInternal(filePath));
@@ -49,7 +36,7 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
   protected abstract T readInternal(String filePath) throws Exception;
 
   protected Double parseNumber(String str) throws ParseException {
-    return VALUE_FORMATTER.parse(str).doubleValue();
+    return TsdlUtil.parseNumber(str);
   }
 
   protected TsdlLogEvent[] parseLogEvents(Iterator<CsvRow> iterator) {
@@ -69,13 +56,14 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
       iterator.next();
     }
 
+    final var commentStart = "TSDL Query Evaluation Logs";
     var valueRow = iterator.next();
-    while (!Objects.equals(valueRow.getField(0), "#TSDL Query Evaluation Logs")) {
+    while (!valueRow.isComment() && !Objects.equals(valueRow.getField(0), commentStart)) {
       rowConsumer.accept(valueRow);
       valueRow = iterator.next();
     }
 
-    Conditions.checkEquals(Condition.STATE, valueRow.getField(0), "#TSDL Query Evaluation Logs", "Expected parser to be at comment section start.");
+    Conditions.checkEquals(Condition.STATE, valueRow.getField(0), commentStart, "Expected parser to be at comment section start.");
     iterator.next(); // skip "timestamp;message" row
 
     return parseLogEvents(iterator);
@@ -93,7 +81,10 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
         var iterator = csvReader.iterator(); // type is in second line
         iterator.next(); // line 1
         var typeLine = iterator.next(); // line 2 (e.g., #TYPE=SCALAR_LIST)
-        var type = typeLine.getField(0).split("=")[1];
+        Conditions.checkIsTrue(Condition.STATE, typeLine.isComment(), "Expected line '%s' to be a comment, but is not.", typeLine.getFields());
+
+        var comment = typeLine.getField(0);
+        var type = comment.split("TYPE=")[1];
         return QueryResultType.valueOf(type);
       }
     });
@@ -105,6 +96,7 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
         .fieldSeparator(';')
         .quoteCharacter('"')
         .commentCharacter('#')
+        .commentStrategy(CommentStrategy.READ)
         .build(Path.of(filePath), StandardCharsets.UTF_8);
   }
 

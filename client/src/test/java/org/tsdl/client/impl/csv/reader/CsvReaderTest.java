@@ -15,32 +15,32 @@ import org.tsdl.infrastructure.model.QueryResult;
 @Slf4j
 class CsvReaderTest {
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_writeDataPoints_writesFileCorrectly")
-  void query_writeDataPoints_writesFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
+  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readDataPoints_readsFileCorrectly")
+  void query_readDataPoints_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_writePeriod_writesFileCorrectly")
-  void query_writePeriod_writesFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
+  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readPeriod_readsFileCorrectly")
+  void query_readPeriod_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_writePeriodSet_writesFileCorrectly")
-  void query_writePeriodSet_writesFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
+  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readPeriodSet_readsFileCorrectly")
+  void query_readPeriodSet_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_writeScalar_writesFileCorrectly")
-  void query_writeScalar_writesFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
+  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readScalar_readsFileCorrectly")
+  void query_readScalar_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_writeScalarList_writesFileCorrectly")
-  void query_writeScalarList_writesFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
+  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readScalarList_readsFileCorrectly")
+  void query_readScalarList_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 

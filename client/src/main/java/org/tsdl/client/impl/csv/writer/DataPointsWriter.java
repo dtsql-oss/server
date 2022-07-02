@@ -14,7 +14,7 @@ public class DataPointsWriter extends BaseWriter<TsdlDataPoints, CsvSerializingQ
   @Override
   protected void writeInternal(TsdlDataPoints result, CsvSerializingQueryClientSpecification specification) throws IOException {
     try (var csvWriter = createWriter(specification.targetFile())) {
-      writeDiscriminatorComment(csvWriter, result);
+      writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("time", "value");
       for (var dp : result.items()) {

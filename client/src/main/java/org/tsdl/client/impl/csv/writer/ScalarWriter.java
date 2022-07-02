@@ -14,10 +14,10 @@ public class ScalarWriter extends BaseWriter<SingularScalarResult, CsvSerializin
   @Override
   protected void writeInternal(SingularScalarResult result, CsvSerializingQueryClientSpecification specification) throws IOException {
     try (var csvWriter = createWriter(specification.targetFile())) {
-      writeDiscriminatorComment(csvWriter, result);
+      writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("value");
-      csvWriter.writeRow(format(result.value()));
+      csvWriter.writeRow(formatNumber(result.value()));
 
       writeLogs(csvWriter, result.logs());
     }

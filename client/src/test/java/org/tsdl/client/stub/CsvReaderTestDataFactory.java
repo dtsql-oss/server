@@ -15,7 +15,7 @@ public final class CsvReaderTestDataFactory {
   private CsvReaderTestDataFactory() {
   }
 
-  public static Stream<Arguments> query_writeDataPoints_writesFileCorrectly() {
+  public static Stream<Arguments> query_readDataPoints_readsFileCorrectly() {
     return Stream.of(
         Arguments.of(
             tempPath(),
@@ -60,7 +60,7 @@ public final class CsvReaderTestDataFactory {
     );
   }
 
-  public static Stream<Arguments> query_writePeriod_writesFileCorrectly() {
+  public static Stream<Arguments> query_readPeriod_readsFileCorrectly() {
     return Stream.of(
         Arguments.of(
             tempPath(),
@@ -89,7 +89,7 @@ public final class CsvReaderTestDataFactory {
     );
   }
 
-  public static Stream<Arguments> query_writePeriodSet_writesFileCorrectly() {
+  public static Stream<Arguments> query_readPeriodSet_readsFileCorrectly() {
     return Stream.of(
         Arguments.of(
             tempPath(),
@@ -126,7 +126,7 @@ public final class CsvReaderTestDataFactory {
     );
   }
 
-  public static Stream<Arguments> query_writeScalar_writesFileCorrectly() {
+  public static Stream<Arguments> query_readScalar_readsFileCorrectly() {
     return Stream.of(
         Arguments.of(
             tempPath(),
@@ -154,7 +154,7 @@ public final class CsvReaderTestDataFactory {
     );
   }
 
-  public static Stream<Arguments> query_writeScalarList_writesFileCorrectly() {
+  public static Stream<Arguments> query_readScalarList_readsFileCorrectly() {
     return Stream.of(
         Arguments.of(
             tempPath(),
