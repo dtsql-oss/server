@@ -37,7 +37,7 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <!--suppress MavenPackageUpdate (should be kept in sync with Spring dependency used in service module ) -->
-            <version>2.0.2</version>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
