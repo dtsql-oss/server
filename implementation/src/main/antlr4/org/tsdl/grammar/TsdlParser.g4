@@ -78,6 +78,11 @@ filterConnective
   :  connectiveIdentifier PARENTHESIS_OPEN whitespace singlePointFilterList whitespace PARENTHESIS_CLOSE
   ;
 
+connectiveIdentifier
+  :  CONNECTIVE_AND
+  |  CONNECTIVE_OR
+  ;
+
 aggregatorsDeclarationStatement
   :  aggregatorList
   ;
@@ -159,11 +164,6 @@ identifier
 
 echoArgument
   : ECHO_ARGUMENT | IDENTIFIER | NUMBER
-  ;
-
-connectiveIdentifier
-  :  CONNECTIVE_AND
-  |  CONNECTIVE_OR
   ;
 
 singlePointFilterList

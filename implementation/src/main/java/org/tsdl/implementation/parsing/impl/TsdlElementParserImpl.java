@@ -87,7 +87,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     } else if (Double.isInfinite(num)) {
       throw new TsdlParserException("Infinity or negative infinity is not a valid number.");
     } else {
-      return parsedNumber.doubleValue() + 0.0; // "+ 0.0" makes that special case -0.0 is still returned as 0.0
+      return parsedNumber.doubleValue() + 0.0; // "+ 0.0" makes that the special case -0.0 is still returned as 0.0
     }
   }
 
