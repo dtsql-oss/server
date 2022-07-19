@@ -23,4 +23,6 @@ public interface TsdlElementParser {
   Double parseNumber(String str);
 
   Integer parseInteger(String str);
+
+  String parseStringLiteral(String str);
 }

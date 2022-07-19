@@ -1,5 +1,6 @@
 package org.tsdl.implementation.factory.impl;
 
+import java.time.Instant;
 import java.util.List;
 import org.tsdl.implementation.evaluation.impl.choice.relation.FollowsOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorImpl;
@@ -15,11 +16,16 @@ import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilter
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalAverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalCountAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalMaximumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalMinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalSumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalAverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalCountAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMaximumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalSumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlElementFactory;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -31,6 +37,7 @@ import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.FilterType;
@@ -38,6 +45,7 @@ import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+// TODO Add tests
 /**
  * Reference implementation of {@link TsdlElementFactory}.
  */
@@ -88,6 +96,12 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
 
   @Override
   public TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
+    return getSample(type, null, null, identifier, includeFormatter, formatterArgs);
+  }
+
+  @Override
+  public TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
+                              String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type of sample must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for sample must not be null.");
     if (!includeFormatter) {
@@ -97,14 +111,7 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
           "If no output formatter is attached to a sample, there must not be any formatting arguments.");
     }
 
-    var aggregator = switch (type) {
-      case AVERAGE -> new AverageAggregatorImpl();
-      case MAXIMUM -> new MaximumAggregatorImpl();
-      case MINIMUM -> new MinimumAggregatorImpl();
-      case SUM -> new SumAggregatorImpl();
-      case COUNT -> new CountAggregatorImpl();
-    };
-
+    var aggregator = getAggregator(type, lowerBound, upperBound);
     return new TsdlSampleImpl(
         aggregator,
         identifier,
@@ -135,5 +142,19 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   public YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifiers) {
     Conditions.checkNotNull(Condition.ARGUMENT, format, "Result format must not be null.");
     return new YieldStatementImpl(format, identifiers);
+  }
+
+  private TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound) {
+    Conditions.checkIsTrue(Condition.ARGUMENT, (lowerBound == null) == (upperBound == null),
+        "Either both or none of lower and upper bound must be null.");
+
+    var global = lowerBound == null; // due to condition above, this implies upperBound is null as well
+    return switch (type) {
+      case AVERAGE -> global ? new GlobalAverageAggregatorImpl() : new LocalAverageAggregatorImpl(lowerBound, upperBound);
+      case MAXIMUM -> global ? new GlobalMaximumAggregatorImpl() : new LocalMaximumAggregatorImpl(lowerBound, upperBound);
+      case MINIMUM -> global ? new GlobalMinimumAggregatorImpl() : new LocalMinimumAggregatorImpl(lowerBound, upperBound);
+      case SUM -> global ? new GlobalSumAggregatorImpl() : new LocalSumAggregatorImpl(lowerBound, upperBound);
+      case COUNT -> global ? new GlobalCountAggregatorImpl() : new LocalCountAggregatorImpl(lowerBound, upperBound);
+    };
   }
 }

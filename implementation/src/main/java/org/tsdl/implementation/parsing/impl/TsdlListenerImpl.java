@@ -1,6 +1,7 @@
 package org.tsdl.implementation.parsing.impl;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,9 +25,10 @@ import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
+import org.tsdl.implementation.parsing.exception.TsdlParserException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
-
-// TODO: use visitor instead of listener?
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 
 /**
  * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
@@ -159,7 +161,30 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         ? parseEchoArguments(ctx.echoStatement().echoArgumentList())
         : new String[0];
 
-    return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
+    var global = ctx.aggregatorFunctionDeclaration().aggregatorInput().INPUT_VARIABLE() != null;
+    if (global) {
+      return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
+    } else {
+      var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().aggregatorInput().timeRange());
+      Conditions.checkSizeExactly(Condition.STATE, timeRange, 2, "Time range must consist of exactly two timestamps.");
+
+      var lowerBound = timeRange[0];
+      var upperBound = timeRange[1];
+      if (!lowerBound.isBefore(upperBound)) {
+        throw new TsdlParserException("Lower bound of a local sample must be before its upper bound.");
+      }
+
+      return elementFactory.getSample(aggregatorType, lowerBound, upperBound, identifier, includeEcho, echoArguments);
+    }
+  }
+
+  private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
+    var instants = new Instant[ctx.STRING_LITERAL().size()];
+    for (var i = 0; i < ctx.STRING_LITERAL().size(); i++) {
+      var instantString = elementParser.parseStringLiteral(ctx.STRING_LITERAL(i).getText());
+      instants[i] = Instant.parse(instantString);
+    }
+    return instants;
   }
 
   private String[] parseEchoArguments(TsdlParser.EchoArgumentListContext ctx) {

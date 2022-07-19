@@ -65,9 +65,9 @@ public abstract class EnumStorageConfiguration implements StorageServiceConfigur
     Conditions.checkIsTrue(Condition.ARGUMENT,
         valueHasCorrectType,
         "'%s' is not a valid type for property '%s' ('%s').",
-        value.getClass().getTypeName(),
+        value.getClass().getName(),
         property,
-        property.type().getTypeName());
+        property.type().getName());
 
     return properties.put(property, value);
   }

@@ -152,6 +152,15 @@ aggregatorFunction
 
 aggregatorInput
   :  INPUT_VARIABLE
+  |  timeRange
+  ;
+
+timeRange
+  :  STRING_LITERAL timeRangeSeparator STRING_LITERAL // expected: ISO-8601 timestamp (to be validated by application)
+  ;
+
+timeRangeSeparator
+  :  whitespace COMMA whitespace
   ;
 
 identifierDeclaration
@@ -210,4 +219,3 @@ mandatoryWhitespace
 filterSeparator
   :  COMMA whitespace
   ;
-

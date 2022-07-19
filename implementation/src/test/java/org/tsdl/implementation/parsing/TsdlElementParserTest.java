@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.NoSuchElementException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -129,20 +128,19 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validParseStringLiteralInputs")
-  @Disabled
   void parseStringLiteral_validLiteral_parsesCorrectly(String str, String expected) {
     assertThat(PARSER.parseStringLiteral(str)).isEqualTo(expected);
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {})
-  @Disabled
+  @ValueSource(strings = {
+      "", " ", "test", "'test'", "'c'", "\"test'", "\"failure", "\"anotherFailure\"'", "\"moreFailure\" ", " \"moreFailure\"", "\"h"
+  })
   void parseStringLiteral_invalidLiteral_throws(String str) {
     assertThatThrownBy(() -> PARSER.parseStringLiteral(str)).isInstanceOf(TsdlParserException.class);
   }
 
   @Test
-  @Disabled
   void parseStringLiteral_null_throws() {
     assertThatThrownBy(() -> PARSER.parseStringLiteral(null)).isInstanceOf(IllegalArgumentException.class);
   }

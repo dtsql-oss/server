@@ -1,5 +1,6 @@
 package org.tsdl.implementation.parsing.stub;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.tsdl.implementation.model.result.YieldFormat;
@@ -10,7 +11,8 @@ import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 
 @SuppressWarnings("unused") // only referenced by string literals, therefore usage unrecognized
 public final class ElementParserDataFactory {
-  private ElementParserDataFactory() {}
+  private ElementParserDataFactory() {
+  }
 
   public static Stream<Arguments> validConnectiveIdentifierInputs() {
     return Stream.of(
@@ -68,6 +70,25 @@ public final class ElementParserDataFactory {
         Arguments.of("128395", 128395.0),
         Arguments.of("-100.0", -100.0),
         Arguments.of("-123.45", -123.45)
+    );
+  }
+
+  public static Stream<Arguments> validParseStringLiteralInputs() {
+    final Function<String, Arguments> testCase = (str) -> Arguments.of("\"%s\"".formatted(str), str);
+    return Stream.of(
+        testCase.apply(""),
+        testCase.apply("null"),
+        testCase.apply(" "),
+        testCase.apply("     "),
+        testCase.apply("1"),
+        testCase.apply("12342"),
+        testCase.apply(" 1"),
+        testCase.apply("e"),
+        testCase.apply(" ereAef"),
+        testCase.apply("ß9"),
+        testCase.apply("ß "),
+        testCase.apply("123456  7"),
+        testCase.apply(" 2ab83 o ")
     );
   }
 }

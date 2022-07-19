@@ -26,6 +26,7 @@ import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
@@ -154,11 +155,7 @@ public class TsdlQueryService implements QueryService {
 
   private boolean containsDataPoint(List<TsdlPeriod> periods, Instant timestamp) {
     return periods.stream()
-        .anyMatch(period -> isWithinRange(timestamp, period.start(), period.end()));
-  }
-
-  private boolean isWithinRange(Instant date, Instant intervalStart, Instant intervalEnd) {
-    return !(date.isBefore(intervalStart) || date.isAfter(intervalEnd));
+        .anyMatch(period -> TsdlUtil.isWithinRange(timestamp, period.start(), period.end()));
   }
 
   /**

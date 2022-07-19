@@ -1,7 +1,6 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,11 +16,11 @@ import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.MultipleScalarResult;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
-import org.tsdl.infrastructure.model.SingularScalarResult;
 import org.tsdl.infrastructure.model.TsdlDataPoints;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 import org.tsdl.infrastructure.model.TsdlPeriodSet;
+import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
@@ -31,6 +30,70 @@ import org.tsdl.testutil.visualization.impl.TsdlTestVisualizer;
 class TsdlQueryServiceTest {
   private static final String DATA_ROOT = "data/query/";
   private static final QueryService queryService = new TsdlQueryService();
+
+  @Nested
+  @DisplayName("sample tests")
+  class QuerySample {
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#globalAggregates")
+    void querySample_yieldGlobalSample(List<DataPoint> dps, String sampleDefinition, Double expectedResult) {
+      var query = "WITH SAMPLES: %s AS s1  YIELD: sample s1".formatted(sampleDefinition);
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResultImpl.class))
+          .extracting(SingularScalarResultImpl::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#globalAggregatesSet")
+    void querySample_yieldGlobalSampleSet(List<DataPoint> dps, String sampleDefinition, String yieldComponent, Double[] expectedResults) {
+      var query = """
+          WITH SAMPLES:
+                      %s
+                    YIELD:
+                      samples %s""".formatted(sampleDefinition, yieldComponent);
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
+          .containsExactly(expectedResults);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#localAggregates")
+    void querySample_yieldLocalSample(List<DataPoint> dps, String sampleDefinition, Double expectedResult) {
+      var query = "WITH SAMPLES: %s AS s1  YIELD: sample s1".formatted(sampleDefinition);
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResultImpl.class))
+          .extracting(SingularScalarResultImpl::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(expectedResult);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#localAggregatesSet")
+    void querySample_yieldLocalSampleSet(List<DataPoint> dps, String sampleDefinition, String yieldComponent, Double[] expectedResults) {
+      var query = """
+          WITH SAMPLES:
+                      %s
+                    YIELD:
+                      samples %s""".formatted(sampleDefinition, yieldComponent);
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
+          .containsExactly(expectedResults);
+    }
+  }
 
   @Nested
   @DisplayName("choose events tests")
@@ -304,7 +367,7 @@ class TsdlQueryServiceTest {
   class QueryFilter {
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_lt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -323,7 +386,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_ltSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -342,7 +405,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gt(List<DataPoint> dataPoints) {
       var query = """
@@ -362,7 +425,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gtSample(List<DataPoint> dataPoints) {
       var query = """
@@ -382,7 +445,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -401,7 +464,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLtSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -421,7 +484,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -440,7 +503,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLtSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -460,7 +523,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -479,7 +542,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLtSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -499,7 +562,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLt(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -518,7 +581,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLtSample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -538,7 +601,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuery(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -557,7 +620,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuerySample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -577,7 +640,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuery(List<DataPoint> dataPoints) {
       var query = """
           FILTER:
@@ -596,7 +659,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuerySample(List<DataPoint> dataPoints) {
       var query = """
           WITH SAMPLES: avg(_input) AS myAvg
@@ -620,7 +683,7 @@ class TsdlQueryServiceTest {
   @DisplayName("integration tests")
   class QueryIntegration {
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryIntegration_queryWithOnlySampleDeclarations_returnsAllDataPoints(List<DataPoint> dataPoints) {
       var query = "WITH SAMPLES: avg(_input) AS s1, min(_input) AS s2, max(_input) AS s3, sum(_input) AS s4\n"
           + "          YIELD: data points";
@@ -637,7 +700,7 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryIntegration_emptyQuery_returnsAllDataPoints(List<DataPoint> dataPoints) {
       var query = "YIELD: data points";
 
@@ -689,41 +752,6 @@ class TsdlQueryServiceTest {
       assertThat(periodsWithoutFilter.periods().get(2).start()).isEqualTo(periodsWitFilter.periods().get(2).start());
       assertThat(periodsWithoutFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T09:35:33.164Z"));
       assertThat(periodsWitFilter.periods().get(2).end()).isEqualTo(Instant.parse("2022-06-03T01:35:33.164Z"));
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
-    void queryIntegration_yieldSample(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-                      avg(_input) AS myAvg
-                    YIELD:
-                      sample myAvg""";
-
-      var result = queryService.query(dps, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
-          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
-          .isEqualTo(42.84, within(0.01));
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.tsdl.implementation.evaluation.stub.DataPointDataFactory#dataPoints_0")
-    void queryIntegration_yieldSampleSet(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES:
-                      min(_input) AS min1,
-                      max(_input) AS max2
-                    YIELD:
-                      samples min1, max2""";
-
-      var result = queryService.query(dps, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
-          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
-          .containsExactly(25.75, 75.52);
     }
 
     @ParameterizedTest

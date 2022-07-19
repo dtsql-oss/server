@@ -101,6 +101,19 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     throw new TsdlParserException("Expected double '%s' to be an integer.".formatted(dbl));
   }
 
+  @Override
+  public String parseStringLiteral(String str) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+
+    if (str.length() < 2) {
+      throw new TsdlParserException("String literals must contain at least two characters, but '%s' does not.".formatted(str));
+    } else if (str.charAt(0) != '"' || str.charAt(str.length() - 1) != '"') {
+      throw new TsdlParserException("String literals must begin and end with quote characters (\"), but '%s' does not.".formatted(str));
+    }
+
+    return str.substring(1, str.length() - 1);
+  }
+
   private <T extends Identifiable> T parseEnumMember(Class<? extends T> clazz, String str) {
     return Arrays.stream(clazz.getEnumConstants())
         .filter(element -> element.representation().equals(str))
