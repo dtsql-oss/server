@@ -49,7 +49,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     var aggregatorFunction = obj.aggregator().type().representation();
     var value = obj.aggregator().value();
 
-    return String.format("sample '%s' of '%s' aggregator := %s", sampleName, aggregatorFunction, decimalFormat.format(value));
+    return "sample '%s' of '%s' aggregator := %s".formatted(sampleName, aggregatorFunction, decimalFormat.format(value));
   }
 
   @Override

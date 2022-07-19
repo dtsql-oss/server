@@ -40,8 +40,7 @@ class TsdlFormattingTests {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgsList")
     void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, String identifier, String[] args,
-                                                            String expectedResult)
-        throws IOException {
+                                                            String expectedResult) {
       var sample = ELEMENTS.getSample(type, ELEMENTS.getIdentifier(identifier), true, args);
       sample.aggregator().compute(dps);
       formattingTestCollection(sample, result -> assertThat(result)

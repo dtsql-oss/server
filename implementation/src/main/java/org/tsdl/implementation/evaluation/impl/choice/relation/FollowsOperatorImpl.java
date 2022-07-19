@@ -3,10 +3,6 @@ package org.tsdl.implementation.evaluation.impl.choice.relation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.choice.relation.FollowsOperator;
@@ -21,19 +17,10 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
  * Default implementation of {@link FollowsOperator}.
  */
 @Slf4j
-@Getter
-@Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class FollowsOperatorImpl implements FollowsOperator {
-  private final TsdlEvent operand1;
-  private final TsdlEvent operand2;
-
-  public FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) {
+public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implements FollowsOperator {
+  public FollowsOperatorImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First operand of 'follows' operator must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second operand of 'follows' operator must not be null.");
-    this.operand1 = operand1;
-    this.operand2 = operand2;
   }
 
   @Override

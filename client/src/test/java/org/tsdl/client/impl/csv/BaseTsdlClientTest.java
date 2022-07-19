@@ -26,7 +26,7 @@ class BaseTsdlClientTest {
   static void setUp() throws IOException {
     mockWebServer = new MockWebServer();
     mockWebServer.start();
-    baseUrl = String.format("http://localhost:%s", mockWebServer.getPort());
+    baseUrl = "http://localhost:%s".formatted(mockWebServer.getPort());
   }
 
   @AfterAll

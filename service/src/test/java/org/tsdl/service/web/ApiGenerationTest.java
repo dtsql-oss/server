@@ -51,7 +51,7 @@ class ApiGenerationTest extends BaseIntegrationTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
     assertThatCode(() -> {
-      var fileName = String.format("%s.%s", LOCAL_FILE_NAME, fileExtension);
+      var fileName = "%s.%s".formatted(LOCAL_FILE_NAME, fileExtension);
       try (var writer = new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8)) {
         writer.write(response.getBody());
       }

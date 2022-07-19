@@ -1,10 +1,6 @@
 package org.tsdl.implementation.evaluation.impl.result;
 
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
@@ -14,18 +10,11 @@ import org.tsdl.infrastructure.common.Conditions;
 /**
  * Default implementation of {@link YieldStatement}.
  */
-@Getter
-@Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class YieldStatementImpl implements YieldStatement {
-  private final YieldFormat format;
-  private final List<TsdlIdentifier> samples;
-
+public record YieldStatementImpl(YieldFormat format, List<TsdlIdentifier> samples) implements YieldStatement {
   /**
    * Initializes this {@link YieldStatementImpl} instance.
    */
-  public YieldStatementImpl(YieldFormat format, List<TsdlIdentifier> samples) {
+  public YieldStatementImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, format, "Result format must not be null");
     if (format == YieldFormat.SAMPLE) {
       Conditions.checkNotNull(Condition.ARGUMENT, samples,
@@ -42,8 +31,5 @@ public final class YieldStatementImpl implements YieldStatement {
           "If result format is neither '%s' nor '%s', then the sample must be null.",
           YieldFormat.SAMPLE.representation(), YieldFormat.SAMPLE_SET.representation());
     }
-
-    this.format = format;
-    this.samples = samples;
   }
 }

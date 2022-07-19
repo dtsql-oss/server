@@ -117,7 +117,7 @@ public class TsdlQueryService implements QueryService {
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
             .filter(dp -> containsDataPoint(periods.periods(), dp.timestamp()))
-            .collect(Collectors.toList());
+            .toList();
         return QueryResult.of(pointsInPeriods);
 
       case SAMPLE:
@@ -235,7 +235,7 @@ public class TsdlQueryService implements QueryService {
       );
     }
 
-    var allEventFilters = query.events().stream().flatMap(event -> event.definition().filters().stream()).collect(Collectors.toList());
+    var allEventFilters = query.events().stream().flatMap(event -> event.definition().filters().stream()).toList();
     setThresholdFilterSampleArguments(
         createThresholdFilterStream(allEventFilters),
         sampleValues
@@ -260,18 +260,17 @@ public class TsdlQueryService implements QueryService {
     return Stream.concat(nonNegated, negated);
   }
 
+  @SuppressWarnings("ConstantConditions") // method too complex for this inspection due to the "filterArgument" pattern variable, but logic is fine
   private void setThresholdFilterSampleArguments(Stream<ThresholdFilter> filters, Map<TsdlIdentifier, Double> sampleValues) {
     filters.forEach(thresholdFilter -> {
-      if (!(thresholdFilter.threshold() instanceof TsdlSampleFilterArgument)) {
+      if (!(thresholdFilter.threshold() instanceof TsdlSampleFilterArgument filterArgument)) {
         throw Conditions.exception(Condition.ARGUMENT, "Filter argument must reference a sample (non-literal).");
       }
-      var filterArgument = ((TsdlSampleFilterArgument) thresholdFilter.threshold());
 
       var argumentIdentifier = filterArgument.sample().identifier();
       if (!sampleValues.containsKey(argumentIdentifier)) {
         throw new TsdlEvaluationException(
-            String.format("Sample '%s' referenced by filter has not been computed. Is it declared in the 'SAMPLES' directive?",
-                argumentIdentifier.name())
+            "Sample '%s' referenced by filter has not been computed. Is it declared in the 'SAMPLES' directive?".formatted(argumentIdentifier.name())
         );
       }
 

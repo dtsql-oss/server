@@ -76,7 +76,7 @@ public class QueryValidationApplication extends JFrame {
           ex = ex.getCause();
         }
 
-        txtResult.setText(String.format("ERROR!%n%s", error));
+        txtResult.setText("ERROR!%n%s".formatted(error));
       }
     });
     topPanel.add(cmdValidate, BorderLayout.SOUTH);

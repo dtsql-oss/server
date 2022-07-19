@@ -27,9 +27,7 @@ public interface StorageProperty {
         .map(StorageProperty.class::cast)
         .filter(element -> identifier.equals(element.identifier()))
         .findFirst()
-        .orElseThrow(() -> new NoSuchElementException(
-            String.format("There is no '%s' member with identifier '%s'.", clazz.getTypeName(), identifier))
-        );
+        .orElseThrow(() -> new NoSuchElementException("There is no '%s' member with identifier '%s'.".formatted(clazz.getTypeName(), identifier)));
   }
 
   String identifier();

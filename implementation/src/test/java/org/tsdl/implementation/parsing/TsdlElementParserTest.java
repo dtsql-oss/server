@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.NoSuchElementException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -110,13 +111,13 @@ class TsdlElementParserTest {
     assertThat(PARSER.parseNumber(str)).isEqualTo(expected);
   }
 
+  @ParameterizedTest
   @ValueSource(strings = {
       "2,9", "2,9 ", "2.9 ", "29 ",
       "293.222,9", "19.283.932", "28,292,833", "2,233.3", "16 325,62", "16 325.62",
       "1,6326E+004", "1.6326E+004", "13%", "13 %", "13€", "13 €", "13 $", "13$", "$13",
       "NaN", "nan", "-NaN", "-nan", "Inf", "inf", "-Inf", "-inf", "Infinity", "infinity", "-Infinity", "-infinity"
   })
-  @ParameterizedTest
   void parseNumber_invalidNumber_throws(String str) {
     assertThatThrownBy(() -> PARSER.parseNumber(str)).isInstanceOf(TsdlParserException.class);
   }
@@ -124,5 +125,25 @@ class TsdlElementParserTest {
   @Test
   void parseNumber_null_throws() {
     assertThatThrownBy(() -> PARSER.parseNumber(null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validParseStringLiteralInputs")
+  @Disabled
+  void parseStringLiteral_validLiteral_parsesCorrectly(String str, String expected) {
+    assertThat(PARSER.parseStringLiteral(str)).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {})
+  @Disabled
+  void parseStringLiteral_invalidLiteral_throws(String str) {
+    assertThatThrownBy(() -> PARSER.parseStringLiteral(str)).isInstanceOf(TsdlParserException.class);
+  }
+
+  @Test
+  @Disabled
+  void parseStringLiteral_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseStringLiteral(null)).isInstanceOf(IllegalArgumentException.class);
   }
 }

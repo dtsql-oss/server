@@ -16,6 +16,6 @@ public class DuplicateIdentifierException extends TsdlParserException {
   }
 
   private static String formatMessage(String identifierName) {
-    return String.format(MESSAGE_TEMPLATE, identifierName);
+    return MESSAGE_TEMPLATE.formatted(identifierName);
   }
 }

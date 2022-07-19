@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.infrastructure.api.StorageService;
 import org.tsdl.infrastructure.common.Condition;
@@ -95,7 +94,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
       var filePath = lookupConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
       var fieldSeparator = lookupConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
       try (var csvReader = createReader(filePath, fieldSeparator)) {
-        return csvReader.stream().collect(Collectors.toList());
+        return csvReader.stream().toList();
       }
     });
   }
@@ -135,7 +134,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
             var value = row.getField(valueIndex);
 
             return DataPoint.of(Instant.from(formatter.parse(dateTime)), Double.valueOf(value));
-          }).collect(Collectors.toList());
+          }).toList();
     });
   }
 

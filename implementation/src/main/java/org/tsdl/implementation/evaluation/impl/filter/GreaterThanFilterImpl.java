@@ -1,9 +1,5 @@
 package org.tsdl.implementation.evaluation.impl.filter;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
 import org.tsdl.implementation.model.filter.GreaterThanFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.infrastructure.common.Condition;
@@ -13,16 +9,9 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link GreaterThanFilter}.
  */
-@Getter
-@Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class GreaterThanFilterImpl implements GreaterThanFilter {
-  private final TsdlFilterArgument threshold;
-
-  public GreaterThanFilterImpl(TsdlFilterArgument threshold) {
+public record GreaterThanFilterImpl(TsdlFilterArgument threshold) implements GreaterThanFilter {
+  public GreaterThanFilterImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, threshold, "Threshold of 'greater than' filter must not be null.");
-    this.threshold = threshold;
   }
 
   @Override

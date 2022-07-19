@@ -16,6 +16,6 @@ public class UnknownIdentifierException extends TsdlParserException {
   }
 
   private static String formatMessage(String identifierName, String purpose) {
-    return String.format(MESSAGE_TEMPLATE, identifierName, purpose);
+    return MESSAGE_TEMPLATE.formatted(identifierName, purpose);
   }
 }

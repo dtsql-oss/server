@@ -61,7 +61,7 @@ public abstract class BaseTsdlClient<T extends QueryClientSpecification> impleme
       if (!response.isSuccessful()) {
         log.error("TSDL Query failed: {}", response.body() != null ? Objects.requireNonNull(response.body()).string() : "unknown reason");
         throw new IOException(
-            String.format("Unexpected HTTP Status Code at '%s': %s", response.request().url(), response.code())
+            "Unexpected HTTP Status Code at '%s': %s".formatted(response.request().url(), response.code())
         );
       }
 
