@@ -13,7 +13,7 @@
 
     <properties>
         <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
-        <java.version>17</java.version>
+        <java.version>18</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
