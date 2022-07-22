@@ -21,6 +21,7 @@
 | Compose Deployment         | `./run/ComposeDeployment.run.xml`      | Docker      |                 |             |
 | Compose Build + Deployment | `./run/ComposeBuildDeployment.run.xml` | Docker      |                 |             |
 | All Tests                  | `./run/AllTests.run.xml`               | JUnit       |                 |             |
+| Checkstyle                 | `./run/Checkstyle.run.xml`             | Maven       |                 |             |
 | Package                    | `./run/Package.run.xml`                | Maven       |                 |             |
 | Install                    | `./run/Install.run.xml`                | Maven       |                 |             |
 | ANTLR Generate             | `./run/ANTLRGenerate.run.xml`          | Maven       |                 |             |

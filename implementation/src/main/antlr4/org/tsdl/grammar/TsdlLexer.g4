@@ -26,6 +26,8 @@ CONNECTIVE_OR  :  'OR'  ;
 
 OPERATOR_GT  :  'gt'  ;
 OPERATOR_LT  :  'lt'  ;
+OPERATOR_BEFORE  :  'before'  ;
+OPERATOR_AFTER  :  'after'  ;
 
 COMMA  :  ','  ;
 PARENTHESIS_OPEN  :  '('  ;
@@ -83,7 +85,5 @@ fragment IDENTIFIER_CHARACTER
   |  DIGIT_CHARACTER
   ;
 
-fragment DIGIT_CHARACTER  : DIGIT  ;
-fragment LETTER_CHARACTER  : [A-Za-z]  ;
-
-//TERMINATOR : [\r\n]+ -> channel(HIDDEN);
+fragment DIGIT_CHARACTER  :  DIGIT  ;
+fragment LETTER_CHARACTER  :  [A-Za-z]  ;

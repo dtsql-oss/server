@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 
 /**
  * Small utility application that validates the syntax of a given TSDL Query.
@@ -63,7 +63,7 @@ public class QueryValidationApplication extends JFrame {
       try {
         queryParser.parseQuery(txtQuery.getText());
         txtResult.setText("SUCCESS!");
-      } catch (TsdlParserException e) {
+      } catch (TsdlParseException e) {
         var error = new StringBuilder();
         error.append(e.getMessage());
 

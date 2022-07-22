@@ -1,10 +1,12 @@
 package org.tsdl.implementation.parsing;
 
+import java.time.Instant;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
-import org.tsdl.implementation.parsing.enums.FilterType;
+import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
+import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 
 /**
  * Provides methods for parsing elements/components of {@link org.tsdl.implementation.model.TsdlQuery}.
@@ -12,7 +14,9 @@ import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 public interface TsdlElementParser {
   ConnectiveIdentifier parseConnectiveIdentifier(String str);
 
-  FilterType parseFilterType(String str);
+  ThresholdFilterType parseThresholdFilterType(String str);
+
+  TemporalFilterType parseTemporalFilterType(String str);
 
   YieldFormat parseResultFormat(String str);
 
@@ -25,4 +29,6 @@ public interface TsdlElementParser {
   Integer parseInteger(String str);
 
   String parseStringLiteral(String str);
+
+  Instant parseDateLiteral(String str);
 }

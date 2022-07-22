@@ -9,11 +9,13 @@ import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutpu
 import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
-import org.tsdl.implementation.evaluation.impl.filter.GreaterThanFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.LowerThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.temporal.BeforeFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.GreaterThanFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.LowerThanFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlLiteralFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalAverageAggregatorImpl;
@@ -33,19 +35,21 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
-import org.tsdl.implementation.parsing.enums.FilterType;
+import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
+import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
 // TODO Add tests
+
 /**
  * Reference implementation of {@link TsdlElementFactory}.
  */
@@ -57,12 +61,22 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   }
 
   @Override
-  public SinglePointFilter getFilter(FilterType type, TsdlFilterArgument argument) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of filter must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of filter must not be null.");
+  public SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of threshold filter must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of threshold filter must not be null.");
     return switch (type) {
       case GT -> new GreaterThanFilterImpl(argument);
       case LT -> new LowerThanFilterImpl(argument);
+    };
+  }
+
+  @Override
+  public SinglePointFilter getTemporalFilter(TemporalFilterType type, Instant argument) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of temporal filter must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of temporal filter must not be null.");
+    return switch (type) {
+      case AFTER -> new AfterFilterImpl(argument);
+      case BEFORE -> new BeforeFilterImpl(argument);
     };
   }
 

@@ -1,13 +1,14 @@
 package org.tsdl.implementation.parsing.stub;
 
+import java.time.Instant;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
-import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
+import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 
 @SuppressWarnings("unused") // only referenced by string literals, therefore usage unrecognized
 public final class ElementParserDataFactory {
@@ -23,8 +24,8 @@ public final class ElementParserDataFactory {
 
   public static Stream<Arguments> validFilterTypeInputs() {
     return Stream.of(
-        Arguments.of("gt", FilterType.GT),
-        Arguments.of("lt", FilterType.LT)
+        Arguments.of("gt", ThresholdFilterType.GT),
+        Arguments.of("lt", ThresholdFilterType.LT)
     );
   }
 
@@ -89,6 +90,19 @@ public final class ElementParserDataFactory {
         testCase.apply("ß "),
         testCase.apply("123456  7"),
         testCase.apply(" 2ab83 o ")
+    );
+  }
+
+  public static Stream<Arguments> validParseDateLiteralInputs() {
+    final Function<String, Arguments> testCase = (str) -> Arguments.of("\"%s\"".formatted(str), Instant.parse(str));
+    return Stream.of(
+        testCase.apply("2022-07-13T23:04:06.123Z"),
+        testCase.apply("2022-07-13T23:04:06.123456Z"),
+        testCase.apply("2022-07-13T23:04:06.123456789Z"),
+        testCase.apply("2022-07-13T23:04:06.12345689Z"),
+        testCase.apply("2022-07-13T23:04:06Z"),
+        testCase.apply("2009-01-01T12:00:00+01:00"),
+        testCase.apply("2009-06-30T18:30:00-02:30")
     );
   }
 }

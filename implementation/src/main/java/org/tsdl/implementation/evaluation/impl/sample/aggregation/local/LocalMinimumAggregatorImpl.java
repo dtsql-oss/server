@@ -36,6 +36,6 @@ public class LocalMinimumAggregatorImpl extends AbstractAggregator implements Lo
 
   @Override
   protected String descriptor() {
-    return "minimum";
+    return "local sample (minimum) from '%s' until '%s'".formatted(lowerBound, upperBound);
   }
 }

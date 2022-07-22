@@ -17,7 +17,7 @@ import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.factory.TsdlElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
@@ -75,7 +75,7 @@ class TsdlFormattingTests {
     void tsdlFormatter_invalidArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
       assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, id, true, "3.4"))
-          .isInstanceOf(TsdlParserException.class);
+          .isInstanceOf(TsdlParseException.class);
     }
   }
 

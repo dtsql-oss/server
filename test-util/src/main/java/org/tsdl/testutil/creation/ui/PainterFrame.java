@@ -128,8 +128,6 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
         Instant.now().plus(5L * 12 * 30, ChronoUnit.DAYS) // 5 years
     );
 
-    Conditions.checkContains(Condition.ARGUMENT, List.of("Java", "CSV"), type, "Unknown output type '%s'", type);
-
     var summaryStatistics = lst.stream().mapToDouble(Point::getY).summaryStatistics();
     return switch (type) {
       case "CSV" -> serializeCsv(lst, lowestDate, summaryStatistics);
@@ -166,7 +164,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     for (var i = 0; i < lst.size(); i++) {
       var point = lst.get(i);
       output
-          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(getYear(i, lowestDate))
           .append(";")
           .append(point.getY())
           .append("\n");
@@ -191,12 +189,16 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
       var trailingComma = i == lst.size() - 1 ? "" : ",";
       output
           .append("  DataPoint.of(")
-          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(getYear(i, lowestDate))
           .append(", ")
           .append(point.getY())
           .append(")%s%n".formatted(trailingComma));
     }
     output.append(")");
     return output.toString();
+  }
+
+  private String getYear(int i, Instant lowestDate) {
+    return INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES));
   }
 }

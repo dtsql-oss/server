@@ -18,14 +18,14 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -171,7 +171,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       var lowerBound = timeRange[0];
       var upperBound = timeRange[1];
       if (!lowerBound.isBefore(upperBound)) {
-        throw new TsdlParserException("Lower bound of a local sample must be before its upper bound.");
+        throw new TsdlParseException("Lower bound of a local sample must be before its upper bound.");
       }
 
       return elementFactory.getSample(aggregatorType, lowerBound, upperBound, identifier, includeEcho, echoArguments);
@@ -179,12 +179,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
-    var instants = new Instant[ctx.STRING_LITERAL().size()];
-    for (var i = 0; i < ctx.STRING_LITERAL().size(); i++) {
-      var instantString = elementParser.parseStringLiteral(ctx.STRING_LITERAL(i).getText());
-      instants[i] = Instant.parse(instantString);
-    }
-    return instants;
+    return ctx.STRING_LITERAL().stream()
+        .map(literal -> elementParser.parseDateLiteral(literal.getText()))
+        .toArray(Instant[]::new);
   }
 
   private String[] parseEchoArguments(TsdlParser.EchoArgumentListContext ctx) {
@@ -233,7 +230,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (ctx.negatedSinglePointFilter() == null) {
       filter = parseSinglePointFilter(ctx.singlePointFilter());
     } else {
-      var innerFilter = parseSinglePointFilter((ctx.negatedSinglePointFilter().singlePointFilter()));
+      var innerFilter = parseSinglePointFilter(ctx.negatedSinglePointFilter().singlePointFilter());
       filter = elementFactory.getNegatedFilter(innerFilter);
     }
 
@@ -241,21 +238,37 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
-    var filterType = elementParser.parseFilterType(ctx.filterType().getText());
+    if (ctx.valueThresholdFilter() != null) {
+      return parseThresholdFilter(ctx.valueThresholdFilter());
+    } else if (ctx.temporalFilter() != null) {
+      return parseTemporalFilter(ctx.temporalFilter());
+    } else {
+      throw new TsdlParseException("Cannot parse SinglePointFilter, unknown rule - neither 'valueThresholdFilter' nor 'temporalFilter'.");
+    }
+  }
+
+  private SinglePointFilter parseThresholdFilter(TsdlParser.ValueThresholdFilterContext ctx) {
+    var filterType = elementParser.parseThresholdFilterType(ctx.valueTresholdFilterType().getText());
     TsdlFilterArgument filterArgument;
 
-    if (ctx.singlePointFilterArgument().identifier() != null) {
-      var identifier = requireIdentifier(ctx.singlePointFilterArgument().identifier(), IdentifierType.SAMPLE);
+    if (ctx.valueThresholdFilterArgument().identifier() != null) {
+      var identifier = requireIdentifier(ctx.valueThresholdFilterArgument().identifier(), IdentifierType.SAMPLE);
       var referencedSample = declaredSamples.get(identifier);
       filterArgument = elementFactory.getFilterArgument(referencedSample);
-    } else if (ctx.singlePointFilterArgument().NUMBER() != null) {
-      var literalValue = elementParser.parseNumber(ctx.singlePointFilterArgument().NUMBER().getText());
+    } else if (ctx.valueThresholdFilterArgument().NUMBER() != null) {
+      var literalValue = elementParser.parseNumber(ctx.valueThresholdFilterArgument().NUMBER().getText());
       filterArgument = elementFactory.getFilterArgument(literalValue);
     } else {
-      throw new IllegalStateException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'");
+      throw new TsdlParseException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
     }
 
-    return elementFactory.getFilter(filterType, filterArgument);
+    return elementFactory.getThresholdFilter(filterType, filterArgument);
+  }
+
+  private SinglePointFilter parseTemporalFilter(TsdlParser.TemporalFilterContext ctx) {
+    var filterType = elementParser.parseTemporalFilterType(ctx.temporalFilterType().getText());
+    var filterArgument = elementParser.parseDateLiteral(ctx.temporalFilterArgument().getText());
+    return elementFactory.getTemporalFilter(filterType, filterArgument);
   }
 
   private TsdlIdentifier requireIdentifier(TsdlParser.IdentifierContext ctx, IdentifierType type) {

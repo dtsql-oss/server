@@ -17,6 +17,6 @@ public class GlobalSumAggregatorImpl extends AbstractAggregator implements Globa
 
   @Override
   protected String descriptor() {
-    return "sum";
+    return "global sample (count)";
   }
 }

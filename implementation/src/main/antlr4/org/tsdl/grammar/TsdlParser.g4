@@ -58,7 +58,7 @@ temporalRelation
   ;
 
 yieldDeclaration
-  : YIELD COLON mandatoryWhitespace yieldType
+  :  YIELD COLON mandatoryWhitespace yieldType
   ;
 
 yieldType
@@ -156,7 +156,7 @@ aggregatorInput
   ;
 
 timeRange
-  :  STRING_LITERAL timeRangeSeparator STRING_LITERAL // expected: ISO-8601 timestamp (to be validated by application)
+  :  STRING_LITERAL timeRangeSeparator STRING_LITERAL  // expected: ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30.123+04:00' (to be validated by application)
   ;
 
 timeRangeSeparator
@@ -164,15 +164,15 @@ timeRangeSeparator
   ;
 
 identifierDeclaration
-  : AS whitespace identifier
+  :  AS whitespace identifier
   ;
 
 identifier
-  : IDENTIFIER
+  :  IDENTIFIER
   ;
 
 echoArgument
-  : ECHO_ARGUMENT | IDENTIFIER | NUMBER
+  :  ECHO_ARGUMENT | IDENTIFIER | NUMBER
   ;
 
 singlePointFilterList
@@ -190,20 +190,37 @@ singlePointFilterDeclaration
   ;
 
 singlePointFilter
-  :  filterType PARENTHESIS_OPEN whitespace singlePointFilterArgument whitespace PARENTHESIS_CLOSE
+  :  valueThresholdFilter
+  |  temporalFilter
   ;
 
 negatedSinglePointFilter
   :  CONNECTIVE_NOT PARENTHESIS_OPEN whitespace singlePointFilter whitespace PARENTHESIS_CLOSE
-  |  singlePointFilter
   ;
 
-singlePointFilterArgument
+temporalFilter
+  :  temporalFilterType PARENTHESIS_OPEN whitespace temporalFilterArgument whitespace PARENTHESIS_CLOSE
+  ;
+
+valueThresholdFilter
+  :  valueTresholdFilterType PARENTHESIS_OPEN whitespace valueThresholdFilterArgument whitespace PARENTHESIS_CLOSE
+  ;
+
+temporalFilterArgument
+  :  STRING_LITERAL  // expected: ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)
+  ;
+
+valueThresholdFilterArgument
   :  NUMBER
   |  identifier
   ;
 
-filterType
+temporalFilterType
+  :  OPERATOR_BEFORE
+  |  OPERATOR_AFTER
+  ;
+
+valueTresholdFilterType
   :  OPERATOR_GT
   |  OPERATOR_LT
   ;

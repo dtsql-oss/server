@@ -3,6 +3,7 @@ package org.tsdl.implementation.parsing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,9 +13,9 @@ import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
-import org.tsdl.implementation.parsing.enums.FilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 
 class TsdlElementParserTest {
   private static final TsdlElementParser PARSER = ObjectFactory.INSTANCE.elementParser();
@@ -38,19 +39,19 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validFilterTypeInputs")
-  void parseFilterType_validRepresentations_ok(String representation, FilterType member) {
-    assertThat(PARSER.parseFilterType(representation)).isEqualTo(member);
+  void parseFilterType_validRepresentations_ok(String representation, ThresholdFilterType member) {
+    assertThat(PARSER.parseThresholdFilterType(representation)).isEqualTo(member);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"lt ", " gt", "g t", "lT ", "", "      ", "0", "1"})
   void parseFilterType_invalidRepresentations_throws(String representation) {
-    assertThatThrownBy(() -> PARSER.parseFilterType(representation)).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(() -> PARSER.parseThresholdFilterType(representation)).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
   void parseFilterType_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseFilterType(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseThresholdFilterType(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest
@@ -118,7 +119,7 @@ class TsdlElementParserTest {
       "NaN", "nan", "-NaN", "-nan", "Inf", "inf", "-Inf", "-inf", "Infinity", "infinity", "-Infinity", "-infinity"
   })
   void parseNumber_invalidNumber_throws(String str) {
-    assertThatThrownBy(() -> PARSER.parseNumber(str)).isInstanceOf(TsdlParserException.class);
+    assertThatThrownBy(() -> PARSER.parseNumber(str)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
@@ -137,11 +138,30 @@ class TsdlElementParserTest {
       "", " ", "test", "'test'", "'c'", "\"test'", "\"failure", "\"anotherFailure\"'", "\"moreFailure\" ", " \"moreFailure\"", "\"h"
   })
   void parseStringLiteral_invalidLiteral_throws(String str) {
-    assertThatThrownBy(() -> PARSER.parseStringLiteral(str)).isInstanceOf(TsdlParserException.class);
+    assertThatThrownBy(() -> PARSER.parseStringLiteral(str)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
   void parseStringLiteral_null_throws() {
     assertThatThrownBy(() -> PARSER.parseStringLiteral(null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validParseDateLiteralInputs")
+  void parseDateLiteral_validLiteral_parsesCorrectly(String str, Instant expected) {
+    assertThat(PARSER.parseDateLiteral(str)).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\""
+  })
+  void parseDateLiteral_invalidLiteral_throws(String str) {
+    assertThatThrownBy(() -> PARSER.parseDateLiteral(str)).isInstanceOf(TsdlParseException.class);
+  }
+
+  @Test
+  void parseDateLiteral_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseDateLiteral(null)).isInstanceOf(IllegalArgumentException.class);
   }
 }

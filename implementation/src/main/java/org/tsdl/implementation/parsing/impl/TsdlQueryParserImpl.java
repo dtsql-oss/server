@@ -9,7 +9,7 @@ import org.tsdl.grammar.TsdlLexer;
 import org.tsdl.implementation.factory.ObjectFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
@@ -38,14 +38,14 @@ public class TsdlQueryParserImpl implements TsdlQueryParser {
       walker.walk(tsdlListener, parser.tsdlQuery());
 
       return tsdlListener.getQuery();
-    } catch (TsdlParserException e) {
-      if (e.getClass().equals(TsdlParserException.class)) {
+    } catch (TsdlParseException e) {
+      if (e.getClass().equals(TsdlParseException.class)) {
         throw e;
       } else {
-        throw new TsdlParserException("Parsing query string failed.", e);
+        throw new TsdlParseException("Parsing query string failed.", e);
       }
     } catch (Exception e) {
-      throw new TsdlParserException("Parsing query string failed.", e);
+      throw new TsdlParseException("Parsing query string failed.", e);
     }
   }
 }

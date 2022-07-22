@@ -1,4 +1,4 @@
-package org.tsdl.implementation.model.filter;
+package org.tsdl.implementation.model.filter.threshold;
 
 /**
  * A "lower than" threshold filter.

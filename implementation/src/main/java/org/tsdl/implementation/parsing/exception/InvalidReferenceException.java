@@ -1,6 +1,6 @@
 package org.tsdl.implementation.parsing.exception;
 
-public class InvalidReferenceException extends TsdlParserException {
+public class InvalidReferenceException extends TsdlParseException {
   private static final String MESSAGE_TEMPLATE = "Identifier '%s' was used as '%s' reference, but never declared as such.";
 
   public InvalidReferenceException(String identifierName, String requiredPurpose) {

@@ -18,6 +18,6 @@ public class GlobalCountAggregatorImpl extends AbstractAggregator implements Glo
 
   @Override
   protected String descriptor() {
-    return "count";
+    return "global sample (count)";
   }
 }

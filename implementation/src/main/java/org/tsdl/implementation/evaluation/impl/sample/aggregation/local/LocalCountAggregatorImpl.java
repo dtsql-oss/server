@@ -37,6 +37,6 @@ public class LocalCountAggregatorImpl extends AbstractAggregator implements Loca
 
   @Override
   protected String descriptor() {
-    return "count";
+    return "local sample (count) from '%s' until '%s'".formatted(lowerBound, upperBound);
   }
 }

@@ -36,6 +36,6 @@ public class LocalSumAggregatorImpl extends AbstractAggregator implements LocalS
 
   @Override
   protected String descriptor() {
-    return "sum";
+    return "local sample (sum) from '%s' until '%s'".formatted(lowerBound, upperBound);
   }
 }

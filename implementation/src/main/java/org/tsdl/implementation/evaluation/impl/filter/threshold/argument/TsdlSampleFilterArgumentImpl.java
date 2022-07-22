@@ -1,7 +1,7 @@
-package org.tsdl.implementation.evaluation.impl.filter.argument;
+package org.tsdl.implementation.evaluation.impl.filter.threshold.argument;
 
 import java.util.Objects;
-import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.threshold.argument.TsdlSampleFilterArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;

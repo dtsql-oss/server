@@ -36,6 +36,6 @@ public class LocalMaximumAggregatorImpl extends AbstractAggregator implements Lo
 
   @Override
   protected String descriptor() {
-    return "maximum";
+    return "local sample (maximum) from '%s' until '%s'".formatted(lowerBound, upperBound);
   }
 }

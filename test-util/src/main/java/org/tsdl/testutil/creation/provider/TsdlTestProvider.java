@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -19,6 +20,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Provides time series, i.e. lists of {@link DataPoint}, to unit tests based on {@link TsdlTestSources} annotations on a unit test.
  */
+@Slf4j
 public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<TsdlTestSources> {
   private List<TsdlTestSource> sourceFiles;
 
@@ -50,6 +52,10 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
           .ofPattern(testSource.timestampFormat())
           .withZone(ZoneOffset.UTC);
 
+      log.debug("Reading test data from '{}'.", testFile);
+      if (testSource.skipHeaders() > 0) {
+        log.debug("Skipping the first {} lines.", testSource.skipHeaders());
+      }
       var skippedHeaders = 0;
       try (var reader = new BufferedReader(new FileReader(testFile))) {
         String line;

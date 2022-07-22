@@ -17,6 +17,6 @@ public class GlobalMaximumAggregatorImpl extends AbstractAggregator implements G
 
   @Override
   protected String descriptor() {
-    return "maximum";
+    return "global sample (count)";
   }
 }

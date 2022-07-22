@@ -369,313 +369,208 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_lt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       AND(lt(27.25))
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_ltSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER: AND(lt(myAvg))
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       AND(gt(27.24))
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(1), dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(1), dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gtSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER: AND(gt(myAvg))
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       AND( gt(25.75), lt(75) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(1));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLtSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       AND( gt(myAvg), lt(76) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       OR( gt(75), lt(26) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLtSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       OR( gt(myAvg), lt(21) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       AND( gt(25.75), NOT(lt(28)) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLtSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       AND( gt(25), NOT(lt(myAvg)) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLt(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       OR( NOT(gt(27.25)), lt(26) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLtSample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       OR( NOT(gt(myAvg)), lt(27) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuery(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       AND( gt(100), lt(100) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of();
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of());
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuerySample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       AND( gt(myAvg), lt(myAvg) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of();
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of());
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuery(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           FILTER:
                       OR( gt(100), lt(100) )
-                    YIELD: data points""";
-
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
-
-      var result = queryService.query(dataPoints, query);
-
-      assertThat(result)
-          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
-          .extracting(TsdlDataPoints::items)
-          .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuerySample(List<DataPoint> dataPoints) {
-      var query = """
+      filterTest("""
           WITH SAMPLES: avg(_input) AS myAvg
                     FILTER:
                       OR( gt(myAvg), lt(myAvg) )
-                    YIELD: data points""";
+                    YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2)));
+    }
 
-      var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_before(List<DataPoint> dataPoints) {
+      filterTest("FILTER: AND(before(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
+    }
 
-      var result = queryService.query(dataPoints, query);
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_beforeImpossible(List<DataPoint> dataPoints) {
+      filterTest("FILTER: AND(before(\"2021-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_after(List<DataPoint> dataPoints) {
+      filterTest("FILTER: AND(after(\"2022-05-24T20:36:44.233Z\")) YIELD: data points", dataPoints, List.of(dataPoints.get(2)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_afterImpossible(List<DataPoint> dataPoints) {
+      filterTest("FILTER: AND(after(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_notAfterAndAfter(List<DataPoint> dataPoints) {
+      filterTest("FILTER: AND(NOT(after(\"2022-05-24T20:33:45.234Z\")), after(\"2022-05-24T20:33:45.000Z\")) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(1)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_notBeforeOrBefore(List<DataPoint> dataPoints) {
+      filterTest("FILTER: OR(NOT(before(\"2022-05-24T20:36:44.234Z\")), before(\"2022-05-24T20:33:45.234Z\")) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(2)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
+    void queryFilter_mixValueAndTimeFilters(List<DataPoint> dataPoints) {
+      filterTest("WITH SAMPLES: max(_input) AS myMax FILTER: AND(NOT(before(\"2022-05-24T20:33:45.234Z\")), lt(myMax)) YIELD: data points",
+          dataPoints, List.of(dataPoints.get(1)));
+    }
+
+    private void filterTest(String query, List<DataPoint> input, List<DataPoint> expectedResult) {
+      var result = queryService.query(input, query);
 
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
           .extracting(TsdlDataPoints::items)
           .usingRecursiveComparison()
-          .isEqualTo(expectedItems);
+          .isEqualTo(expectedResult);
     }
   }
 
@@ -778,7 +673,30 @@ class TsdlQueryServiceTest {
               "sample 'm1' of 'avg' aggregator := 2.000",
               "sample 'm2' of 'max' aggregator := 3"
           ));
+    }
 
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series4.csv", skipHeaders = 6),
+        @TsdlTestSource(value = DATA_ROOT + "series4_result.csv"),
+    })
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd/MM HH:mm")
+    void queryIntegration_temporalAndValueFilterBasedOnLocalAverage_cutsOffCorrectly(List<DataPoint> dps, List<DataPoint> expectedResult) {
+      var query = """
+          WITH SAMPLES: avg("2022-07-22T17:30:00.000Z", "2022-07-22T23:55:00.000Z") AS localAvg -> echo(4)
+          FILTER: AND(
+                    NOT(before("2022-07-22T17:30:00.000Z")),
+                    NOT(after("2022-07-22T23:55:00.000Z")),
+                    gt(localAvg)
+                  )
+          YIELD: data points""";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlDataPoints.class))
+          .extracting(TsdlDataPoints::items, InstanceOfAssertFactories.list(DataPoint.class))
+          .isEqualTo(expectedResult);
     }
   }
 }

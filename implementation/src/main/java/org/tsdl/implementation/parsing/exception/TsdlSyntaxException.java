@@ -1,6 +1,6 @@
 package org.tsdl.implementation.parsing.exception;
 
-public class TsdlSyntaxException extends TsdlParserException {
+public class TsdlSyntaxException extends TsdlParseException {
   public TsdlSyntaxException() {
   }
 

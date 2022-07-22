@@ -17,6 +17,6 @@ public class GlobalMinimumAggregatorImpl extends AbstractAggregator implements G
 
   @Override
   protected String descriptor() {
-    return "minimum";
+    return "global sample (count)";
   }
 }

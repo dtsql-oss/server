@@ -17,6 +17,6 @@ public class GlobalAverageAggregatorImpl extends AbstractAggregator implements G
 
   @Override
   protected String descriptor() {
-    return "arithmetic mean";
+    return "global sample (arithmetic mean)";
   }
 }

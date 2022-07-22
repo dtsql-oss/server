@@ -36,6 +36,6 @@ public class LocalAverageAggregatorImpl extends AbstractAggregator implements Lo
 
   @Override
   protected String descriptor() {
-    return "arithmetic mean";
+    return "local sample (arithmetic mean) from '%s' until '%s'".formatted(lowerBound, upperBound);
   }
 }

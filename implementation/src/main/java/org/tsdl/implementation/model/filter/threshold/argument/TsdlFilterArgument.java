@@ -1,4 +1,4 @@
-package org.tsdl.implementation.model.filter.argument;
+package org.tsdl.implementation.model.filter.threshold.argument;
 
 /**
  * An argument to a TSDL filter.
