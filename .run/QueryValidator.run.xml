@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="QueryValidationApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+  <configuration default="false" name="QueryValidator" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.tsdl.service.QueryValidationApplication" />
     <module name="service" />
     <extension name="coverage">
