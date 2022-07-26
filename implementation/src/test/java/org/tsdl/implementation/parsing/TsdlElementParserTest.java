@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -18,7 +18,7 @@ import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 
 class TsdlElementParserTest {
-  private static final TsdlElementParser PARSER = ObjectFactory.INSTANCE.elementParser();
+  private static final TsdlElementParser PARSER = TsdlComponentFactory.INSTANCE.elementParser();
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validConnectiveIdentifierInputs")

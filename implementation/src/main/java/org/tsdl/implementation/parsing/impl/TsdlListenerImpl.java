@@ -11,8 +11,8 @@ import java.util.Set;
 import org.tsdl.grammar.TsdlParser;
 import org.tsdl.grammar.TsdlParserBaseListener;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
-import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.factory.TsdlElementFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -34,8 +34,8 @@ import org.tsdl.infrastructure.common.Conditions;
  * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
  */
 public class TsdlListenerImpl extends TsdlParserBaseListener {
-  private final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
-  private final TsdlElementFactory elementFactory = ObjectFactory.INSTANCE.elementFactory();
+  private final TsdlElementParser elementParser = TsdlComponentFactory.INSTANCE.elementParser();
+  private final TsdlQueryElementFactory elementFactory = TsdlComponentFactory.INSTANCE.elementFactory();
   private final Set<TsdlIdentifier> declaredIdentifiers = new HashSet<>();
   private final Map<TsdlIdentifier, TsdlEvent> declaredEvents = new HashMap<>();
   private final Map<TsdlIdentifier, TsdlSample> declaredSamples = new HashMap<>();
@@ -88,14 +88,14 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (eventList.events() != null) {
       var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).toList();
       events.forEach(event -> {
-        declaredEvents.put(event.identifier(), event);
+        declaredEvents.put(event.definition().identifier(), event);
         parsedEvents.add(event);
       });
     }
 
     if (eventList.eventDeclaration() != null) {
       var event = parseEvent(eventList.eventDeclaration());
-      declaredEvents.put(event.identifier(), event);
+      declaredEvents.put(event.definition().identifier(), event);
       parsedEvents.add(event);
     }
 
@@ -203,7 +203,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
     var connective = parseSinglePointFilterConnective(ctx.filterConnective());
     var identifier = parseIdentifier(ctx.identifierDeclaration().identifier());
-    return elementFactory.getEvent(connective, identifier);
+    return elementFactory.getSinglePointEvent(connective, identifier);
   }
 
   private SinglePointFilterConnective parseSinglePointFilterConnective(TsdlParser.FilterConnectiveContext ctx) {

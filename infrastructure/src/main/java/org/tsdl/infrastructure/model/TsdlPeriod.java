@@ -19,6 +19,8 @@ public interface TsdlPeriod extends QueryResult {
 
   boolean isEmpty();
 
+  boolean contains(Instant timestamp);
+
   @Override
   default QueryResultType type() {
     return QueryResultType.PERIOD;

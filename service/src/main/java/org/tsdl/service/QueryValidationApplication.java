@@ -13,7 +13,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 
@@ -25,7 +25,7 @@ public class QueryValidationApplication extends JFrame {
 
   private final JTextArea txtResult = new JTextArea();
 
-  private final transient TsdlQueryParser queryParser = ObjectFactory.INSTANCE.queryParser();
+  private final transient TsdlQueryParser queryParser = TsdlComponentFactory.INSTANCE.queryParser();
 
   private QueryValidationApplication() {
     super("TSDL Syntax Checker");

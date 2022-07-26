@@ -51,8 +51,8 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
   }
 
   private boolean follows(AnnotatedTsdlPeriod previousPeriod, AnnotatedTsdlPeriod currentPeriod) {
-    return Objects.equals(operand2().identifier(), previousPeriod.event())
-        && Objects.equals(operand1().identifier(), currentPeriod.event());
+    return Objects.equals(operand2().definition().identifier(), previousPeriod.event())
+        && Objects.equals(operand1().definition().identifier(), currentPeriod.event());
   }
 
   private TsdlPeriod mergePeriods(AnnotatedTsdlPeriod period1, AnnotatedTsdlPeriod period2, int index) {

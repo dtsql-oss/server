@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.factory.TsdlElementFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
@@ -22,7 +22,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
 class TsdlFormattingTests {
-  private static final TsdlElementFactory ELEMENTS = ObjectFactory.INSTANCE.elementFactory();
+  private static final TsdlQueryElementFactory ELEMENTS = TsdlComponentFactory.INSTANCE.elementFactory();
 
   @Nested
   @DisplayName("Sample Formatting Tests")

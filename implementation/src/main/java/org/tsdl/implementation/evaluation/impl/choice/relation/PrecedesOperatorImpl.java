@@ -51,8 +51,8 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) imple
   }
 
   private boolean precedes(AnnotatedTsdlPeriod previousPeriod, AnnotatedTsdlPeriod currentPeriod) {
-    return Objects.equals(operand1().identifier(), previousPeriod.event())
-        && Objects.equals(operand2().identifier(), currentPeriod.event());
+    return Objects.equals(operand1().definition().identifier(), previousPeriod.event())
+        && Objects.equals(operand2().definition().identifier(), currentPeriod.event());
   }
 
   private TsdlPeriod mergePeriods(AnnotatedTsdlPeriod period1, AnnotatedTsdlPeriod period2, int index) {

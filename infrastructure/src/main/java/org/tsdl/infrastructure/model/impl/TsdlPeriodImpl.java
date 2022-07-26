@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
@@ -35,6 +36,11 @@ public record TsdlPeriodImpl(Integer index, Instant start, Instant end, List<Tsd
   @Override
   public boolean isEmpty() {
     return emptyData(index, start, end);
+  }
+
+  @Override
+  public boolean contains(Instant timestamp) {
+    return TsdlUtil.isWithinRange(timestamp, start, end);
   }
 
   @Override

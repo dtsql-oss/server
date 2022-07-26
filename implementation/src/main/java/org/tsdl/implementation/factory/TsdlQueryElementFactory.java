@@ -22,7 +22,7 @@ import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 /**
  * Factory for creating elements of a {@link TsdlQuery}.
  */
-public interface TsdlElementFactory {
+public interface TsdlQueryElementFactory {
   TsdlIdentifier getIdentifier(String name);
 
   SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument);
@@ -42,7 +42,7 @@ public interface TsdlElementFactory {
   TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
                        String... formatterArgs);
 
-  TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
+  TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
 
   TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
 

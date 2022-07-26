@@ -9,6 +9,7 @@ import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutpu
 import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
+import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.BeforeFilterImpl;
@@ -28,11 +29,12 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalCou
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMaximumAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMinimumAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalSumAggregatorImpl;
-import org.tsdl.implementation.factory.TsdlElementFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
+import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
@@ -51,9 +53,9 @@ import org.tsdl.infrastructure.common.Conditions;
 // TODO Add tests
 
 /**
- * Reference implementation of {@link TsdlElementFactory}.
+ * Reference implementation of {@link TsdlQueryElementFactory}.
  */
-public class TsdlElementFactoryImpl implements TsdlElementFactory {
+public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   @Override
   public TsdlIdentifier getIdentifier(String name) {
     Conditions.checkNotNull(Condition.ARGUMENT, name, "Identifier name must not be null.");
@@ -134,10 +136,13 @@ public class TsdlElementFactoryImpl implements TsdlElementFactory {
   }
 
   @Override
-  public TsdlEvent getEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier) {
+  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier) {
     Conditions.checkNotNull(Condition.ARGUMENT, definition, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
-    return new TsdlEventImpl(definition, identifier);
+    return new TsdlEventImpl(
+        new SinglePointEventDefinitionImpl(identifier, definition),
+        TsdlEventStrategyType.SINGLE_POINT_EVENT
+    );
   }
 
   @Override

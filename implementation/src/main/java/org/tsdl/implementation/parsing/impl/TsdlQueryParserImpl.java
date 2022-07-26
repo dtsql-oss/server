@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.tsdl.grammar.TsdlLexer;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
@@ -17,7 +17,7 @@ import org.tsdl.infrastructure.common.Conditions;
  * Default implementation of {@link TsdlQuery}.
  */
 public class TsdlQueryParserImpl implements TsdlQueryParser {
-  private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
+  private final ANTLRErrorListener errorListener = TsdlComponentFactory.INSTANCE.errorListener();
 
   @Override
   public TsdlQuery parseQuery(String query) {

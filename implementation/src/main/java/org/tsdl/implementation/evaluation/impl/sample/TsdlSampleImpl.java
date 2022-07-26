@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.tsdl.implementation.evaluation.impl.common.DefaultFormattable;
+import org.tsdl.implementation.evaluation.DefaultFormattable;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
