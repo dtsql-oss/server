@@ -33,6 +33,10 @@ import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
+import org.tsdl.implementation.model.event.EventDuration;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationImpl;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
@@ -136,13 +140,21 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier) {
+  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, EventDuration duration) {
     Conditions.checkNotNull(Condition.ARGUMENT, definition, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
     return new TsdlEventImpl(
-        new SinglePointEventDefinitionImpl(identifier, definition),
-        TsdlEventStrategyType.SINGLE_POINT_EVENT
+        new SinglePointEventDefinitionImpl(identifier, definition, duration),
+        duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT
     );
+  }
+
+  @Override
+  public EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, EventDurationUnit unit) {
+    Conditions.checkNotNull(Condition.ARGUMENT, unit, "The unit of the event duration must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, lowerBound, "The lower bound of an event must not be null. Use 0 (inclusive) instead.");
+    Conditions.checkNotNull(Condition.ARGUMENT, upperBound, "The upper bound of an event must not be null. Use Long.MAX_VALUE instead.");
+    return new EventDurationImpl(lowerBound, upperBound, unit);
   }
 
   @Override

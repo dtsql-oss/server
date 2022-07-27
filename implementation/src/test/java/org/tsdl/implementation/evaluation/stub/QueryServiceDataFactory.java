@@ -39,11 +39,11 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, "avg(_input)", 47.864),
-        Arguments.of(input, "min(_input)", 25.75),
-        Arguments.of(input, "max(_input)", 75.52),
-        Arguments.of(input, "count(_input)", 5.0),
-        Arguments.of(input, "sum(_input)", 239.32)
+        Arguments.of(input, "avg()", 47.864),
+        Arguments.of(input, "min()", 25.75),
+        Arguments.of(input, "max()", 75.52),
+        Arguments.of(input, "count()", 5.0),
+        Arguments.of(input, "sum()", 239.32)
     );
   }
 
@@ -57,9 +57,9 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, "avg(_input) AS s1,  min(_input) AS s2", "s1,s2", new Double[] {47.864, 25.75}),
-        Arguments.of(input, "max(_input) AS s1", "s1", new Double[] {75.52}),
-        Arguments.of(input, "count(_input) AS s1, sum(_input) AS sample3", "s1, sample3", new Double[] {5.0, 239.32})
+        Arguments.of(input, "avg() AS s1,  min() AS s2", "s1,s2", new Double[] {47.864, 25.75}),
+        Arguments.of(input, "max() AS s1", "s1", new Double[] {75.52}),
+        Arguments.of(input, "count() AS s1, sum() AS sample3", "s1, sample3", new Double[] {5.0, 239.32})
     );
   }
 

@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -57,6 +59,33 @@ public final class ElementParserDataFactory {
     return Stream.of(
         Arguments.of("follows", TemporalRelationType.FOLLOWS),
         Arguments.of("precedes", TemporalRelationType.PRECEDES)
+    );
+  }
+
+  public static Stream<Arguments> validEventDurationBoundInputs() {
+    return Stream.of(
+        Arguments.of("[5", true, EventDurationBound.of(5, true)),
+        Arguments.of("[ 5", true, EventDurationBound.of(5, true)),
+        Arguments.of("[   0", true, EventDurationBound.of(0, true)),
+        Arguments.of("   2345)   ", false, EventDurationBound.of(2345, false)),
+        Arguments.of("   7   )", false, EventDurationBound.of(7, false)),
+        Arguments.of("   5]   ", false, EventDurationBound.of(5, true)),
+        Arguments.of("   (   035   ", true, EventDurationBound.of(35, false)),
+        Arguments.of("   [\n   35   ", true, EventDurationBound.of(35, true)),
+        Arguments.of("35   \r]\n", false, EventDurationBound.of(35, true)),
+        Arguments.of(" ] ", false, EventDurationBound.of(Long.MAX_VALUE, true)),
+        Arguments.of(")", false, EventDurationBound.of(Long.MAX_VALUE, false))
+    );
+  }
+
+  public static Stream<Arguments> validEventDurationUnitInputs() {
+    return Stream.of(
+        Arguments.of("weeks", EventDurationUnit.WEEKS),
+        Arguments.of("days", EventDurationUnit.DAYS),
+        Arguments.of("hours", EventDurationUnit.HOURS),
+        Arguments.of("minutes", EventDurationUnit.MINUTES),
+        Arguments.of("seconds", EventDurationUnit.SECONDS),
+        Arguments.of("millis", EventDurationUnit.MILLISECONDS)
     );
   }
 

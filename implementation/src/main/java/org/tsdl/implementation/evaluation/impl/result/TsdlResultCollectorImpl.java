@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import org.tsdl.implementation.evaluation.TsdlResultCollector;
+import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
+import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
-import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -24,20 +25,30 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
   }
 
   @Override
-  public QueryResult collect(YieldStatement result, TsdlPeriodSet periods, List<DataPoint> dataPoints, Map<TsdlIdentifier, Double> samples) {
+  public QueryResult collect(YieldStatement result, List<DataPoint> dataPoints, List<AnnotatedTsdlPeriod> detectedPeriods, TemporalOperator choice,
+                             Map<TsdlIdentifier, Double> samples) {
+    TsdlPeriodSet periodSet;
+    if (choice != null) {
+      periodSet = choice.evaluate(detectedPeriods);
+    } else if (!detectedPeriods.isEmpty()) {
+      periodSet = QueryResult.of(detectedPeriods.size(), detectedPeriods.stream().map(AnnotatedTsdlPeriod::period).toList());
+    } else {
+      periodSet = TsdlPeriodSet.EMPTY;
+    }
+
     switch (result.format()) {
       case ALL_PERIODS:
-        return periods;
+        return periodSet;
 
       case LONGEST_PERIOD:
-        return findSpecialPeriod(periods.periods(), SpecialPeriod.MAXIMUM);
+        return findSpecialPeriod(periodSet.periods(), SpecialPeriod.MAXIMUM);
 
       case SHORTEST_PERIOD:
-        return findSpecialPeriod(periods.periods(), SpecialPeriod.MINIMUM);
+        return findSpecialPeriod(periodSet.periods(), SpecialPeriod.MINIMUM);
 
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
-            .filter(dp -> anyPeriodContains(periods.periods(), dp.timestamp()))
+            .filter(dp -> (periodSet.isEmpty() && choice == null) || anyPeriodContains(periodSet.periods(), dp.timestamp()))
             .toList();
         return QueryResult.of(pointsInPeriods);
 
@@ -52,36 +63,6 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
       default:
         throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);
     }
-  }
-
-  @Override
-  public QueryResult collect(YieldStatement result, List<DataPoint> dataPoints, Map<TsdlIdentifier, Double> samples) {
-    if (result.format() == YieldFormat.DATA_POINTS) {
-      return QueryResult.of(dataPoints);
-    }
-
-    if (result.format() == YieldFormat.SAMPLE) {
-      var sampleValue = samples.get(result.samples().get(0));
-      return QueryResult.of(sampleValue);
-    } else if (result.format() == YieldFormat.SAMPLE_SET) {
-      var sampleValues = result.samples().stream().map(samples::get).toArray(Double[]::new);
-      return QueryResult.of(sampleValues);
-    }
-
-    // since order preservation is part of the filter contract, we may assume the first element to be the start and the last element to be the end
-    var periodStart = dataPoints.get(0).timestamp();
-    var periodEnd = dataPoints.get(dataPoints.size() - 1).timestamp();
-    var period = QueryResult.of(0, periodStart, periodEnd);
-
-    if (result.format() == YieldFormat.LONGEST_PERIOD || result.format() == YieldFormat.SHORTEST_PERIOD) {
-      return period;
-    }
-
-    if (result.format() == YieldFormat.ALL_PERIODS) {
-      return QueryResult.of(1, List.of(period));
-    }
-
-    throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);
   }
 
   private TsdlPeriod findSpecialPeriod(List<TsdlPeriod> periods, SpecialPeriod type) {

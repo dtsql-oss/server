@@ -28,6 +28,7 @@ public record TsdlPeriodImpl(Integer index, Instant start, Instant end, List<Tsd
 
       Conditions.checkNotNull(Condition.ARGUMENT, start, "Period start must not be null.");
       Conditions.checkNotNull(Condition.ARGUMENT, end, "Period end must not be null.");
+      Conditions.checkIsTrue(Condition.ARGUMENT, !start.isAfter(end), "Period start must not be after end.");
     }
 
     Conditions.checkNotNull(Condition.ARGUMENT, logs, "Logs must not be null.");

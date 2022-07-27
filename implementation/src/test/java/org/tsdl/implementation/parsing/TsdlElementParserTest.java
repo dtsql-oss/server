@@ -7,9 +7,12 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -103,6 +106,50 @@ class TsdlElementParserTest {
   @Test
   void parseTemporalRelationType_null_throws() {
     assertThatThrownBy(() -> PARSER.parseTemporalRelationType(null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationBoundInputs")
+  void parseEventDurationBound_validRepresentations_ok(String representation, boolean lowerBound, EventDurationBound expected) {
+    assertThat(PARSER.parseEventDurationBound(representation, lowerBound)).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "[-5,true",
+      "5.3],false",
+      "-25.3],false",
+      "-253],false",
+      "[235.324,true",
+      "[522,false",
+      "2323],true",
+      "23][,false",
+      "],true",
+  })
+  void parseEventDurationBound_invalidRepresentations_throws(String representation, boolean lowerBound) {
+    assertThatThrownBy(() -> PARSER.parseEventDurationBound(representation, lowerBound)).isInstanceOf(TsdlParseException.class);
+  }
+
+  @Test
+  void parseEventDurationBound_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseEventDurationBound(null, false)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationUnitInputs")
+  void parseEventDurationUnit_validRepresentations_ok(String representation, EventDurationUnit member) {
+    assertThat(PARSER.parseEventDurationUnit(representation)).isEqualTo(member);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"years", "DAYS", "Minutes", "", "   ", "minutes ", " seconds", "milliseconds", "milli"})
+  void parseEventDurationUnit_invalidRepresentations_throws(String representation) {
+    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(representation)).isInstanceOf(NoSuchElementException.class);
+  }
+
+  @Test
+  void parseEventDurationUnit_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest

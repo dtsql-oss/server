@@ -127,7 +127,7 @@ class TsdlQueryServiceTest {
     void queryChooseEvents_lowFollowsHighSampleEventDefinition(List<DataPoint> dps) {
       var query = """
           WITH SAMPLES:
-                      avg(_input) AS myAvg
+                      avg() AS myAvg
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       AND(gt(myAvg)) AS high
@@ -151,6 +151,65 @@ class TsdlQueryServiceTest {
             assertThat(periodSet.periods().get(1)).isEqualTo(
                 QueryResult.of(1, Instant.parse("2022-12-15T04:51:48.000Z"), Instant.parse("2022-12-15T09:21:48.000Z"))
             );
+          });
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_lowFollowsHighSampleEventDefinitionWithPossibleDurationConstraint_reducesNumberOfResultPeriods(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+                      avg() AS myAvg
+                    USING EVENTS:
+                      AND(lt(myAvg)) AS low,
+                      AND(gt(myAvg)) FOR [2,] hours AS high
+                    CHOOSE:
+                      low follows high
+                    YIELD:
+                      all periods""";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(1);
+            assertThat(periodSet.periods()).hasSize(1);
+
+            assertThat(periodSet.periods().get(0)).isEqualTo(
+                QueryResult.of(0, Instant.parse("2022-12-15T04:51:48.000Z"), Instant.parse("2022-12-15T09:21:48.000Z"))
+            );
+          });
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series2.csv")
+    })
+    void queryChooseEvents_lowFollowsHighSampleEventDefinitionWithImpossibleDuration_returnsEmptyPeriodSet(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+                      avg() AS myAvg
+                    USING EVENTS:
+                      AND(lt(myAvg)) FOR [3,] days AS low,
+                      AND(gt(myAvg)) FOR [20,] weeks AS high
+                    CHOOSE:
+                      low follows high
+                    YIELD:
+                      all periods""";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(0);
+            assertThat(periodSet.periods()).hasSize(0);
+            assertThat(periodSet.isEmpty()).isTrue();
           });
     }
 
@@ -187,7 +246,7 @@ class TsdlQueryServiceTest {
     void queryChooseEvents_lowFollowsHigh_returnsLongestPeriod(List<DataPoint> dps) {
       var query = """
           WITH SAMPLES:
-                      avg(_input) AS myAvg
+                      avg() AS myAvg
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       OR(gt(myAvg)) AS high
@@ -370,7 +429,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_lt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       AND(lt(27.25))
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0)));
     }
@@ -379,8 +438,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_ltSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER: AND(lt(myAvg))
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER: AND(lt(myAvg))
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
 
@@ -389,7 +448,7 @@ class TsdlQueryServiceTest {
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       AND(gt(27.24))
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(1), dataPoints.get(2)));
     }
@@ -399,8 +458,8 @@ class TsdlQueryServiceTest {
     @TsdlTestVisualization(dateAxisFormat = TsdlTestVisualization.PRECISE_AXIS_FORMAT)
     void queryFilter_gtSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER: AND(gt(myAvg))
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER: AND(gt(myAvg))
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
 
@@ -408,7 +467,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       AND( gt(25.75), lt(75) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(1)));
     }
@@ -417,8 +476,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndLtSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       AND( gt(myAvg), lt(76) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
@@ -427,7 +486,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       OR( gt(75), lt(26) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(2)));
     }
@@ -436,8 +495,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtOrLtSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       OR( gt(myAvg), lt(21) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
@@ -446,7 +505,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       AND( gt(25.75), NOT(lt(28)) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
@@ -455,8 +514,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_gtAndNotLtSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       AND( gt(25), NOT(lt(myAvg)) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(2)));
     }
@@ -465,7 +524,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLt(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       OR( NOT(gt(27.25)), lt(26) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
@@ -474,8 +533,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notGtOrLtSample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       OR( NOT(gt(myAvg)), lt(27) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
     }
@@ -484,7 +543,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuery(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       AND( gt(100), lt(100) )
                     YIELD: data points""", dataPoints, List.of());
     }
@@ -493,8 +552,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_impossibleQuerySample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       AND( gt(myAvg), lt(myAvg) )
                     YIELD: data points""", dataPoints, List.of());
     }
@@ -503,7 +562,7 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuery(List<DataPoint> dataPoints) {
       filterTest("""
-          FILTER:
+          APPLY FILTER:
                       OR( gt(100), lt(100) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2)));
     }
@@ -512,8 +571,8 @@ class TsdlQueryServiceTest {
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_trivialQuerySample(List<DataPoint> dataPoints) {
       filterTest("""
-          WITH SAMPLES: avg(_input) AS myAvg
-                    FILTER:
+          WITH SAMPLES: avg() AS myAvg
+                    APPLY FILTER:
                       OR( gt(myAvg), lt(myAvg) )
                     YIELD: data points""", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2)));
     }
@@ -521,45 +580,46 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_before(List<DataPoint> dataPoints) {
-      filterTest("FILTER: AND(before(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of(dataPoints.get(0), dataPoints.get(1)));
+      filterTest("APPLY FILTER: AND(before(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_beforeImpossible(List<DataPoint> dataPoints) {
-      filterTest("FILTER: AND(before(\"2021-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
+      filterTest("APPLY FILTER: AND(before(\"2021-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_after(List<DataPoint> dataPoints) {
-      filterTest("FILTER: AND(after(\"2022-05-24T20:36:44.233Z\")) YIELD: data points", dataPoints, List.of(dataPoints.get(2)));
+      filterTest("APPLY FILTER: AND(after(\"2022-05-24T20:36:44.233Z\")) YIELD: data points", dataPoints, List.of(dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_afterImpossible(List<DataPoint> dataPoints) {
-      filterTest("FILTER: AND(after(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
+      filterTest("APPLY FILTER: AND(after(\"2022-05-24T20:36:44.234Z\")) YIELD: data points", dataPoints, List.of());
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notAfterAndAfter(List<DataPoint> dataPoints) {
-      filterTest("FILTER: AND(NOT(after(\"2022-05-24T20:33:45.234Z\")), after(\"2022-05-24T20:33:45.000Z\")) YIELD: data points", dataPoints,
+      filterTest("APPLY FILTER: AND(NOT(after(\"2022-05-24T20:33:45.234Z\")), after(\"2022-05-24T20:33:45.000Z\")) YIELD: data points", dataPoints,
           List.of(dataPoints.get(1)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_notBeforeOrBefore(List<DataPoint> dataPoints) {
-      filterTest("FILTER: OR(NOT(before(\"2022-05-24T20:36:44.234Z\")), before(\"2022-05-24T20:33:45.234Z\")) YIELD: data points", dataPoints,
+      filterTest("APPLY FILTER: OR(NOT(before(\"2022-05-24T20:36:44.234Z\")), before(\"2022-05-24T20:33:45.234Z\")) YIELD: data points", dataPoints,
           List.of(dataPoints.get(0), dataPoints.get(2)));
     }
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryFilter_mixValueAndTimeFilters(List<DataPoint> dataPoints) {
-      filterTest("WITH SAMPLES: max(_input) AS myMax FILTER: AND(NOT(before(\"2022-05-24T20:33:45.234Z\")), lt(myMax)) YIELD: data points",
+      filterTest("WITH SAMPLES: max() AS myMax APPLY FILTER: AND(NOT(before(\"2022-05-24T20:33:45.234Z\")), lt(myMax)) YIELD: data points",
           dataPoints, List.of(dataPoints.get(1)));
     }
 
@@ -580,7 +640,7 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_0")
     void queryIntegration_queryWithOnlySampleDeclarations_returnsAllDataPoints(List<DataPoint> dataPoints) {
-      var query = "WITH SAMPLES: avg(_input) AS s1, min(_input) AS s2, max(_input) AS s3, sum(_input) AS s4\n"
+      var query = "WITH SAMPLES: avg() AS s1, min() AS s2, max() AS s3, sum() AS s4\n"
           + "          YIELD: data points";
 
       var expectedItems = List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2));
@@ -620,7 +680,7 @@ class TsdlQueryServiceTest {
           USING EVENTS: AND(lt(170)) AS low, AND(gt(170)) AS high
                     CHOOSE: low follows high
                     YIELD: all periods""";
-      var queryWithFilter = "FILTER: AND(NOT(lt(130)))\n" + queryWithoutFilter;
+      var queryWithFilter = "APPLY FILTER: AND(NOT(lt(130)))\n" + queryWithoutFilter;
 
       var resultWithoutFilter = queryService.query(dps, queryWithoutFilter);
       var resultWithFilter = queryService.query(dps, queryWithFilter);
@@ -654,7 +714,7 @@ class TsdlQueryServiceTest {
         "samples m1, m2", "samples m2,m1"})
     void queryIntegration_queryWithEchos_collectsLogMessages(String yield) {
       var query = """
-          WITH SAMPLES: avg(_input) AS m1 -> echo(3), max(_input) AS m2 -> echo(0)
+          WITH SAMPLES: avg() AS m1 -> echo(3), max() AS m2 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
                     CHOOSE: low precedes high
                     YIELD: %s""".formatted(yield);
@@ -684,7 +744,7 @@ class TsdlQueryServiceTest {
     void queryIntegration_temporalAndValueFilterBasedOnLocalAverage_cutsOffCorrectly(List<DataPoint> dps, List<DataPoint> expectedResult) {
       var query = """
           WITH SAMPLES: avg("2022-07-22T17:30:00.000Z", "2022-07-22T23:55:00.000Z") AS localAvg -> echo(4)
-          FILTER: AND(
+          APPLY FILTER: AND(
                     NOT(before("2022-07-22T17:30:00.000Z")),
                     NOT(after("2022-07-22T23:55:00.000Z")),
                     gt(localAvg)

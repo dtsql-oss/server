@@ -9,7 +9,10 @@ import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import org.tsdl.implementation.model.common.Identifiable;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
@@ -73,6 +76,51 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
+  public EventDurationBound parseEventDurationBound(String str, boolean lowerBound) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+
+    final var inclusiveBounds = Set.of('[', ']');
+    final var exclusiveBounds = Set.of('(', ')');
+    final var lowerParentheses = Set.of('[', '(');
+    final var upperParentheses = Set.of(']', ')');
+
+    var trimmedStr = str.trim();
+
+    var parenthesis = lowerBound ? trimmedStr.charAt(0) : trimmedStr.charAt(trimmedStr.length() - 1);
+    if (!inclusiveBounds.contains(parenthesis) && !exclusiveBounds.contains(parenthesis)) {
+      throw new TsdlParseException("'%s' is not a valid duration parenthesis. Valid options: '(', '[', ']', ')'".formatted(parenthesis));
+    } else if (lowerBound && !lowerParentheses.contains(parenthesis)) {
+      throw new TsdlParseException("'%s' is not a valid parenthesis for duration lower bounds. Valid options: '(', '['".formatted(parenthesis));
+    } else if (!lowerBound && !upperParentheses.contains(parenthesis)) {
+      throw new TsdlParseException("'%s' is not a valid parenthesis for duration upper bounds. Valid options: ')', ']'".formatted(parenthesis));
+    }
+
+    var inclusive = inclusiveBounds.contains(parenthesis); // otherwise firstChar must be in exclusive list due to assertion above
+    var valueString = lowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
+
+    long value;
+    if ("".equals(valueString) && lowerBound) {
+      value = 0;
+    } else if ("".equals(valueString)) {
+      value = Long.MAX_VALUE;
+    } else {
+      value = parseInteger(valueString.trim());
+    }
+
+    if (value < 0) {
+      throw new TsdlParseException("The value of an event duration bound must be greater than or equal to 0, but was %s".formatted(value));
+    }
+
+    return EventDurationBound.of(value, inclusive);
+  }
+
+  @Override
+  public EventDurationUnit parseEventDurationUnit(String str) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+    return parseEnumMember(EventDurationUnit.class, str);
+  }
+
+  @Override
   public Double parseNumber(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
@@ -100,11 +148,11 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Integer parseInteger(String str) {
+  public Long parseInteger(String str) {
     var dbl = parseNumber(str);
     var isInteger = dbl == Math.floor(dbl); // double is not infinite by implementation of "parseDouble", so no !Double.isInfinite() check required
     if (isInteger) {
-      return dbl.intValue();
+      return dbl.longValue();
     }
 
     throw new TsdlParseException("Expected double '%s' to be an integer.".formatted(dbl));

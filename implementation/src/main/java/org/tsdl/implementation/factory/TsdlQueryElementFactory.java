@@ -6,6 +6,9 @@ import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
+import org.tsdl.implementation.model.event.EventDuration;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
@@ -42,7 +45,9 @@ public interface TsdlQueryElementFactory {
   TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
                        String... formatterArgs);
 
-  TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier);
+  TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, EventDuration duration);
+
+  EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, EventDurationUnit unit);
 
   TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
 

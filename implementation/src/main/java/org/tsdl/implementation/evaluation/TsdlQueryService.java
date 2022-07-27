@@ -41,13 +41,14 @@ public class TsdlQueryService implements QueryService {
           : data;
 
       var detectedPeriods = periodAssembler.assemble(relevantDataPoints, parsedQuery.events());
-      QueryResult result;
-      if (parsedQuery.choice().isPresent()) {
-        var periods = parsedQuery.choice().get().evaluate(detectedPeriods);
-        result = resultCollector.collect(parsedQuery.result(), periods, relevantDataPoints, sampleValues);
-      } else {
-        result = resultCollector.collect(parsedQuery.result(), relevantDataPoints, sampleValues);
-      }
+
+      var result = resultCollector.collect(
+          parsedQuery.result(),
+          relevantDataPoints,
+          detectedPeriods,
+          parsedQuery.choice().orElse(null),
+          sampleValues
+      );
 
       return result.withLogs(logEvents);
     } catch (TsdlEvaluationException e) {

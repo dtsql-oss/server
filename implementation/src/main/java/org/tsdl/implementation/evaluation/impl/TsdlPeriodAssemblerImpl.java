@@ -8,6 +8,7 @@ import org.tsdl.implementation.evaluation.impl.event.strategy.SinglePointEventSt
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
+import org.tsdl.implementation.model.event.strategy.DurationEventStrategyImpl;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.model.DataPoint;
 
@@ -39,6 +40,7 @@ public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
   private TsdlEventStrategy getEventStrategy(TsdlEventStrategyType type) {
     return switch (type) {
       case SINGLE_POINT_EVENT -> new SinglePointEventStrategyImpl();
+      case SINGLE_POINT_EVENT_WITH_DURATION -> new DurationEventStrategyImpl(new SinglePointEventStrategyImpl());
     };
   }
 }
