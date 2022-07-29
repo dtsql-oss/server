@@ -6,10 +6,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.tsdl.grammar.TsdlLexer;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
@@ -17,7 +17,7 @@ import org.tsdl.infrastructure.common.Conditions;
  * Default implementation of {@link TsdlQuery}.
  */
 public class TsdlQueryParserImpl implements TsdlQueryParser {
-  private final ANTLRErrorListener errorListener = ObjectFactory.INSTANCE.errorListener();
+  private final ANTLRErrorListener errorListener = TsdlComponentFactory.INSTANCE.errorListener();
 
   @Override
   public TsdlQuery parseQuery(String query) {
@@ -38,14 +38,14 @@ public class TsdlQueryParserImpl implements TsdlQueryParser {
       walker.walk(tsdlListener, parser.tsdlQuery());
 
       return tsdlListener.getQuery();
-    } catch (TsdlParserException e) {
-      if (e.getClass().equals(TsdlParserException.class)) {
+    } catch (TsdlParseException e) {
+      if (e.getClass().equals(TsdlParseException.class)) {
         throw e;
       } else {
-        throw new TsdlParserException("Parsing query string failed.", e);
+        throw new TsdlParseException("Parsing query string failed.", e);
       }
     } catch (Exception e) {
-      throw new TsdlParserException("Parsing query string failed.", e);
+      throw new TsdlParseException("Parsing query string failed.", e);
     }
   }
 }

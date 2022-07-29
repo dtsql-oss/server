@@ -13,7 +13,7 @@
     <artifactId>implementation</artifactId>
     <version>${revision}</version>
     <name>implementation</name>
-    <description>Implementation of the TSDL language specification, i.e., query evaluation.</description>
+    <description>Implementation of the TSDL language specification, i.e., parsing and query evaluation.</description>
 
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
@@ -78,6 +78,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <argLine>--enable-preview</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -87,6 +90,9 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <release>${java.version}</release>
+                    <compilerArgs>
+                        <compilerArg>--enable-preview</compilerArg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 

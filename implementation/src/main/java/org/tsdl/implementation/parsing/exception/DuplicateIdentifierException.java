@@ -1,6 +1,6 @@
 package org.tsdl.implementation.parsing.exception;
 
-public class DuplicateIdentifierException extends TsdlParserException {
+public class DuplicateIdentifierException extends TsdlParseException {
   private static final String MESSAGE_TEMPLATE = "Identifiers must be unique, but '%s' has been declared more than once.";
 
   public DuplicateIdentifierException(String identifierName) {
@@ -16,6 +16,6 @@ public class DuplicateIdentifierException extends TsdlParserException {
   }
 
   private static String formatMessage(String identifierName) {
-    return String.format(MESSAGE_TEMPLATE, identifierName);
+    return MESSAGE_TEMPLATE.formatted(identifierName);
   }
 }

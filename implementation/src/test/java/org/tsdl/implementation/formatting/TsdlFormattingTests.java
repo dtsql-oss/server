@@ -13,16 +13,16 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.factory.TsdlElementFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
 class TsdlFormattingTests {
-  private static final TsdlElementFactory ELEMENTS = ObjectFactory.INSTANCE.elementFactory();
+  private static final TsdlQueryElementFactory ELEMENTS = TsdlComponentFactory.INSTANCE.elementFactory();
 
   @Nested
   @DisplayName("Sample Formatting Tests")
@@ -40,8 +40,7 @@ class TsdlFormattingTests {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgsList")
     void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, String identifier, String[] args,
-                                                            String expectedResult)
-        throws IOException {
+                                                            String expectedResult) {
       var sample = ELEMENTS.getSample(type, ELEMENTS.getIdentifier(identifier), true, args);
       sample.aggregator().compute(dps);
       formattingTestCollection(sample, result -> assertThat(result)
@@ -76,7 +75,7 @@ class TsdlFormattingTests {
     void tsdlFormatter_invalidArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
       assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, id, true, "3.4"))
-          .isInstanceOf(TsdlParserException.class);
+          .isInstanceOf(TsdlParseException.class);
     }
   }
 

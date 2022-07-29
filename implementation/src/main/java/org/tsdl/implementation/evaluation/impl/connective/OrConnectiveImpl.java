@@ -1,11 +1,6 @@
 package org.tsdl.implementation.evaluation.impl.connective;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.connective.OrConnective;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
@@ -17,16 +12,9 @@ import org.tsdl.infrastructure.model.DataPoint;
  * Default implementation of {@link OrConnective}.
  */
 @Slf4j
-@Getter
-@Accessors(fluent = true)
-@EqualsAndHashCode
-@ToString
-public final class OrConnectiveImpl implements OrConnective {
-  private final List<SinglePointFilter> filters;
-
-  public OrConnectiveImpl(List<SinglePointFilter> filters) {
+public record OrConnectiveImpl(List<SinglePointFilter> filters) implements OrConnective {
+  public OrConnectiveImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters of 'or' connective must not be null.");
-    this.filters = filters;
   }
 
   @Override
@@ -42,7 +30,7 @@ public final class OrConnectiveImpl implements OrConnective {
 
     var filteredList = data.stream()
         .filter(this::isSatisfied)
-        .collect(Collectors.toList());
+        .toList();
 
     log.debug("After evaluating 'or' connective, {} data points are remaining.", filteredList.size());
     return filteredList;

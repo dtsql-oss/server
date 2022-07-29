@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -122,24 +121,19 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
         .mapToObj(points::get)
         .sorted(Comparator.comparingDouble(Point::getX))
         .filter(distinctByKey(Point::getX))
-        .collect(Collectors.toList());
+        .toList();
 
     var lowestDate = referenceDate != null ? referenceDate : randomInstantBetween(
         Instant.now().minus(5L * 12 * 30, ChronoUnit.DAYS), // 5 years
         Instant.now().plus(5L * 12 * 30, ChronoUnit.DAYS) // 5 years
     );
 
-    Conditions.checkContains(Condition.ARGUMENT, List.of("Java", "CSV"), type, "Unknown output type '%s'", type);
-
     var summaryStatistics = lst.stream().mapToDouble(Point::getY).summaryStatistics();
-    switch (type) {
-      case "CSV":
-        return serializeCsv(lst, lowestDate, summaryStatistics);
-      case "Java":
-        return serializeJava(lst, lowestDate, summaryStatistics);
-      default:
-        throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
-    }
+    return switch (type) {
+      case "CSV" -> serializeCsv(lst, lowestDate, summaryStatistics);
+      case "Java" -> serializeJava(lst, lowestDate, summaryStatistics);
+      default -> throw Conditions.exception(Condition.ARGUMENT, "Unknown output type '%s'", type);
+    };
   }
 
   //CHECKSTYLE.OFF: MissingJavadocMethod - No documentation for external interface method needed.
@@ -170,7 +164,7 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
     for (var i = 0; i < lst.size(); i++) {
       var point = lst.get(i);
       output
-          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(getYear(i, lowestDate))
           .append(";")
           .append(point.getY())
           .append("\n");
@@ -195,12 +189,16 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
       var trailingComma = i == lst.size() - 1 ? "" : ",";
       output
           .append("  DataPoint.of(")
-          .append(INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES)))
+          .append(getYear(i, lowestDate))
           .append(", ")
           .append(point.getY())
-          .append(String.format(")%s%n", trailingComma));
+          .append(")%s%n".formatted(trailingComma));
     }
     output.append(")");
     return output.toString();
+  }
+
+  private String getYear(int i, Instant lowestDate) {
+    return INSTANT_FORMATTER.format(lowestDate.plus(i * 15L, ChronoUnit.MINUTES));
   }
 }

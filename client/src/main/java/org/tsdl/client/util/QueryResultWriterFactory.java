@@ -6,8 +6,6 @@ import org.tsdl.client.impl.csv.writer.PeriodSetWriter;
 import org.tsdl.client.impl.csv.writer.PeriodWriter;
 import org.tsdl.client.impl.csv.writer.ScalarListWriter;
 import org.tsdl.client.impl.csv.writer.ScalarWriter;
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
 
@@ -24,19 +22,12 @@ public final class QueryResultWriterFactory {
    * @param type the {@link QueryResultType} determining the concrete {@link QueryResultWriter} implementation to be constructed
    */
   public static QueryResultWriter getCsvWriter(QueryResultType type) {
-    switch (type) {
-      case DATA_POINTS:
-        return new DataPointsWriter();
-      case PERIOD_SET:
-        return new PeriodSetWriter();
-      case PERIOD:
-        return new PeriodWriter();
-      case SCALAR:
-        return new ScalarWriter();
-      case SCALAR_LIST:
-        return new ScalarListWriter();
-      default:
-        throw Conditions.exception(Condition.ARGUMENT, "Unknown query result type '%s'", type);
-    }
+    return switch (type) {
+      case DATA_POINTS -> new DataPointsWriter();
+      case PERIOD_SET -> new PeriodSetWriter();
+      case PERIOD -> new PeriodWriter();
+      case SCALAR -> new ScalarWriter();
+      case SCALAR_LIST -> new ScalarListWriter();
+    };
   }
 }

@@ -17,13 +17,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Slf4j
 public class LoggingRequestInterceptor implements HandlerInterceptor {
   @Override
-  public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
+  public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
     log.info("Starting request \"{} {}\"", request.getMethod(), request.getRequestURI());
     return true;
   }
 
   @Override
-  public void afterCompletion(HttpServletRequest request, HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
+  public void afterCompletion(HttpServletRequest request, HttpServletResponse response, @NonNull Object handler, Exception ex) {
     var statusCode = HttpStatus.resolve(response.getStatus());
     log.info("Completed request \"{} {}\" - {}{}",
         request.getMethod(),

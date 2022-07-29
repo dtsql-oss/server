@@ -54,7 +54,7 @@ public abstract class StorageServiceConfigurationMapper {
         .filter(c -> c.canConvert(value, targetType))
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(
-            String.format("There is no element converter available supporting a conversion from type '%s' to type '%s'.", value.getClass().getName(),
+            "There is no element converter available supporting a conversion from type '%s' to type '%s'.".formatted(value.getClass().getName(),
                 targetType.getName())));
 
     return converter.convert(value);

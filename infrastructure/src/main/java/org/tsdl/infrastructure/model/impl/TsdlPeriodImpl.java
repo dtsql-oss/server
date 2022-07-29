@@ -2,12 +2,9 @@ package org.tsdl.infrastructure.model.impl;
 
 import java.time.Instant;
 import java.util.List;
-import lombok.Builder;
-import lombok.Value;
-import lombok.experimental.Accessors;
-import lombok.extern.jackson.Jacksonized;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
@@ -15,22 +12,13 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
 /**
  * Default implementation of the {@link TsdlPeriod} interface.
  */
-@Jacksonized
-@Builder
-@Value
-@Accessors(fluent = true)
-public class TsdlPeriodImpl implements TsdlPeriod {
-  Integer index;
-  Instant start;
-  Instant end;
-  List<TsdlLogEvent> logs;
-
+public record TsdlPeriodImpl(Integer index, Instant start, Instant end, List<TsdlLogEvent> logs) implements TsdlPeriod {
   /**
-   * Create an {@link TsdlPeriodSetImpl} instance. Either all parameters have to be null (being equivalent to {@link TsdlPeriod#EMPTY}, or
+   * Create an {@link TsdlPeriodSetImpl} instance. Either all parameters have to be null (being equivalent to {@link TsdlPeriod#EMPTY}), or
    * at least the {@link Instant} arguments {@code start} and {@code end}. The {@code index} parameter may be null because initializing a
    * {@link TsdlPeriod} with unknown index (because it becomes known/computed only later on) is allowed.
    */
-  public TsdlPeriodImpl(Integer index, Instant start, Instant end, List<TsdlLogEvent> logs) {
+  public TsdlPeriodImpl {
     if (!emptyData(index, start, end)) {
       if (index != null) {
         // initializing with unknown index is okay (e.g. if it is known/calculated only later on)
@@ -40,18 +28,20 @@ public class TsdlPeriodImpl implements TsdlPeriod {
 
       Conditions.checkNotNull(Condition.ARGUMENT, start, "Period start must not be null.");
       Conditions.checkNotNull(Condition.ARGUMENT, end, "Period end must not be null.");
+      Conditions.checkIsTrue(Condition.ARGUMENT, !start.isAfter(end), "Period start must not be after end.");
     }
 
     Conditions.checkNotNull(Condition.ARGUMENT, logs, "Logs must not be null.");
-    this.index = index;
-    this.start = start;
-    this.end = end;
-    this.logs = logs;
   }
 
   @Override
   public boolean isEmpty() {
     return emptyData(index, start, end);
+  }
+
+  @Override
+  public boolean contains(Instant timestamp) {
+    return TsdlUtil.isWithinRange(timestamp, start, end);
   }
 
   @Override

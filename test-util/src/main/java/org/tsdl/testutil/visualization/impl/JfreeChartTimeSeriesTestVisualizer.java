@@ -85,7 +85,7 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
       var series = timeSeries.get(i);
       Conditions.checkNotNull(Condition.ARGUMENT, series, "Time series instances of list of time series must not be null.");
 
-      var newSeries = new TimeSeries(String.format("Series%d", i));
+      var newSeries = new TimeSeries("Series%d".formatted(i));
       for (var dataPoint : series) {
         newSeries.add(dataPointFromTimestamp(dataPoint.timestamp()), dataPoint.value());
       }

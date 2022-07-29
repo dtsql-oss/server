@@ -83,20 +83,36 @@ public final class Conditions {
     checkIsTrue(conditionType, index >= 0 && collection.size() > index, "Index must be within collection range.");
   }
 
-  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
-    checkIsTrue(conditionType, i1 > i2, messageTemplate, messageArguments);
-  }
-
-  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2) {
-    checkIsTrue(conditionType, i1 > i2, "First integer must be greater than second.");
-  }
-
   public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
-    checkIsTrue(conditionType, i1 >= i2, messageTemplate, messageArguments);
+    checkIsGreaterThanOrEqual(conditionType, Long.valueOf(i1), Long.valueOf(i2), messageTemplate, messageArguments);
   }
 
   public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2) {
+    checkIsGreaterThanOrEqual(conditionType, Long.valueOf(i1), Long.valueOf(i2));
+  }
+
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, Long i1, Long i2, String messageTemplate, Object... messageArguments) {
+    checkIsTrue(conditionType, i1 >= i2, messageTemplate, messageArguments);
+  }
+
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, Long i1, Long i2) {
     checkIsTrue(conditionType, i1 >= i2, "First integer must be greater than second.");
+  }
+
+  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
+    checkIsGreaterThan(conditionType, Long.valueOf(i1), Long.valueOf(i2), messageTemplate, messageArguments);
+  }
+
+  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2) {
+    checkIsGreaterThan(conditionType, Long.valueOf(i1), Long.valueOf(i2));
+  }
+
+  public static void checkIsGreaterThan(Condition conditionType, Long i1, Long i2, String messageTemplate, Object... messageArguments) {
+    checkIsTrue(conditionType, i1 > i2, messageTemplate, messageArguments);
+  }
+
+  public static void checkIsGreaterThan(Condition conditionType, Long i1, Long i2) {
+    checkIsTrue(conditionType, i1 > i2, "First integer must be greater than second.");
   }
 
   public static void checkSizeExactly(Condition conditionType, Object[] array, int requiredSize, String messageTemplate, Object... messageArguments) {
@@ -121,13 +137,9 @@ public final class Conditions {
   }
 
   private static RuntimeException exception(Condition condition, String message) {
-    switch (condition) {
-      case STATE:
-        return new IllegalStateException(message);
-      case ARGUMENT:
-        return new IllegalArgumentException(message);
-      default:
-        throw Conditions.exception(Condition.ARGUMENT, "Unknown condition '%s'", condition);
-    }
+    return switch (condition) {
+      case STATE -> new IllegalStateException(message);
+      case ARGUMENT -> new IllegalArgumentException(message);
+    };
   }
 }

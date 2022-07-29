@@ -1,5 +1,5 @@
 # build stage
-FROM maven:3-openjdk-11 AS dependencies
+FROM maven:3-openjdk-18 AS dependencies
 
 WORKDIR /src
 
@@ -20,7 +20,7 @@ COPY . /src
 RUN mvn -Dcheckstyle.skip -DskipTests -DcreateChecksum=true clean package
 
 # production stage
-FROM openjdk:11 as release
+FROM openjdk:18 as release
 
 COPY --from=build /src/service/target/service-*.jar /service-app.jar
 

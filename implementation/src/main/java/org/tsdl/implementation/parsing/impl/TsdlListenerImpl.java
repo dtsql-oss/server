@@ -1,42 +1,43 @@
 package org.tsdl.implementation.parsing.impl;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.tsdl.grammar.TsdlParser;
 import org.tsdl.grammar.TsdlParserBaseListener;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
-import org.tsdl.implementation.factory.ObjectFactory;
-import org.tsdl.implementation.factory.TsdlElementFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
+import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
-
-// TODO: use visitor instead of listener?
 
 /**
  * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
  */
 public class TsdlListenerImpl extends TsdlParserBaseListener {
-  private final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
-  private final TsdlElementFactory elementFactory = ObjectFactory.INSTANCE.elementFactory();
+  private final TsdlElementParser elementParser = TsdlComponentFactory.INSTANCE.elementParser();
+  private final TsdlQueryElementFactory elementFactory = TsdlComponentFactory.INSTANCE.elementFactory();
   private final Set<TsdlIdentifier> declaredIdentifiers = new HashSet<>();
   private final Map<TsdlIdentifier, TsdlEvent> declaredEvents = new HashMap<>();
   private final Map<TsdlIdentifier, TsdlSample> declaredSamples = new HashMap<>();
@@ -44,7 +45,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   @Override
   public void enterIdentifierDeclaration(TsdlParser.IdentifierDeclarationContext ctx) {
-    var identifier = parseIdentifier(ctx.identifier());
+    var identifier = parseIdentifier(ctx.IDENTIFIER());
 
     if (!declaredIdentifiers.contains(identifier)) {
       declaredIdentifiers.add(identifier);
@@ -65,7 +66,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var parsedSamples = new ArrayList<TsdlSample>(); // not reusing declaredSamples.values() because that does not preserve insertion order
 
     if (aggregatorList.aggregators() != null) {
-      var samples = aggregatorList.aggregators().aggregatorDeclaration().stream().map(this::parseSample).collect(Collectors.toList());
+      var samples = aggregatorList.aggregators().aggregatorDeclaration().stream().map(this::parseSample).toList();
       samples.forEach(sample -> {
         declaredSamples.put(sample.identifier(), sample);
         parsedSamples.add(sample);
@@ -87,16 +88,16 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var parsedEvents = new ArrayList<TsdlEvent>(); // not reusing declaredEvents.values() because that does not preserve insertion order
 
     if (eventList.events() != null) {
-      var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).collect(Collectors.toList());
+      var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).toList();
       events.forEach(event -> {
-        declaredEvents.put(event.identifier(), event);
+        declaredEvents.put(event.definition().identifier(), event);
         parsedEvents.add(event);
       });
     }
 
     if (eventList.eventDeclaration() != null) {
       var event = parseEvent(eventList.eventDeclaration());
-      declaredEvents.put(event.identifier(), event);
+      declaredEvents.put(event.definition().identifier(), event);
       parsedEvents.add(event);
     }
 
@@ -108,13 +109,13 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var choiceStatement = ctx.choiceStatement();
 
     var chosenEvents = new ArrayList<TsdlEvent>();
-    for (var identifierDeclaration : choiceStatement.identifier()) {
+    for (var identifierDeclaration : choiceStatement.IDENTIFIER()) {
       var identifier = requireIdentifier(identifierDeclaration, IdentifierType.EVENT);
       var referencedEvent = declaredEvents.get(identifier);
       chosenEvents.add(referencedEvent);
     }
 
-    var relationType = elementParser.parseTemporalRelationType(choiceStatement.temporalRelation().getText());
+    var relationType = elementParser.parseTemporalRelationType(choiceStatement.TEMPORAL_RELATION().getText());
     var operator = elementFactory.getChoice(relationType, chosenEvents);
 
     queryBuilder.choiceValue(operator);
@@ -131,7 +132,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (format != YieldFormat.SAMPLE && format != YieldFormat.SAMPLE_SET) {
       return elementFactory.getResult(format, null);
     } else if (format == YieldFormat.SAMPLE) {
-      var identifier = requireIdentifier(ctx.identifier(), IdentifierType.SAMPLE);
+      var identifier = requireIdentifier(ctx.IDENTIFIER(), IdentifierType.SAMPLE);
       return elementFactory.getResult(format, List.of(identifier));
     } else {
       var identifierList = ctx.identifierList();
@@ -139,14 +140,14 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       var identifiers = new ArrayList<TsdlIdentifier>();
       if (identifierList.identifiers() != null) {
         var identifiersContext = identifierList.identifiers();
-        var parsedIdentifiers = identifiersContext.identifier().stream()
+        var parsedIdentifiers = identifiersContext.IDENTIFIER().stream()
             .map(i -> requireIdentifier(i, IdentifierType.SAMPLE))
-            .collect(Collectors.toList());
+            .toList();
         identifiers.addAll(parsedIdentifiers);
       }
 
-      if (identifierList.identifier() != null) {
-        var lastIdentifier = identifierList.identifier();
+      if (identifierList.IDENTIFIER() != null) {
+        var lastIdentifier = identifierList.IDENTIFIER();
         identifiers.add(requireIdentifier(lastIdentifier, IdentifierType.SAMPLE));
       }
 
@@ -155,26 +156,46 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
-    var aggregatorType = elementParser.parseAggregatorType(ctx.aggregatorFunctionDeclaration().aggregatorFunction().getText());
-    var identifier = parseIdentifier(ctx.identifierDeclaration().identifier());
+    var aggregatorType = elementParser.parseAggregatorType(ctx.aggregatorFunctionDeclaration().AGGREGATOR_FUNCTION().getText());
+    var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var includeEcho = ctx.echoStatement() != null;
     var echoArguments = includeEcho && ctx.echoStatement().echoArgumentList() != null
         ? parseEchoArguments(ctx.echoStatement().echoArgumentList())
         : new String[0];
 
-    return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
+    var global = ctx.aggregatorFunctionDeclaration().timeRange() == null;
+    if (global) {
+      return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
+    } else {
+      var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().timeRange());
+      Conditions.checkSizeExactly(Condition.STATE, timeRange, 2, "Time range must consist of exactly two timestamps.");
+
+      var lowerBound = timeRange[0];
+      var upperBound = timeRange[1];
+      if (!lowerBound.isBefore(upperBound)) {
+        throw new TsdlParseException("Lower bound of a local sample must be before its upper bound.");
+      }
+
+      return elementFactory.getSample(aggregatorType, lowerBound, upperBound, identifier, includeEcho, echoArguments);
+    }
+  }
+
+  private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
+    return ctx.STRING_LITERAL().stream()
+        .map(literal -> elementParser.parseDateLiteral(literal.getText()))
+        .toArray(Instant[]::new);
   }
 
   private String[] parseEchoArguments(TsdlParser.EchoArgumentListContext ctx) {
     var arguments = new ArrayList<String>();
 
     if (ctx.echoArguments() != null) {
-      var argList = ctx.echoArguments().echoArgumentDeclaration();
-      argList.forEach(arg -> arguments.add(arg.echoArgument().getText()));
+      var argList = ctx.echoArguments().echoArgument();
+      argList.forEach(arg -> arguments.add(arg.getText()));
     }
 
-    if (ctx.echoArgumentDeclaration() != null) {
-      var lastArg = ctx.echoArgumentDeclaration().echoArgument();
+    if (ctx.echoArgument() != null) {
+      var lastArg = ctx.echoArgument();
       arguments.add(lastArg.getText());
     }
 
@@ -183,18 +204,19 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
     var connective = parseSinglePointFilterConnective(ctx.filterConnective());
-    var identifier = parseIdentifier(ctx.identifierDeclaration().identifier());
-    return elementFactory.getEvent(connective, identifier);
+    var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
+    var duration = parseEventDuration(ctx.durationSpecification());
+    return elementFactory.getSinglePointEvent(connective, identifier, duration);
   }
 
   private SinglePointFilterConnective parseSinglePointFilterConnective(TsdlParser.FilterConnectiveContext ctx) {
-    var connectiveIdentifier = elementParser.parseConnectiveIdentifier(ctx.connectiveIdentifier().getText());
+    var connectiveIdentifier = elementParser.parseConnectiveIdentifier(ctx.CONNECTIVE_IDENTIFIER().getText());
     var filterList = ctx.singlePointFilterList();
 
     var parsedFilters = new ArrayList<SinglePointFilter>();
     if (filterList.singlePointFilters() != null) {
       var filtersContext = filterList.singlePointFilters();
-      var firstFilters = filtersContext.singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).collect(Collectors.toList());
+      var firstFilters = filtersContext.singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).toList();
       parsedFilters.addAll(firstFilters);
     }
 
@@ -211,7 +233,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (ctx.negatedSinglePointFilter() == null) {
       filter = parseSinglePointFilter(ctx.singlePointFilter());
     } else {
-      var innerFilter = parseSinglePointFilter((ctx.negatedSinglePointFilter().singlePointFilter()));
+      var innerFilter = parseSinglePointFilter(ctx.negatedSinglePointFilter().singlePointFilter());
       filter = elementFactory.getNegatedFilter(innerFilter);
     }
 
@@ -219,36 +241,45 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
-    var filterType = elementParser.parseFilterType(ctx.filterType().getText());
-    TsdlFilterArgument filterArgument;
-
-    if (ctx.singlePointFilterArgument().identifier() != null) {
-      var identifier = requireIdentifier(ctx.singlePointFilterArgument().identifier(), IdentifierType.SAMPLE);
-      var referencedSample = declaredSamples.get(identifier);
-      filterArgument = elementFactory.getFilterArgument(referencedSample);
-    } else if (ctx.singlePointFilterArgument().NUMBER() != null) {
-      var literalValue = elementParser.parseNumber(ctx.singlePointFilterArgument().NUMBER().getText());
-      filterArgument = elementFactory.getFilterArgument(literalValue);
+    if (ctx.valueThresholdFilter() != null) {
+      return parseThresholdFilter(ctx.valueThresholdFilter());
+    } else if (ctx.temporalFilter() != null) {
+      return parseTemporalFilter(ctx.temporalFilter());
     } else {
-      throw new IllegalStateException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'");
+      throw new TsdlParseException("Cannot parse SinglePointFilter, unknown rule - neither 'valueThresholdFilter' nor 'temporalFilter'.");
     }
-
-    return elementFactory.getFilter(filterType, filterArgument);
   }
 
-  private TsdlIdentifier requireIdentifier(TsdlParser.IdentifierContext ctx, IdentifierType type) {
-    var identifier = parseIdentifier(ctx);
-    Map<TsdlIdentifier, ?> identifierMap;
-    switch (type) {
-      case EVENT:
-        identifierMap = declaredEvents;
-        break;
-      case SAMPLE:
-        identifierMap = declaredSamples;
-        break;
-      default:
-        throw Conditions.exception(Condition.ARGUMENT, "Unknown identifier type '%s'", type);
+  private SinglePointFilter parseThresholdFilter(TsdlParser.ValueThresholdFilterContext ctx) {
+    var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
+    TsdlFilterArgument filterArgument;
+
+    if (ctx.valueThresholdFilterArgument().IDENTIFIER() != null) {
+      var identifier = requireIdentifier(ctx.valueThresholdFilterArgument().IDENTIFIER(), IdentifierType.SAMPLE);
+      var referencedSample = declaredSamples.get(identifier);
+      filterArgument = elementFactory.getFilterArgument(referencedSample);
+    } else if (ctx.valueThresholdFilterArgument().NUMBER() != null) {
+      var literalValue = elementParser.parseNumber(ctx.valueThresholdFilterArgument().NUMBER().getText());
+      filterArgument = elementFactory.getFilterArgument(literalValue);
+    } else {
+      throw new TsdlParseException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
     }
+
+    return elementFactory.getThresholdFilter(filterType, filterArgument);
+  }
+
+  private SinglePointFilter parseTemporalFilter(TsdlParser.TemporalFilterContext ctx) {
+    var filterType = elementParser.parseTemporalFilterType(ctx.TEMPORAL_FILTER_TYPE().getText());
+    var filterArgument = elementParser.parseDateLiteral(ctx.STRING_LITERAL().getText());
+    return elementFactory.getTemporalFilter(filterType, filterArgument);
+  }
+
+  private TsdlIdentifier requireIdentifier(TerminalNode node, IdentifierType type) {
+    var identifier = parseIdentifier(node);
+    var identifierMap = switch (type) {
+      case EVENT -> declaredEvents;
+      case SAMPLE -> declaredSamples;
+    };
 
     if (declaredIdentifiers.contains(identifier) && identifierMap.containsKey(identifier)) {
       return identifier;
@@ -259,9 +290,32 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private TsdlIdentifier parseIdentifier(TsdlParser.IdentifierContext ctx) {
-    var identifierName = ctx.IDENTIFIER().getText();
-    return elementFactory.getIdentifier(identifierName);
+  private EventDuration parseEventDuration(TsdlParser.DurationSpecificationContext ctx) {
+    if (ctx == null) {
+      return null;
+    }
+
+    var bounds = ctx.DURATION_RANGE().getText().trim().split(",");
+    Conditions.checkSizeExactly(Condition.STATE, bounds, 2, "There must be exactly two bounds for an event duration, separated by ','.");
+
+    var lowerBound = elementParser.parseEventDurationBound(bounds[0], true);
+    var upperBound = elementParser.parseEventDurationBound(bounds[1], false);
+
+    if (lowerBound.value() > upperBound.value()) {
+      throw new TsdlParseException("The lower bound of an event duration must be less than or equal to its upper bound.");
+    }
+
+    if ((lowerBound.value() == upperBound.value()) && !(lowerBound.inclusive() && upperBound.inclusive())) {
+      throw new TsdlParseException("If the lower and upper bound of an event are equal, both of them have to be inclusive, i.e., use '[' and ']'.");
+    }
+
+    var unit = elementParser.parseEventDurationUnit(ctx.TIME_UNIT().getText());
+
+    return elementFactory.getEventDuration(lowerBound, upperBound, unit);
+  }
+
+  private TsdlIdentifier parseIdentifier(TerminalNode node) {
+    return elementFactory.getIdentifier(node.getText());
   }
 
   public TsdlQuery getQuery() {

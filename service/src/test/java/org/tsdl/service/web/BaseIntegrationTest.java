@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.assertj.core.util.TriFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -122,7 +121,7 @@ public abstract class BaseIntegrationTest {
     var encodedQueryParams = new LinkedMultiValueMap<String, String>();
     queryParams.forEach((key, value) -> encodedQueryParams.put(key, value.stream()
         .map(item -> UriUtils.encode(item, StandardCharsets.UTF_8))
-        .collect(Collectors.toList())));
+        .toList()));
     return encodedQueryParams;
   }
 }

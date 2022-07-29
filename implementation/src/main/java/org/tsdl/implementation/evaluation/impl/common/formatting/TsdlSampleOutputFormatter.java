@@ -3,9 +3,10 @@ package org.tsdl.implementation.evaluation.impl.common.formatting;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.TsdlLocalAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -14,7 +15,7 @@ import org.tsdl.infrastructure.common.Conditions;
  * Concrete output formatter for {@link TsdlSample} instances.
  */
 public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample> {
-  private static final TsdlElementParser elementParser = ObjectFactory.INSTANCE.elementParser();
+  private static final TsdlElementParser ELEMENT_PARSER = TsdlComponentFactory.INSTANCE.elementParser();
   private final int decimalPlaces;
   private final String[] args;
 
@@ -27,11 +28,11 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     Conditions.checkNotNull(Condition.ARGUMENT, args, "Output formatting arguments must not be null.");
     Conditions.checkSizeExactly(Condition.ARGUMENT, args, 1, "There must be exactly one argument to the sample output formatter.");
 
-    var decimalArgument = elementParser.parseInteger(args[0]);
-    Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, decimalArgument, 0, "Number of decimal places must be greater than or equal to 0.");
+    var decimalArgument = ELEMENT_PARSER.parseInteger(args[0]);
+    Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, decimalArgument, 0L, "Number of decimal places must be greater than or equal to 0.");
 
     this.args = args;
-    decimalPlaces = decimalArgument;
+    decimalPlaces = decimalArgument.intValue();
   }
 
   @Override
@@ -49,7 +50,15 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     var aggregatorFunction = obj.aggregator().type().representation();
     var value = obj.aggregator().value();
 
-    return String.format("sample '%s' of '%s' aggregator := %s", sampleName, aggregatorFunction, decimalFormat.format(value));
+    var isLocal = obj.aggregator() instanceof TsdlLocalAggregator;
+    var localAddendum = "";
+    if (isLocal) {
+      var localAggregator = (TsdlLocalAggregator) obj.aggregator();
+      localAddendum = "(from %s until %s) ".formatted(localAggregator.lowerBound(), localAggregator.upperBound());
+    }
+
+    return "%ssample '%s' of '%s' aggregator %s:= %s".formatted(isLocal ? "local " : "", sampleName, aggregatorFunction, localAddendum,
+        decimalFormat.format(value));
   }
 
   @Override

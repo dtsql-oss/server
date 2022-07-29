@@ -13,9 +13,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import org.tsdl.implementation.factory.ObjectFactory;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
-import org.tsdl.implementation.parsing.exception.TsdlParserException;
+import org.tsdl.implementation.parsing.exception.TsdlParseException;
 
 /**
  * Small utility application that validates the syntax of a given TSDL Query.
@@ -25,7 +25,7 @@ public class QueryValidationApplication extends JFrame {
 
   private final JTextArea txtResult = new JTextArea();
 
-  private final transient TsdlQueryParser queryParser = ObjectFactory.INSTANCE.queryParser();
+  private final transient TsdlQueryParser queryParser = TsdlComponentFactory.INSTANCE.queryParser();
 
   private QueryValidationApplication() {
     super("TSDL Syntax Checker");
@@ -63,7 +63,7 @@ public class QueryValidationApplication extends JFrame {
       try {
         queryParser.parseQuery(txtQuery.getText());
         txtResult.setText("SUCCESS!");
-      } catch (TsdlParserException e) {
+      } catch (TsdlParseException e) {
         var error = new StringBuilder();
         error.append(e.getMessage());
 
@@ -76,7 +76,7 @@ public class QueryValidationApplication extends JFrame {
           ex = ex.getCause();
         }
 
-        txtResult.setText(String.format("ERROR!%n%s", error));
+        txtResult.setText("ERROR!%n%s".formatted(error));
       }
     });
     topPanel.add(cmdValidate, BorderLayout.SOUTH);

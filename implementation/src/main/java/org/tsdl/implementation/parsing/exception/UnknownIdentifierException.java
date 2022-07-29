@@ -1,6 +1,6 @@
 package org.tsdl.implementation.parsing.exception;
 
-public class UnknownIdentifierException extends TsdlParserException {
+public class UnknownIdentifierException extends TsdlParseException {
   private static final String MESSAGE_TEMPLATE = "Identifier '%s' was referenced as %s, but never declared.";
 
   public UnknownIdentifierException(String identifierName, String purpose) {
@@ -16,6 +16,6 @@ public class UnknownIdentifierException extends TsdlParserException {
   }
 
   private static String formatMessage(String identifierName, String purpose) {
-    return String.format(MESSAGE_TEMPLATE, identifierName, purpose);
+    return MESSAGE_TEMPLATE.formatted(identifierName, purpose);
   }
 }

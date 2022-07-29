@@ -5,11 +5,12 @@ WHITESPACE
   |  '\r'
   |  '\n'
   |  '\r\n'
+  |  '\t'
   ;
 
 SAMPLES_CLAUSE  :  'WITH SAMPLES'  ;
 EVENTS_CLAUSE  :  'USING EVENTS'  ;
-FILTER_CLAUSE  :  'FILTER'  ;
+FILTER_CLAUSE  :  'APPLY FILTER'  ;
 CHOOSE_CLAUSE  :  'CHOOSE'  ;
 
 YIELD  :  'YIELD'  ;
@@ -21,11 +22,20 @@ YIELD_SAMPLE  :  'sample'  ;
 YIELD_SAMPLE_SET :  'samples'  ;
 
 CONNECTIVE_NOT  :  'NOT'  ;
-CONNECTIVE_AND  :  'AND'  ;
-CONNECTIVE_OR  :  'OR'  ;
+CONNECTIVE_IDENTIFIER
+  :  'AND'
+  |  'OR'
+  ;
 
-OPERATOR_GT  :  'gt'  ;
-OPERATOR_LT  :  'lt'  ;
+THRESHOLD_FILTER_TYPE
+  :  'gt'
+  |  'lt'
+  ;
+
+TEMPORAL_FILTER_TYPE
+  :  'before'
+  |  'after'
+  ;
 
 COMMA  :  ','  ;
 PARENTHESIS_OPEN  :  '('  ;
@@ -54,32 +64,49 @@ AS  :  'AS'  ;
 ECHO_ARROW  :  '->'  ;
 ECHO_LABEL  :  'echo'  ;
 
-TEMPORAL_PRECEDES  :  'precedes'  ;
-TEMPORAL_FOLLOWS  :  'follows'  ;
+TEMPORAL_RELATION
+  :  'precedes'
+  |  'follows'
+  ;
 
-AGGREGATOR_AVG  :  'avg'  ;
-AGGREGATOR_MAX  :  'max'  ;
-AGGREGATOR_MIN  :  'min'  ;
-AGGREGATOR_SUM  :  'sum'  ;
-AGGREGATOR_COUNT  :  'count'  ;
-INPUT_VARIABLE  :  '_input'  ;
+AGGREGATOR_GLOBAL_INPUT  :  '_input'  ;
+AGGREGATOR_FUNCTION
+  :  'avg'
+  |  'max'
+  |  'min'
+  |  'sum'
+  |  'count'
+  ;
+
+DURATION_FOR  :  'FOR'  ;
+DURATION_RANGE  :  DURATION_RANGE_OPEN WHITESPACE* INT? WHITESPACE* COMMA WHITESPACE* INT? DURATION_RANGE_CLOSE  ; // INT >= 0 (app validation)
+fragment DURATION_RANGE_OPEN  :  PARENTHESIS_OPEN  |  '['  ;
+fragment DURATION_RANGE_CLOSE  :  PARENTHESIS_CLOSE  | ']'  ;
+
+TIME_UNIT
+  :  'weeks'
+  |  'days'
+  |  'hours'
+  |  'minutes'
+  |  'seconds'
+  |  'millis'
+  ;
+
+STRING_LITERAL  :  '"' STRING_CHARACTERS? '"'  ;
+fragment STRING_CHARACTERS  :  STRING_CHARACTER+  ;
+fragment STRING_CHARACTER  :  ~["\\\r\n]  ;
 
 IDENTIFIER
   :  IDENTIFIER_FIRST_CHARACTER IDENTIFIER_CHARACTER*
   ;
 
 ECHO_ARGUMENT
-  :  (IDENTIFIER_CHARACTER)+
+  :  NUMBER
+  |  STRING_LITERAL
   ;
 
 fragment IDENTIFIER_FIRST_CHARACTER  :  LETTER_CHARACTER  ;
+fragment IDENTIFIER_CHARACTER  :  LETTER_CHARACTER  |  DIGIT_CHARACTER  ;
 
-fragment IDENTIFIER_CHARACTER
-  :  LETTER_CHARACTER
-  |  DIGIT_CHARACTER
-  ;
-
-fragment DIGIT_CHARACTER  : DIGIT  ;
-fragment LETTER_CHARACTER  : [A-Za-z]  ;
-
-//TERMINATOR : [\r\n]+ -> channel(HIDDEN);
+fragment DIGIT_CHARACTER  :  DIGIT  ;
+fragment LETTER_CHARACTER  :  [A-Za-z]  ;

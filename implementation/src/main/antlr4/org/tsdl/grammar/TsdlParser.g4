@@ -28,20 +28,20 @@ eventsDeclarationStatement
   ;
 
 eventList
-  :  events eventSeparator eventDeclaration     // either two or more events
+  :  events COMMA whitespace eventDeclaration     // either two or more events
   |  eventDeclaration                           // or exactly one
   ;
 
 events
-  :  eventDeclaration (eventSeparator eventDeclaration)*   // one event plus [0..n] additional events
+  :  eventDeclaration (COMMA whitespace eventDeclaration)*   // one event plus [0..n] additional events
   ;
 
 eventDeclaration
-  :  filterConnective whitespace identifierDeclaration
+  :  filterConnective whitespace (durationSpecification whitespace)? identifierDeclaration
   ;
 
-eventSeparator
-  :  COMMA whitespace
+durationSpecification
+  : DURATION_FOR mandatoryWhitespace DURATION_RANGE mandatoryWhitespace TIME_UNIT
   ;
 
 chooseDeclaration
@@ -49,16 +49,11 @@ chooseDeclaration
   ;
 
 choiceStatement
-  :  identifier mandatoryWhitespace temporalRelation mandatoryWhitespace identifier
-  ;
-
-temporalRelation
-  :  TEMPORAL_PRECEDES
-  |  TEMPORAL_FOLLOWS
+  :  IDENTIFIER mandatoryWhitespace TEMPORAL_RELATION mandatoryWhitespace IDENTIFIER
   ;
 
 yieldDeclaration
-  : YIELD COLON mandatoryWhitespace yieldType
+  :  YIELD COLON mandatoryWhitespace yieldType
   ;
 
 yieldType
@@ -66,7 +61,7 @@ yieldType
   |  YIELD_LONGEST_PERIOD
   |  YIELD_SHORTEST_PERIOD
   |  YIELD_DATA_POINTS
-  |  YIELD_SAMPLE mandatoryWhitespace identifier
+  |  YIELD_SAMPLE mandatoryWhitespace IDENTIFIER
   |  YIELD_SAMPLE_SET mandatoryWhitespace identifierList
   ;
 
@@ -75,12 +70,7 @@ filtersDeclaration
   ;
 
 filterConnective
-  :  connectiveIdentifier PARENTHESIS_OPEN whitespace singlePointFilterList whitespace PARENTHESIS_CLOSE
-  ;
-
-connectiveIdentifier
-  :  CONNECTIVE_AND
-  |  CONNECTIVE_OR
+  :  CONNECTIVE_IDENTIFIER PARENTHESIS_OPEN whitespace singlePointFilterList whitespace PARENTHESIS_CLOSE
   ;
 
 aggregatorsDeclarationStatement
@@ -105,74 +95,56 @@ echoStatement
   ;
 
 echoArgumentList
-  :  echoArguments echoArgumentSeparator echoArgumentDeclaration      // either two or more echo arguments
-  |  echoArgumentDeclaration                                          // or exactly one
+  :  echoArguments COMMA whitespace echoArgument      // either two or more echo arguments
+  |  echoArgument                                          // or exactly one
   ;
 
 echoArguments
-  :  echoArgumentDeclaration (echoArgumentSeparator echoArgumentDeclaration)*    // one echo argument plus [0..n] additional arguments
-  ;
-
-echoArgumentDeclaration
-  :  echoArgument
-  ;
-
-echoArgumentSeparator
-  :  COMMA whitespace
+  :  echoArgument (COMMA whitespace echoArgument)*    // one echo argument plus [0..n] additional arguments
   ;
 
 identifierList
-  :  identifiers identifierSeparator identifier      // either two or more identifiers
-  |  identifier                                       // or exactly one
+  :  identifiers COMMA whitespace IDENTIFIER      // either two or more identifiers
+  |  IDENTIFIER                                       // or exactly one
   ;
 
 identifiers
-  :  identifier (identifierSeparator identifier)*    // one aggregator plus [0..n] additional aggregators
-  ;
-
-identifierSeparator
-  :  COMMA whitespace
+  :  IDENTIFIER (COMMA whitespace IDENTIFIER)*    // one aggregator plus [0..n] additional aggregators
   ;
 
 aggregatorFunctionDeclaration
-  :  aggregatorFunction PARENTHESIS_OPEN whitespace aggregatorInput whitespace PARENTHESIS_CLOSE
+  :  AGGREGATOR_FUNCTION PARENTHESIS_OPEN whitespace timeRange? whitespace PARENTHESIS_CLOSE
   ;
 
 aggregatorSeparator
   :  COMMA whitespace
   ;
 
-aggregatorFunction
-  :  AGGREGATOR_AVG
-  |  AGGREGATOR_MAX
-  |  AGGREGATOR_MIN
-  |  AGGREGATOR_SUM
-  |  AGGREGATOR_COUNT
+timeRange
+  :  STRING_LITERAL timeRangeSeparator STRING_LITERAL  // expected: ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30.123+04:00' (to be validated by application)
   ;
 
-aggregatorInput
-  :  INPUT_VARIABLE
+timeRangeSeparator
+  :  whitespace COMMA whitespace
   ;
 
 identifierDeclaration
-  : AS whitespace identifier
-  ;
-
-identifier
-  : IDENTIFIER
+  :  AS whitespace IDENTIFIER
   ;
 
 echoArgument
-  : ECHO_ARGUMENT | IDENTIFIER | NUMBER
+  :  ECHO_ARGUMENT
+  |  IDENTIFIER
+  |  NUMBER
   ;
 
 singlePointFilterList
-  :  singlePointFilters filterSeparator singlePointFilterDeclaration     // either two or more parameters
+  :  singlePointFilters COMMA whitespace singlePointFilterDeclaration     // either two or more parameters
   |  singlePointFilterDeclaration                                        // or exactly one
   ;
 
 singlePointFilters
-  :  singlePointFilterDeclaration (filterSeparator singlePointFilterDeclaration)* // one parameter plus [0..n] additional parameters
+  :  singlePointFilterDeclaration (COMMA whitespace singlePointFilterDeclaration)* // one parameter plus [0..n] additional parameters
   ;
 
 singlePointFilterDeclaration
@@ -181,22 +153,26 @@ singlePointFilterDeclaration
   ;
 
 singlePointFilter
-  :  filterType PARENTHESIS_OPEN whitespace singlePointFilterArgument whitespace PARENTHESIS_CLOSE
+  :  valueThresholdFilter
+  |  temporalFilter
   ;
 
 negatedSinglePointFilter
   :  CONNECTIVE_NOT PARENTHESIS_OPEN whitespace singlePointFilter whitespace PARENTHESIS_CLOSE
-  |  singlePointFilter
   ;
 
-singlePointFilterArgument
+// filter argument: STRING_LITERAL; ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)
+temporalFilter
+  :  TEMPORAL_FILTER_TYPE PARENTHESIS_OPEN whitespace STRING_LITERAL whitespace PARENTHESIS_CLOSE
+  ;
+
+valueThresholdFilter
+  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN whitespace valueThresholdFilterArgument whitespace PARENTHESIS_CLOSE
+  ;
+
+valueThresholdFilterArgument
   :  NUMBER
-  |  identifier
-  ;
-
-filterType
-  :  OPERATOR_GT
-  |  OPERATOR_LT
+  |  IDENTIFIER
   ;
 
 whitespace
@@ -205,9 +181,5 @@ whitespace
 
 mandatoryWhitespace
   :  WHITESPACE+
-  ;
-
-filterSeparator
-  :  COMMA whitespace
   ;
 
