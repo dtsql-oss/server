@@ -33,7 +33,7 @@ class TsdlFormattingTests {
                                                         String expectedResult)
         throws IOException {
       var sample = ELEMENTS.getSample(type, ELEMENTS.getIdentifier(identifier), true, args);
-      sample.aggregator().compute(dps);
+      sample.aggregator().compute(identifier, dps);
       formattingTestStream(sample, result -> assertThat(result).isEqualTo(expectedResult));
     }
 
@@ -42,7 +42,7 @@ class TsdlFormattingTests {
     void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, String identifier, String[] args,
                                                             String expectedResult) {
       var sample = ELEMENTS.getSample(type, ELEMENTS.getIdentifier(identifier), true, args);
-      sample.aggregator().compute(dps);
+      sample.aggregator().compute(identifier, dps);
       formattingTestCollection(sample, result -> assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.list(TsdlLogEvent.class))
           .hasSize(1)

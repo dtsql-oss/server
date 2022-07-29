@@ -2,9 +2,11 @@ package org.tsdl.implementation.evaluation.impl.event.strategy;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.evaluation.impl.choice.AnnotatedTsdlPeriodImpl;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -19,9 +21,12 @@ import org.tsdl.infrastructure.model.QueryResult;
 /**
  * Default implementation of {@link SinglePointEventStrategy}.
  */
+@Slf4j
 public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events) {
+    log.debug("Detecting periods using '{}' over {} data points and {} events.", SinglePointEventStrategyImpl.class.getName(), dataPoints.size(),
+        events.size());
     var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
     var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
     for (var i = 0; i < dataPoints.size(); i++) {
@@ -31,11 +36,12 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
       markEvents(dataPoints, events, eventMarkers, detectedPeriods, i, currentDataPoint, previousDataPoint);
     }
 
-    return detectedPeriods;
+    log.debug("Detected {} periods using '{}'.", detectedPeriods.size(), SinglePointEventStrategyImpl.class.getName());
+    return Collections.unmodifiableList(detectedPeriods);
   }
 
   private void markEvents(List<DataPoint> dataPoints, List<TsdlEventDefinition> events, HashMap<TsdlIdentifier, Instant> eventMarkers,
-                         ArrayList<AnnotatedTsdlPeriod> detectedPeriods, int i, DataPoint currentDataPoint, DataPoint previousDataPoint) {
+                          ArrayList<AnnotatedTsdlPeriod> detectedPeriods, int i, DataPoint currentDataPoint, DataPoint previousDataPoint) {
     for (TsdlEventDefinition event : events) {
       if (!(event instanceof SinglePointEventDefinition eventDef)) {
         throw Conditions.exception(Condition.ARGUMENT, "The event strategy '%s' only supports event definitions of type '%s'. Received: '%s'",

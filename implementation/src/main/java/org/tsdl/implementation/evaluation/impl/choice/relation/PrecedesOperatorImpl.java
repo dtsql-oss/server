@@ -25,7 +25,7 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) imple
 
   @Override
   public TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
-    log.debug("Evaluating 'precedes' temporal operator.");
+    log.debug("Evaluating '{} precedes {}' temporal operator.", operand1.definition().identifier().name(), operand2.definition().identifier().name());
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Annotated periods as input to 'precedes' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand1, "First event argument of 'precedes' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument of 'precedes' operator must not be null.");
@@ -46,7 +46,8 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) imple
       }
     }
 
-    log.debug("Evaluation of 'precedes' resulted in a period set with {} periods.", chosenPeriods.size());
+    log.debug("Evaluation of '{} precedes {}' resulted in a period set with {} periods.", operand1.definition().identifier().name(),
+        operand2.definition().identifier().name(), chosenPeriods.size());
     return QueryResult.of(chosenPeriods.size(), chosenPeriods);
   }
 

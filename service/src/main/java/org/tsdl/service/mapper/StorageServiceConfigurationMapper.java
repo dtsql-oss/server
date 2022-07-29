@@ -54,8 +54,11 @@ public abstract class StorageServiceConfigurationMapper {
         .filter(c -> c.canConvert(value, targetType))
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(
-            "There is no element converter available supporting a conversion from type '%s' to type '%s'.".formatted(value.getClass().getName(),
-                targetType.getName())));
+            "Invalid value for storage configuration property '%s'. Implicit conversion from type '%s' to type '%s' is invalid.".formatted(
+                property.identifier(),
+                value.getClass().getName(),
+                targetType.getName()))
+        );
 
     return converter.convert(value);
   }

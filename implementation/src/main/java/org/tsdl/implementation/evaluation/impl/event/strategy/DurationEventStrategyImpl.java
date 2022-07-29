@@ -1,4 +1,4 @@
-package org.tsdl.implementation.model.event.strategy;
+package org.tsdl.implementation.evaluation.impl.event.strategy;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
+import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
+import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -19,6 +22,7 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
 /**
  * Default implementation of {@link DurationEventStrategy}.
  */
+@Slf4j
 public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements DurationEventStrategy {
   private static final Map<EventDurationUnit, Double> MILLIS_TO_UNIT_CONVERSION_FACTOR = Map.of(
       EventDurationUnit.MILLISECONDS, 1.0,
@@ -31,9 +35,16 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
 
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events) {
+    log.debug("Detecting periods using composite strategy '{}' over {} data points and {} events.", DurationEventStrategyImpl.class.getName(),
+        dataPoints.size(),
+        events.size());
+
     var eventsByIdentifier = events.stream()
         .collect(Collectors.toMap(TsdlEventDefinition::identifier, Function.identity()));
+    log.debug("Employing wrapped strategy '{}' to assemble initial periods.", strategy.getClass().getName());
     var detectedPeriods = strategy.detectPeriods(dataPoints, events);
+    log.debug("Detected {} data points using wrapped strategy '{}'. Filtering the result now using duration-specific logic.", detectedPeriods.size(),
+        strategy.getClass().getName());
 
     var validPeriods = new ArrayList<AnnotatedTsdlPeriod>();
     for (var detectedPeriod : detectedPeriods) {
@@ -51,6 +62,7 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
       }
     }
 
+    log.debug("Detected {} valid periods using composite strategy '{}'.", validPeriods.size(), DurationEventStrategyImpl.class.getName());
     return Collections.unmodifiableList(validPeriods);
   }
 

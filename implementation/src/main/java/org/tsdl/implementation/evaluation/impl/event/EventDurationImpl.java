@@ -1,5 +1,8 @@
-package org.tsdl.implementation.model.event;
+package org.tsdl.implementation.evaluation.impl.event;
 
+import org.tsdl.implementation.model.event.EventDuration;
+import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 

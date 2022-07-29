@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import org.tsdl.implementation.evaluation.TsdlResultCollector;
-import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
-import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.infrastructure.common.Condition;
@@ -25,16 +23,9 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
   }
 
   @Override
-  public QueryResult collect(YieldStatement result, List<DataPoint> dataPoints, List<AnnotatedTsdlPeriod> detectedPeriods, TemporalOperator choice,
+  public QueryResult collect(YieldStatement result, List<DataPoint> dataPoints, TsdlPeriodSet periodSet, boolean noPeriodDefinitions,
                              Map<TsdlIdentifier, Double> samples) {
-    TsdlPeriodSet periodSet;
-    if (choice != null) {
-      periodSet = choice.evaluate(detectedPeriods);
-    } else if (!detectedPeriods.isEmpty()) {
-      periodSet = QueryResult.of(detectedPeriods.size(), detectedPeriods.stream().map(AnnotatedTsdlPeriod::period).toList());
-    } else {
-      periodSet = TsdlPeriodSet.EMPTY;
-    }
+
 
     switch (result.format()) {
       case ALL_PERIODS:
@@ -48,7 +39,7 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
 
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
-            .filter(dp -> (periodSet.isEmpty() && choice == null) || anyPeriodContains(periodSet.periods(), dp.timestamp()))
+            .filter(dp -> noPeriodDefinitions || anyPeriodContains(periodSet.periods(), dp.timestamp()))
             .toList();
         return QueryResult.of(pointsInPeriods);
 

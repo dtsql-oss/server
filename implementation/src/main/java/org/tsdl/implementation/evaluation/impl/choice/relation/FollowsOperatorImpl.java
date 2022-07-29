@@ -25,7 +25,7 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
 
   @Override
   public TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
-    log.debug("Evaluating 'follows' temporal operator.");
+    log.debug("Evaluating '{} follows {}' temporal operator.", operand1.definition().identifier().name(), operand2.definition().identifier().name());
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Annotated periods as input to 'follows' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand1, "First event argument of 'follows' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument of 'follows' operator must not be null.");
@@ -46,7 +46,8 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
       }
     }
 
-    log.debug("Evaluation of 'follows' resulted in a period set with {} periods.", chosenPeriods.size());
+    log.debug("Evaluation of '{} follows {}' resulted in a period set with {} periods.", operand1.definition().identifier().name(),
+        operand2.definition().identifier().name(), chosenPeriods.size());
     return QueryResult.of(chosenPeriods.size(), chosenPeriods);
   }
 

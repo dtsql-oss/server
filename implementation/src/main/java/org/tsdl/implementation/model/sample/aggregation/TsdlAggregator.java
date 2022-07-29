@@ -13,7 +13,7 @@ public interface TsdlAggregator {
    * Computes the aggregator value if it has not been yet. If the value has already been computed, it is not computed again, but the previously
    * computed value is returned.
    */
-  double compute(List<DataPoint> dataPoints);
+  double compute(String sampleIdentifier, List<DataPoint> dataPoints);
 
   /**
    * Returns the computed aggregator value. If it has not been computed yet, a {@link IllegalStateException} is thrown.

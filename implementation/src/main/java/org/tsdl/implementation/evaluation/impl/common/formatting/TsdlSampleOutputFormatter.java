@@ -3,6 +3,7 @@ package org.tsdl.implementation.evaluation.impl.common.formatting;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -14,6 +15,7 @@ import org.tsdl.infrastructure.common.Conditions;
 /**
  * Concrete output formatter for {@link TsdlSample} instances.
  */
+@Slf4j
 public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample> {
   private static final TsdlElementParser ELEMENT_PARSER = TsdlComponentFactory.INSTANCE.elementParser();
   private final int decimalPlaces;
@@ -57,8 +59,10 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
       localAddendum = "(from %s until %s) ".formatted(localAggregator.lowerBound(), localAggregator.upperBound());
     }
 
-    return "%ssample '%s' of '%s' aggregator %s:= %s".formatted(isLocal ? "local " : "", sampleName, aggregatorFunction, localAddendum,
+    var formattedString = "%ssample '%s' of '%s' aggregator %s:= %s".formatted(isLocal ? "local " : "", sampleName, aggregatorFunction, localAddendum,
         decimalFormat.format(value));
+    log.debug(formattedString);
+    return formattedString;
   }
 
   @Override

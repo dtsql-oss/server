@@ -24,14 +24,14 @@ public abstract class AbstractAggregator implements TsdlAggregator {
   protected abstract String descriptor();
 
   @Override
-  public double compute(List<DataPoint> dataPoints) {
+  public double compute(String sampleIdentifier, List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
-    log.debug("Calculating {} over {} data points.", descriptor(), dataPoints.size());
+    log.info("Calculating '{}' {} over {} data points.", sampleIdentifier, descriptor(), dataPoints.size());
 
     var valueStream = getValueStream(dataPoints);
     sampleValue = aggregate(valueStream);
 
-    log.debug("Calculated {} to be {}", descriptor(), sampleValue);
+    log.info("Calculated '{}' {} to be {}", sampleIdentifier, descriptor(), sampleValue);
 
     return sampleValue;
   }
