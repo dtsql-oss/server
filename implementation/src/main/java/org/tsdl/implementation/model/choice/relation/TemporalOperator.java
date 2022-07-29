@@ -12,6 +12,7 @@ public interface TemporalOperator {
 
   /**
    * Precondition: annotated periods are ordered by start time.
+   * For equal start times, the period whose declaring event has the lower index has precedence
    */
   TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods);
 }

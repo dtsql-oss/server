@@ -2,7 +2,6 @@ package org.tsdl.implementation.evaluation.impl.choice.relation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.choice.relation.FollowsOperator;
@@ -31,7 +30,7 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
     Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument of 'follows' operator must not be null.");
 
     if (periods.size() < 2) {
-      log.debug("Less than two annotated periods as input, hence resulting set of 'follows' periods is empty.");
+      log.debug("Less than two detected periods as input, hence resulting set of 'follows' periods must be empty.");
       return TsdlPeriodSet.EMPTY;
     }
 
@@ -40,23 +39,22 @@ public record FollowsOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) implem
       var previousPeriod = periods.get(i - 1);
       var currentPeriod = periods.get(i);
 
-      if (follows(previousPeriod, currentPeriod)) {
-        var newPeriod = mergePeriods(previousPeriod, currentPeriod, chosenPeriods.size());
-        chosenPeriods.add(newPeriod);
+      // ensures "current follows previous"
+      var follows = previousPeriod.subsequentDataPoint().isPresent()
+          && previousPeriod.subsequentDataPoint().get().timestamp().equals(currentPeriod.period().start());
+
+      // but "current follows previous" is not enough, we need "operand1 follows operand2" (i.e., "operand1 = current", "operand2 = previous")
+      var operatorConformFollows = currentPeriod.event().equals(operand1.definition().identifier())
+          && previousPeriod.event().equals(operand2.definition().identifier());
+
+      if (follows && operatorConformFollows) {
+        var mergedPeriod = QueryResult.of(chosenPeriods.size(), previousPeriod.period().start(), currentPeriod.period().end());
+        chosenPeriods.add(mergedPeriod);
       }
     }
 
     log.debug("Evaluation of '{} follows {}' resulted in a period set with {} periods.", operand1.definition().identifier().name(),
         operand2.definition().identifier().name(), chosenPeriods.size());
     return QueryResult.of(chosenPeriods.size(), chosenPeriods);
-  }
-
-  private boolean follows(AnnotatedTsdlPeriod previousPeriod, AnnotatedTsdlPeriod currentPeriod) {
-    return Objects.equals(operand2().definition().identifier(), previousPeriod.event())
-        && Objects.equals(operand1().definition().identifier(), currentPeriod.event());
-  }
-
-  private TsdlPeriod mergePeriods(AnnotatedTsdlPeriod period1, AnnotatedTsdlPeriod period2, int index) {
-    return QueryResult.of(index, period1.period().start(), period2.period().end());
   }
 }

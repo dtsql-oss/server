@@ -714,10 +714,11 @@ class TsdlQueryParserTest {
                   count("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s5
 
                 APPLY FILTER:
-                  AND(gt(s2), NOT(lt(3.5)), NOT(before("2022-07-03T12:45:03.123Z")),after("2022-07-03T12:45:03.123Z"))
+                  AND(gt(s2), NOT(lt(3.5)),
+                  NOT(before("2022-07-03T12:45:03.123Z")),after("2022-07-03T12:45:03.123Z"))
 
                 USING EVENTS:
-                  AND(lt(3.5)) AS low,
+                  AND(lt(3.5)) FOR (3,] weeks  AS low,
                   OR(NOT(gt(7))) AS high,
                   AND(gt(s2)) AS mid
 
@@ -815,7 +816,11 @@ class TsdlQueryParserTest {
                         ELEMENTS.getConnective(ConnectiveIdentifier.AND,
                             List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5)))
                         ),
-                        null
+                        ELEMENTS.getEventDuration(
+                            EventDurationBound.of(3, false),
+                            EventDurationBound.of(Long.MAX_VALUE, true),
+                            EventDurationUnit.WEEKS
+                        )
                     )
                 );
 

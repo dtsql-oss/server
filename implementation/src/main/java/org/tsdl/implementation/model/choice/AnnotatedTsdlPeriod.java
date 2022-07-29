@@ -1,6 +1,8 @@
 package org.tsdl.implementation.model.choice;
 
+import java.util.Optional;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
+import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
 /**
@@ -10,4 +12,8 @@ public interface AnnotatedTsdlPeriod {
   TsdlPeriod period();
 
   TsdlIdentifier event();
+
+  Optional<DataPoint> priorDataPoint();
+
+  Optional<DataPoint> subsequentDataPoint();
 }
