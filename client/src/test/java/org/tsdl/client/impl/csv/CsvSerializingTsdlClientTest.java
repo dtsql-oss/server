@@ -51,7 +51,7 @@ class CsvSerializingTsdlClientTest {
 
   @Test
   void query_incorrectClientSpecification_throws() {
-    assertThatThrownBy(() -> csvClient.query(new QueryClientSpecification() {
+    var incorrectSpec = new QueryClientSpecification() {
       @Override
       public QueryDto query() {
         return null;
@@ -61,7 +61,9 @@ class CsvSerializingTsdlClientTest {
       public String serverUrl() {
         return null;
       }
-    }))
+    };
+
+    assertThatThrownBy(() -> csvClient.query(incorrectSpec))
         .isInstanceOf(TsdlClientException.class)
         .hasCauseInstanceOf(IllegalArgumentException.class)
         .extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)

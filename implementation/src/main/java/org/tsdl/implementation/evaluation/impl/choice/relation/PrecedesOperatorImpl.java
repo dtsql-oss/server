@@ -48,7 +48,7 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2) imple
 
       // but "previous precedes current" is not enough, we need "operand1 precedes operand" (i.e., "operand1 = previous", "operand2 = current")
       var operatorConformPrecedes = previousPeriod.event().equals(operand1.definition().identifier())
-          & currentPeriod.event().equals(operand2.definition().identifier());
+          && currentPeriod.event().equals(operand2.definition().identifier());
 
       if (precedes && operatorConformPrecedes) {
         var mergedPeriod = QueryResult.of(chosenPeriods.size(), previousPeriod.period().start(), currentPeriod.period().end());

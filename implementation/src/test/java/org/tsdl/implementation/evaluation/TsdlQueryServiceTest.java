@@ -1,6 +1,7 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.withPrecision;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.MultipleScalarResult;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.QueryResultType;
+import org.tsdl.infrastructure.model.SingularScalarResult;
 import org.tsdl.infrastructure.model.TsdlDataPoints;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
@@ -74,7 +76,7 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResultImpl.class))
           .extracting(SingularScalarResultImpl::value, InstanceOfAssertFactories.DOUBLE)
-          .isEqualTo(expectedResult);
+          .isEqualTo(expectedResult, withPrecision(0.01d));
     }
 
     @ParameterizedTest
@@ -92,6 +94,66 @@ class TsdlQueryServiceTest {
           .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
           .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
           .containsExactly(expectedResults);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series5.csv")
+    )
+    void querySample_yieldGlobalIntegralWithRegularSampling(List<DataPoint> dps) {
+      var query = "WITH SAMPLES: integral() AS myIntegral YIELD: sample myIntegral";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
+          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(50175d);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series7.csv")
+    )
+    void querySample_yieldGlobalIntegralWithIrregularSampling(List<DataPoint> dps) {
+      var query = "WITH SAMPLES: integral() AS myIntegral YIELD: sample myIntegral";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
+          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(123_525d);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series6.csv")
+    )
+    void querySample_yieldLocalIntegralWithRegularSampling(List<DataPoint> dps) {
+      var query = "WITH SAMPLES: integral(\"2022-07-18T12:45:00Z\", \"2022-07-18T13:45:00Z\") AS myIntegral YIELD: sample myIntegral";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
+          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(50175d);
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series8.csv")
+    )
+    void querySample_yieldLocalIntegralWithIrregularSampling(List<DataPoint> dps) {
+      var query = "WITH SAMPLES: integral(\"2022-07-18T12:45:00.000Z\", \"2022-07-18T15:15:00.000Z\") AS myIntegral YIELD: sample myIntegral";
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResult.class))
+          .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
+          .isEqualTo(123_525d);
     }
   }
 
@@ -134,8 +196,8 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
           .satisfies(periodSet -> {
-            assertThat(periodSet.totalPeriods()).isEqualTo(0);
-            assertThat(periodSet.periods()).hasSize(0);
+            assertThat(periodSet.totalPeriods()).isZero();
+            assertThat(periodSet.periods()).isEmpty();
             assertThat(periodSet.isEmpty()).isTrue();
           });
     }
@@ -177,8 +239,8 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
           .satisfies(periodSet -> {
-            assertThat(periodSet.totalPeriods()).isEqualTo(0);
-            assertThat(periodSet.periods()).hasSize(0);
+            assertThat(periodSet.totalPeriods()).isZero();
+            assertThat(periodSet.periods()).isEmpty();
             assertThat(periodSet.isEmpty()).isTrue();
           });
     }
@@ -270,8 +332,8 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
           .satisfies(periodSet -> {
-            assertThat(periodSet.totalPeriods()).isEqualTo(0);
-            assertThat(periodSet.periods()).hasSize(0);
+            assertThat(periodSet.totalPeriods()).isZero();
+            assertThat(periodSet.periods()).isEmpty();
             assertThat(periodSet.isEmpty()).isTrue();
           });
     }
@@ -775,7 +837,7 @@ class TsdlQueryServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"data points", "all periods", "shortest period", "longest period", "sample m1", "sample m2", "samples m1", "samples m2",
         "samples m1, m2", "samples m2,m1"})
-    void queryIntegration_queryWithEchos_collectsLogMessages(String yield) {
+    void queryIntegration_queryWithSampleEchos_collectsLogMessages(String yield) {
       var query = """
           WITH SAMPLES: avg() AS m1 -> echo(3), max() AS m2 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
@@ -793,8 +855,34 @@ class TsdlQueryServiceTest {
           .hasSize(2)
           .extracting(TsdlLogEvent::message)
           .isEqualTo(List.of(
-              "sample 'm1' of 'avg' aggregator := 2.000",
-              "sample 'm2' of 'max' aggregator := 3"
+              "sample avg() with ID 'm1' := 2.000",
+              "sample max() with ID 'm2' := 3"
+          ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"data points", "all periods", "shortest period", "longest period", "sample m1", "sample m2", "samples m1", "samples m2",
+        "samples m1, m2", "samples m2,m1"})
+    void queryIntegration_queryWithLocalSampleEchos_collectsLogMessages(String yield) {
+      var query = """
+          WITH SAMPLES: avg("2022-07-31T08:12:59.123Z","") AS m1 -> echo(3), max("","2022-07-31T10:12:59.123Z") AS m2 -> echo(0)
+                    USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
+                    CHOOSE: low precedes high
+                    YIELD: %s""".formatted(yield);
+
+      var input = List.of(
+          DataPoint.of(Instant.parse("2022-07-31T08:12:59.123Z"), 1.),
+          DataPoint.of(Instant.parse("2022-07-31T09:12:59.123Z"), 2.),
+          DataPoint.of(Instant.parse("2022-07-31T10:12:59.123Z"), 3.)
+      );
+      var result = queryService.query(input, query);
+
+      assertThat(result.logs())
+          .hasSize(2)
+          .extracting(TsdlLogEvent::message)
+          .isEqualTo(List.of(
+              "sample avg(\"2022-07-31T08:12:59.123Z\", \"\") with ID 'm1' := 2.000",
+              "sample max(\"\", \"2022-07-31T10:12:59.123Z\") with ID 'm2' := 3"
           ));
     }
 

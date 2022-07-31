@@ -20,16 +20,12 @@ import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlLit
 import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalAverageAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalCountAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalMaximumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalMinimumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.global.GlobalSumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalAverageAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalCountAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMaximumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalMinimumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.local.LocalSumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.IntegralAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -115,11 +111,6 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
-    return getSample(type, null, null, identifier, includeFormatter, formatterArgs);
-  }
-
-  @Override
   public TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
                               String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type of sample must not be null.");
@@ -176,16 +167,15 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   private TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound) {
-    Conditions.checkIsTrue(Condition.ARGUMENT, (lowerBound == null) == (upperBound == null),
-        "Either both or none of lower and upper bound must be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
 
-    var global = lowerBound == null; // due to condition above, this implies upperBound is null as well
     return switch (type) {
-      case AVERAGE -> global ? new GlobalAverageAggregatorImpl() : new LocalAverageAggregatorImpl(lowerBound, upperBound);
-      case MAXIMUM -> global ? new GlobalMaximumAggregatorImpl() : new LocalMaximumAggregatorImpl(lowerBound, upperBound);
-      case MINIMUM -> global ? new GlobalMinimumAggregatorImpl() : new LocalMinimumAggregatorImpl(lowerBound, upperBound);
-      case SUM -> global ? new GlobalSumAggregatorImpl() : new LocalSumAggregatorImpl(lowerBound, upperBound);
-      case COUNT -> global ? new GlobalCountAggregatorImpl() : new LocalCountAggregatorImpl(lowerBound, upperBound);
+      case AVERAGE -> new AverageAggregatorImpl(lowerBound, upperBound);
+      case MAXIMUM -> new MaximumAggregatorImpl(lowerBound, upperBound);
+      case MINIMUM -> new MinimumAggregatorImpl(lowerBound, upperBound);
+      case SUM -> new SumAggregatorImpl(lowerBound, upperBound);
+      case COUNT -> new CountAggregatorImpl(lowerBound, upperBound);
+      case INTEGRAL -> new IntegralAggregatorImpl(lowerBound, upperBound);
     };
   }
 }

@@ -1,10 +1,8 @@
 package org.tsdl.implementation.evaluation.impl.event.strategy;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +14,8 @@ import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
@@ -24,15 +24,6 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
  */
 @Slf4j
 public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements DurationEventStrategy {
-  private static final Map<EventDurationUnit, Double> MILLIS_TO_UNIT_CONVERSION_FACTOR = Map.of(
-      EventDurationUnit.MILLISECONDS, 1.0,
-      EventDurationUnit.SECONDS, 1.0 / 1000,
-      EventDurationUnit.MINUTES, 1.0 / (1000 * 60),
-      EventDurationUnit.HOURS, 1.0 / (1000 * 60 * 60),
-      EventDurationUnit.DAYS, 1.0 / (1000 * 60 * 60 * 24),
-      EventDurationUnit.WEEKS, 1.0 / (1000 * 60 * 60 * 24 * 7)
-  );
-
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events) {
     log.debug("Detecting periods using composite strategy '{}' over {} data points and {} events.", DurationEventStrategyImpl.class.getName(),
@@ -79,12 +70,15 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
   }
 
   private double getDurationInUnit(TsdlPeriod period, EventDurationUnit unit) {
-    var durationMillis = ChronoUnit.MILLIS.between(period.start(), period.end());
+    var tsdlTimeUnit = switch (unit) {
+      case WEEKS -> TsdlTimeUnit.WEEKS;
+      case DAYS -> TsdlTimeUnit.DAYS;
+      case HOURS -> TsdlTimeUnit.HOURS;
+      case MINUTES -> TsdlTimeUnit.MINUTES;
+      case SECONDS -> TsdlTimeUnit.SECONDS;
+      case MILLISECONDS -> TsdlTimeUnit.MILLISECONDS;
+    };
 
-    if (!MILLIS_TO_UNIT_CONVERSION_FACTOR.containsKey(unit)) {
-      throw Conditions.exception(Condition.STATE, "No conversion routine for unit '%s' available.", unit);
-    }
-
-    return durationMillis * MILLIS_TO_UNIT_CONVERSION_FACTOR.get(unit);
+    return TsdlUtil.getTimespan(period.start(), period.end(), tsdlTimeUnit);
   }
 }

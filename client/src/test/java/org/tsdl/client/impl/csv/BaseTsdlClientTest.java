@@ -94,8 +94,7 @@ class BaseTsdlClientTest {
       "{ \"result\": null, \"type\": \"SCALAR\" } ", "{ \"type\": \"SCALAR\" } "})
   void query_serviceReturnsInvalidResponse_throws(String response) {
     enqueueMockResponse(response);
-
-    assertThatThrownBy(() -> CLIENT.query(baseUrl, null));
+    assertThatThrownBy(() -> CLIENT.query(baseUrl, null)).isInstanceOf(Exception.class);
   }
 
   @Test

@@ -51,7 +51,8 @@ public final class ElementParserDataFactory {
         Arguments.of("max", AggregatorType.MAXIMUM),
         Arguments.of("min", AggregatorType.MINIMUM),
         Arguments.of("sum", AggregatorType.SUM),
-        Arguments.of("count", AggregatorType.COUNT)
+        Arguments.of("count", AggregatorType.COUNT),
+        Arguments.of("integral", AggregatorType.INTEGRAL)
     );
   }
 

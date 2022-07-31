@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
-import org.tsdl.implementation.model.sample.aggregation.TsdlLocalAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -51,16 +50,22 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     var sampleName = obj.identifier().name();
     var aggregatorFunction = obj.aggregator().type().representation();
     var value = obj.aggregator().value();
+    var lowerBound = obj.aggregator().lowerBound().orElse(null);
+    var upperBound = obj.aggregator().upperBound().orElse(null);
 
-    var isLocal = obj.aggregator() instanceof TsdlLocalAggregator;
-    var localAddendum = "";
-    if (isLocal) {
-      var localAggregator = (TsdlLocalAggregator) obj.aggregator();
-      localAddendum = "(from %s until %s) ".formatted(localAggregator.lowerBound(), localAggregator.upperBound());
-    }
+    var formattedString = "sample %s(%s) with ID '%s' := %s".formatted(
+        aggregatorFunction,
+        lowerBound == null && upperBound == null
+            ? ""
+            : String.join(
+                ", ",
+                "\"" + (lowerBound != null ? lowerBound.toString() : "") + "\"",
+                "\"" + (upperBound != null ? upperBound.toString() : "") + "\""
+            ),
+        sampleName,
+        decimalFormat.format(value)
+    );
 
-    var formattedString = "%ssample '%s' of '%s' aggregator %s:= %s".formatted(isLocal ? "local " : "", sampleName, aggregatorFunction, localAddendum,
-        decimalFormat.format(value));
     log.debug(formattedString);
     return formattedString;
   }

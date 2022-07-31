@@ -40,8 +40,6 @@ public interface TsdlQueryElementFactory {
 
   TsdlFilterArgument getFilterArgument(TsdlSample sample);
 
-  TsdlSample getSample(AggregatorType type, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
-
   TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
                        String... formatterArgs);
 

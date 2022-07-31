@@ -81,7 +81,7 @@ class TsdlElementParserTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "cnt", "      ", "0", "1"})
+  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "cnt", "      ", "0", "1", "int", " integral"})
   void parseAggregatorType_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseAggregatorType(representation)).isInstanceOf(NoSuchElementException.class);
   }
@@ -201,7 +201,7 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\""
+      "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\"", "\"2015-11-05 12:35:45Z\""
   })
   void parseDateLiteral_invalidLiteral_throws(String str) {
     assertThatThrownBy(() -> PARSER.parseDateLiteral(str)).isInstanceOf(TsdlParseException.class);

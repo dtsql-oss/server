@@ -163,26 +163,26 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         ? parseEchoArguments(ctx.echoStatement().echoArgumentList())
         : new String[0];
 
-    var global = ctx.aggregatorFunctionDeclaration().timeRange() == null;
-    if (global) {
-      return elementFactory.getSample(aggregatorType, identifier, includeEcho, echoArguments);
-    } else {
+    Instant lowerBound = null;
+    Instant upperBound = null;
+    if (ctx.aggregatorFunctionDeclaration().timeRange() != null) {
       var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().timeRange());
       Conditions.checkSizeExactly(Condition.STATE, timeRange, 2, "Time range must consist of exactly two timestamps.");
 
-      var lowerBound = timeRange[0];
-      var upperBound = timeRange[1];
-      if (!lowerBound.isBefore(upperBound)) {
+      lowerBound = timeRange[0];
+      upperBound = timeRange[1];
+      if ((lowerBound != null && upperBound != null) && !lowerBound.isBefore(upperBound)) {
         throw new TsdlParseException("Lower bound of a local sample must be before its upper bound.");
       }
-
-      return elementFactory.getSample(aggregatorType, lowerBound, upperBound, identifier, includeEcho, echoArguments);
     }
+
+    return elementFactory.getSample(aggregatorType, lowerBound, upperBound, identifier, includeEcho, echoArguments);
   }
 
   private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
+    // the empty string literal '""' stands for a non-existing bound, e.g., so that only a lower bound may be specified
     return ctx.STRING_LITERAL().stream()
-        .map(literal -> elementParser.parseDateLiteral(literal.getText()))
+        .map(literal -> "\"\"".equals(literal.getText()) ? null : elementParser.parseDateLiteral(literal.getText()))
         .toArray(Instant[]::new);
   }
 

@@ -77,7 +77,11 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "max(\"2022-05-23T20:37:47.234Z\" , \"2022-05-24T20:33:45.234Z\")", 27.25),
         Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"2022-05-24T20:40:44.000Z\")", 53.25),
         Arguments.of(input, "count(\"2022-05-24T20:30:45.000Z\"\r,\n\"2022-05-24T20:37:47.233Z\")", 3.0),
-        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\")", 102.77)
+        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\")", 102.77),
+        Arguments.of(input, "sum(\"\"\n ,  \"2022-05-24T20:36:46.234Z\")", 128.52),
+        Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"\")", 53.25),
+        Arguments.of(input, "sum(\"2022-05-24T20:35:46.234Z\",   \"\")", 186.32),
+        Arguments.of(input, "avg(\"\",   \"\")", 47.864)
     );
   }
 
@@ -91,15 +95,22 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, """
+        Arguments.of(
+            input, """
                 avg("2022-05-23T20:33:45.000Z", "2022-05-24T20:33:44.000Z") AS s1,
                 max("2022-05-23T20:37:47.234Z" , "2022-05-24T20:33:45.234Z") AS numeroDos,
                 min("2022-05-24T20:35:46.234Z",   "2022-05-24T20:40:44.000Z") AS sampleNumber3,
-                count("2022-05-24T20:30:45.000Z"
+                count(""
                 ,
-                "2022-05-24T20:37:47.233Z") AS fourthOneIsTheCharm""",
-            "s1, numeroDos,   sampleNumber3,fourthOneIsTheCharm", new Double[] {0.0, 27.25, 53.25, 3.0}),
-        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1", "s1", new Double[] {102.77})
+                "2022-05-24T20:36:46.233Z") AS fourthOneIsTheCharm""",
+            "s1, numeroDos,   sampleNumber3,fourthOneIsTheCharm", new Double[] {0.0, 27.25, 53.25, 2.0}
+        ),
+        Arguments.of(
+            input,
+            "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1",
+            "s1",
+            new Double[] {102.77}
+        )
     );
   }
 

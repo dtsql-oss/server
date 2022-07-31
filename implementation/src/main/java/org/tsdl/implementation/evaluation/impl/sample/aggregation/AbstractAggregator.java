@@ -1,45 +1,76 @@
 package org.tsdl.implementation.evaluation.impl.sample.aggregation;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.DoubleStream;
+import java.util.Optional;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
-import org.tsdl.implementation.model.sample.aggregation.TsdlGlobalAggregator;
-import org.tsdl.implementation.model.sample.aggregation.TsdlLocalAggregator;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
-import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
- * Abstract base class for {@link TsdlAggregator} implementations that encapsulates common tasks such as preparing a stream of values from a list of
- * {@link DataPoint} instances as well as filtering that stream based on the interval specification of a concrete {@link TsdlLocalAggregator}.
+ * Abstract base class for {@link TsdlAggregator} implementations that encapsulates common tasks such as logging and preparing a list of
+ * {@link DataPoint} actually to be processed by a concrete {@link TsdlAggregator} implementation, based on its {@link TsdlAggregator#lowerBound()}
+ * and {@link TsdlAggregator#upperBound()} values.
  */
 @Slf4j
 public abstract class AbstractAggregator implements TsdlAggregator {
+  private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
+  private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
+
   private Double sampleValue;
 
-  protected abstract Double aggregate(DoubleStream valueStream);
+  private final String descriptor;
 
-  protected abstract String descriptor();
+  private final Instant lowerBound;
+
+  private final Instant upperBound;
+
+  /**
+   * Initializes a {@link AbstractAggregator} instance.
+   */
+  public AbstractAggregator(Instant lowerBound, Instant upperBound) {
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
+    this.descriptor = "%s sample from %s until %s".formatted(
+        type(),
+        lowerBound().isPresent() ? lowerBound().get() : "<beginning>",
+        upperBound().isPresent() ? upperBound().get() : "<end>"
+    );
+  }
+
+  protected abstract double aggregate(List<DataPoint> input);
 
   @Override
   public double compute(String sampleIdentifier, List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
-    log.info("Calculating '{}' {} over {} data points.", sampleIdentifier, descriptor(), dataPoints.size());
+    log.info("Calculating {} called '{}' over {} data points.", descriptor, sampleIdentifier, dataPoints.size());
 
-    var valueStream = getValueStream(dataPoints);
+    var valueStream = getAggregatorInput(dataPoints);
     sampleValue = aggregate(valueStream);
+    Conditions.checkNotNull(Condition.STATE, sampleValue, "Sample computation failed, aggregate value must not be null.");
 
-    log.info("Calculated '{}' {} to be {}", sampleIdentifier, descriptor(), sampleValue);
+    log.info("Calculated {} called '{}' to be {}.", descriptor, sampleIdentifier, sampleValue);
 
     return sampleValue;
   }
 
   @Override
   public double value() {
-    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Sample value (%s) must have been computed before accessing it.", descriptor());
+    Conditions.checkIsTrue(Condition.STATE, this::isComputed, "Value of %s must have been computed before trying to access it.", descriptor);
     return sampleValue;
+  }
+
+  @Override
+  public Optional<Instant> lowerBound() {
+    return Optional.ofNullable(lowerBound);
+  }
+
+  @Override
+  public Optional<Instant> upperBound() {
+    return Optional.ofNullable(upperBound);
   }
 
   @Override
@@ -47,14 +78,9 @@ public abstract class AbstractAggregator implements TsdlAggregator {
     return sampleValue != null;
   }
 
-  private DoubleStream getValueStream(List<DataPoint> dataPoints) {
-    var relevantDataPoints = switch (this) {
-      case TsdlGlobalAggregator ignored -> dataPoints.stream();
-      case TsdlLocalAggregator localAggregator ->
-          dataPoints.stream().filter(dp -> TsdlUtil.isWithinRange(dp.timestamp(), localAggregator.lowerBound(), localAggregator.upperBound()));
-      default -> throw Conditions.exception(Condition.STATE, "Unknown type of aggregator '%s'", this.getClass().getName());
-    };
-
-    return relevantDataPoints.mapToDouble(DataPoint::value);
+  private List<DataPoint> getAggregatorInput(List<DataPoint> dataPoints) {
+    return dataPoints.stream()
+        .filter(dp -> lowerBoundChecker.apply(dp) && upperBoundChecker.apply(dp))
+        .toList();
   }
 }

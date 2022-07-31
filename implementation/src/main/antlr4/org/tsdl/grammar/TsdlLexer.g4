@@ -64,13 +64,13 @@ TEMPORAL_RELATION
   |  'follows'
   ;
 
-AGGREGATOR_GLOBAL_INPUT  :  '_input'  ;
 AGGREGATOR_FUNCTION
   :  'avg'
   |  'max'
   |  'min'
   |  'sum'
   |  'count'
+  |  'integral'
   ;
 
 DURATION_FOR  :  'FOR'  ;
