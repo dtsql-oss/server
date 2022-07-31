@@ -1,12 +1,7 @@
 lexer grammar TsdlLexer;
 
-WHITESPACE
-  :  ' '
-  |  '\r'
-  |  '\n'
-  |  '\r\n'
-  |  '\t'
-  ;
+WHITESPACE  :  WHITESPACE_CHARACTER+  ;
+fragment WHITESPACE_CHARACTER  :  ' '  |  '\r'  |  '\n'  |  '\r\n'  |  '\t'  ;
 
 SAMPLES_CLAUSE  :  'WITH SAMPLES'  ;
 EVENTS_CLAUSE  :  'USING EVENTS'  ;
@@ -37,11 +32,11 @@ TEMPORAL_FILTER_TYPE
   |  'after'
   ;
 
-COMMA  :  ','  ;
 PARENTHESIS_OPEN  :  '('  ;
 PARENTHESIS_CLOSE  :  ')'  ;
-
 COLON  :  ':'  ;
+fragment COMMA  :  ','  ;
+LIST_SEPARATOR:  WHITESPACE? COMMA WHITESPACE?  ;
 
 NUMBER
   :  INT
@@ -79,7 +74,7 @@ AGGREGATOR_FUNCTION
   ;
 
 DURATION_FOR  :  'FOR'  ;
-DURATION_RANGE  :  DURATION_RANGE_OPEN WHITESPACE* INT? WHITESPACE* COMMA WHITESPACE* INT? DURATION_RANGE_CLOSE  ; // INT >= 0 (app validation)
+DURATION_RANGE  :  DURATION_RANGE_OPEN WHITESPACE? INT? LIST_SEPARATOR INT? DURATION_RANGE_CLOSE  ; // INT >= 0 (app validation)
 fragment DURATION_RANGE_OPEN  :  PARENTHESIS_OPEN  |  '['  ;
 fragment DURATION_RANGE_CLOSE  :  PARENTHESIS_CLOSE  | ']'  ;
 

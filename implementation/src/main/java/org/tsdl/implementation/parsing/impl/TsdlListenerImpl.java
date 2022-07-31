@@ -241,25 +241,25 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
-    if (ctx.valueThresholdFilter() != null) {
-      return parseThresholdFilter(ctx.valueThresholdFilter());
+    if (ctx.thresholdFilter() != null) {
+      return parseThresholdFilter(ctx.thresholdFilter());
     } else if (ctx.temporalFilter() != null) {
       return parseTemporalFilter(ctx.temporalFilter());
     } else {
-      throw new TsdlParseException("Cannot parse SinglePointFilter, unknown rule - neither 'valueThresholdFilter' nor 'temporalFilter'.");
+      throw new TsdlParseException("Cannot parse SinglePointFilter, unknown rule - neither 'thresholdFilter' nor 'temporalFilter'.");
     }
   }
 
-  private SinglePointFilter parseThresholdFilter(TsdlParser.ValueThresholdFilterContext ctx) {
+  private SinglePointFilter parseThresholdFilter(TsdlParser.ThresholdFilterContext ctx) {
     var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
     TsdlFilterArgument filterArgument;
 
-    if (ctx.valueThresholdFilterArgument().IDENTIFIER() != null) {
-      var identifier = requireIdentifier(ctx.valueThresholdFilterArgument().IDENTIFIER(), IdentifierType.SAMPLE);
+    if (ctx.thresholdFilterArgument().IDENTIFIER() != null) {
+      var identifier = requireIdentifier(ctx.thresholdFilterArgument().IDENTIFIER(), IdentifierType.SAMPLE);
       var referencedSample = declaredSamples.get(identifier);
       filterArgument = elementFactory.getFilterArgument(referencedSample);
-    } else if (ctx.valueThresholdFilterArgument().NUMBER() != null) {
-      var literalValue = elementParser.parseNumber(ctx.valueThresholdFilterArgument().NUMBER().getText());
+    } else if (ctx.thresholdFilterArgument().NUMBER() != null) {
+      var literalValue = elementParser.parseNumber(ctx.thresholdFilterArgument().NUMBER().getText());
       filterArgument = elementFactory.getFilterArgument(literalValue);
     } else {
       throw new TsdlParseException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
