@@ -50,6 +50,20 @@ class TsdlQueryServiceTest {
     }
 
     @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#globalAggregates")
+    void querySample_yieldGlobalSampleAndLocalWithoutBounds_isEqual(List<DataPoint> dps, String sampleDefinition, Double expectedResult) {
+      var queryGlobal = "WITH SAMPLES: %s AS s1  YIELD: sample s1".formatted(sampleDefinition);
+      var queryLocal = queryGlobal.replaceAll("\\(\\)", "(\"\", \"\")");
+
+      var globalResult = (SingularScalarResult) queryService.query(dps, queryGlobal);
+      var localResult = (SingularScalarResult) queryService.query(dps, queryLocal);
+
+      assertThat(globalResult.value())
+          .isEqualTo(expectedResult)
+          .isEqualTo(localResult.value());
+    }
+
+    @ParameterizedTest
     @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#globalAggregatesSet")
     void querySample_yieldGlobalSampleSet(List<DataPoint> dps, String sampleDefinition, String yieldComponent, Double[] expectedResults) {
       var query = """

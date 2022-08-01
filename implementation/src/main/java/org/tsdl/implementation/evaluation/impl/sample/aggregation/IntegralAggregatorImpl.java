@@ -25,9 +25,6 @@ public class IntegralAggregatorImpl extends AbstractAggregator implements Integr
       var currentDataPoint = input.get(i);
       var previousDataPoint = input.get(i - 1);
       var doubleArea = doubleTrapezoidalArea(previousDataPoint, currentDataPoint);
-      Conditions.checkIsTrue(Condition.STATE, doubleArea >= 0,
-          "Trapezoid area must not be negative. Are data points not in ascending order (by date)?");
-
       doubleCumulativeIntegral += doubleArea;
     }
 
@@ -40,6 +37,13 @@ public class IntegralAggregatorImpl extends AbstractAggregator implements Integr
     var a = dp1.value();
     var c = dp2.value();
     var h = TsdlUtil.getTimespan(dp1.timestamp(), dp2.timestamp(), TsdlTimeUnit.SECONDS);
+    Conditions.checkIsTrue(
+        Condition.STATE,
+        h >= 0,
+        "Trapezoid height for data points at %s and %s is negative. Are the data points not in ascending order (by date)?",
+        dp1.timestamp(),
+        dp2.timestamp()
+    );
     return (a + c) * h;
   }
 }
