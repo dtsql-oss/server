@@ -12,8 +12,8 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
  */
 public class PeriodWriter extends BaseWriter<TsdlPeriod, CsvSerializingQueryClientSpecification> {
   @Override
-  protected void writeInternal(TsdlPeriod result, CsvSerializingQueryClientSpecification specification) throws IOException {
-    try (var csvWriter = createWriter(specification.targetFile())) {
+  protected void writeInternal(TsdlPeriod result, CsvSerializingQueryClientSpecification specification, String targetFile) throws IOException {
+    try (var csvWriter = createWriter(targetFile)) {
       writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("index", "empty", "start", "end");

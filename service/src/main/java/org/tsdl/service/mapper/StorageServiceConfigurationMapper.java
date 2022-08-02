@@ -14,11 +14,12 @@ import org.tsdl.service.mapper.converters.CharacterArrayValueConverter;
 import org.tsdl.service.mapper.converters.CharacterValueConverter;
 import org.tsdl.service.mapper.converters.InstantValueConverter;
 import org.tsdl.service.mapper.converters.PropertyValueConverter;
+import org.tsdl.service.mapper.converters.StringArrayValueConverter;
 
 @Mapper
 public abstract class StorageServiceConfigurationMapper {
   private static final List<PropertyValueConverter<?>> AVAILABLE_CONVERTERS = List.of(
-      new CharacterValueConverter(), new CharacterArrayValueConverter(), new InstantValueConverter()
+      new CharacterValueConverter(), new CharacterArrayValueConverter(), new InstantValueConverter(), new StringArrayValueConverter()
   );
 
   public StorageServiceConfiguration mapToConfiguration(Map<String, Object> properties,

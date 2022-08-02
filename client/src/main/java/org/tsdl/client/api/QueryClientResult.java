@@ -1,7 +1,10 @@
 package org.tsdl.client.api;
 
+import org.tsdl.infrastructure.model.QueryResult;
+
 /**
- * Common marker interface representing values returned by a {@link TsdlClient#query(QueryClientSpecification)} implementation.
+ * Common interface representing values returned by a {@link TsdlClient#query(QueryClientSpecification)} implementation.
  */
 public interface QueryClientResult {
+  QueryResult queryResult();
 }

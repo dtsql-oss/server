@@ -8,7 +8,6 @@ import org.tsdl.infrastructure.dto.QueryDto;
  */
 public record CsvSerializingQueryClientSpecification(
     QueryDto query,
-    String serverUrl,
-    String targetFile
+    String serverUrl
 ) implements QueryClientSpecification {
 }

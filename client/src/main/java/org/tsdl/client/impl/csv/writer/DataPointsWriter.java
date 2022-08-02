@@ -12,8 +12,8 @@ import org.tsdl.infrastructure.model.TsdlDataPoints;
  */
 public class DataPointsWriter extends BaseWriter<TsdlDataPoints, CsvSerializingQueryClientSpecification> {
   @Override
-  protected void writeInternal(TsdlDataPoints result, CsvSerializingQueryClientSpecification specification) throws IOException {
-    try (var csvWriter = createWriter(specification.targetFile())) {
+  protected void writeInternal(TsdlDataPoints result, CsvSerializingQueryClientSpecification specification, String targetFile) throws IOException {
+    try (var csvWriter = createWriter(targetFile)) {
       writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("time", "value");

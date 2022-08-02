@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.infrastructure.api.StorageService;
 import org.tsdl.infrastructure.common.Condition;
@@ -90,11 +91,28 @@ public final class CsvStorageService extends BaseStorageService implements Stora
       Conditions.checkNotNull(Condition.ARGUMENT, lookupConfiguration, "The lookup configuration must not be null.");
       requireProperty(lookupConfiguration, CsvStorageProperty.FILE_PATH, LOAD_PROPERTY_REQUIRED);
       requireProperty(lookupConfiguration, CsvStorageProperty.FIELD_SEPARATOR, LOAD_PROPERTY_REQUIRED);
+      requireProperty(lookupConfiguration, CsvStorageProperty.SKIP_HEADERS, TRANSFORMATION_PROPERTY_REQUIRED);
+
+      var skipHeaders = lookupConfiguration.getProperty(CsvStorageProperty.SKIP_HEADERS, Integer.class);
+      Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT,
+          skipHeaders,
+          0,
+          "'%' property ('%s') must be greater than or equal to 0.",
+          CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
 
       var filePath = lookupConfiguration.getProperty(CsvStorageProperty.FILE_PATH, String.class);
       var fieldSeparator = lookupConfiguration.getProperty(CsvStorageProperty.FIELD_SEPARATOR, Character.class);
       try (var csvReader = createReader(filePath, fieldSeparator)) {
-        return csvReader.stream().toList();
+        try (var csvStream = csvReader.stream()) {
+          var customEofsPresent = lookupConfiguration.isPropertySet(CsvStorageProperty.CUSTOM_EOF_MARKERS);
+          var customEofs = customEofsPresent
+              ? Set.of(lookupConfiguration.getProperty(CsvStorageProperty.CUSTOM_EOF_MARKERS, String[].class))
+              : Set.of();
+          return csvStream
+              .skip(skipHeaders)
+              .takeWhile(p -> !customEofsPresent || !customEofs.contains(String.join(Character.toString(fieldSeparator), p.getFields())))
+              .toList();
+        }
       }
     });
   }
@@ -107,14 +125,6 @@ public final class CsvStorageService extends BaseStorageService implements Stora
       requireProperty(transformationConfiguration, CsvStorageProperty.VALUE_COLUMN, TRANSFORMATION_PROPERTY_REQUIRED);
       requireProperty(transformationConfiguration, CsvStorageProperty.TIME_COLUMN, TRANSFORMATION_PROPERTY_REQUIRED);
       requireProperty(transformationConfiguration, CsvStorageProperty.TIME_FORMAT, TRANSFORMATION_PROPERTY_REQUIRED);
-      requireProperty(transformationConfiguration, CsvStorageProperty.SKIP_HEADERS, TRANSFORMATION_PROPERTY_REQUIRED);
-
-      var skipHeaders = transformationConfiguration.getProperty(CsvStorageProperty.SKIP_HEADERS, Integer.class);
-      Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT,
-          skipHeaders,
-          0,
-          "'%' property ('%s') must be greater than or equal to 0.",
-          CsvStorageProperty.SKIP_HEADERS.name(), CsvStorageProperty.SKIP_HEADERS.identifier());
 
       var valueIndex = transformationConfiguration.getProperty(CsvStorageProperty.VALUE_COLUMN, Integer.class);
       var timeIndex = transformationConfiguration.getProperty(CsvStorageProperty.TIME_COLUMN, Integer.class);
@@ -123,7 +133,6 @@ public final class CsvStorageService extends BaseStorageService implements Stora
           .withZone(ZoneOffset.UTC);
 
       return loadedData.stream()
-          .skip(skipHeaders)
           .map(row -> {
             Conditions.checkValidIndex(Condition.STATE, row.getFields(), timeIndex, "Time column index '%s' is not valid for row '%s'.", timeIndex,
                 row.toString());
@@ -147,6 +156,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
   CsvReader createReader(String filePath, Character fieldSeparator) throws IOException {
     return CsvReader.builder()
         .fieldSeparator(fieldSeparator)
+        .skipEmptyRows(true)
         .build(Path.of(filePath), StandardCharsets.UTF_8);
   }
 

@@ -21,6 +21,7 @@ public final class CsvWriterTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(
                 List.of(
                     dp("2022-12-15T01:21:48Z", 37.0),
@@ -45,6 +46,7 @@ public final class CsvWriterTestDataFactory {
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(
                 List.of(
                     dp("2022-12-15T01:21:48Z", 37.0),
@@ -70,6 +72,7 @@ public final class CsvWriterTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(
                 QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")
                 )
@@ -85,6 +88,7 @@ public final class CsvWriterTestDataFactory {
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z"),
                 ev("2022-06-26T14:10:01.117410600Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             )),
@@ -105,6 +109,7 @@ public final class CsvWriterTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(
                 1,
                 List.of(
@@ -122,6 +127,7 @@ public final class CsvWriterTestDataFactory {
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(
                 1,
                 List.of(
@@ -146,6 +152,7 @@ public final class CsvWriterTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(151.03030303030303)),
             """
                 #TSDL Query Result
@@ -158,6 +165,7 @@ public final class CsvWriterTestDataFactory {
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(151.03030303030303,
                 ev("2022-06-26T14:14:11.548995900Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             )),
@@ -178,6 +186,7 @@ public final class CsvWriterTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.0})),
             """
                 #TSDL Query Result
@@ -191,6 +200,7 @@ public final class CsvWriterTestDataFactory {
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.},
                 ev("2022-06-26T14:19:25.731197800Z", "sample 'mean1' of 'avg' aggregator := 151.0")
             )),
@@ -209,7 +219,7 @@ public final class CsvWriterTestDataFactory {
   }
 
   private static CsvSerializingQueryClientSpecification spec() {
-    return new CsvSerializingQueryClientSpecification(null, "", tempFile());
+    return new CsvSerializingQueryClientSpecification(null, "");
   }
 
   private static String tempFile() {

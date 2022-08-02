@@ -33,7 +33,7 @@ public enum CsvStorageProperty implements StorageProperty {
 
   /**
    * <p>
-   * Used by transform.
+   * Used by load.
    * </p>
    * <p>
    * Specifies the number of rows to skip before the actual data starts.
@@ -59,7 +59,14 @@ public enum CsvStorageProperty implements StorageProperty {
   /**
    * Used by store.
    */
-  INCLUDE_HEADERS("includeHeaders", Boolean.class);
+  INCLUDE_HEADERS("includeHeaders", Boolean.class),
+
+  /**
+   * Used by load.
+   * If present, instructs CSV parser to abort when a line whose content is equivalent to one of the custom EOFs. This is useful for when
+   * you know a CSV file contains additional information up from a certain point which is not relevant in this context.
+   */
+  CUSTOM_EOF_MARKERS("customEndOfFileMarkers", String[].class);
 
   private final String identifier;
 

@@ -18,8 +18,8 @@ public final class CsvSerializingTsdClientTestDataFactory {
 
   public static Stream<Arguments> query_serviceReturnsDataPoints_writesFileCorrectly() {
     return Stream.of(
-        Arguments.of(spec(), dto(QueryResult.of(List.of()))),
-        Arguments.of(spec(), dto(QueryResult.of(List.of())))
+        Arguments.of(spec(), tempFile(), dto(QueryResult.of(List.of()))),
+        Arguments.of(spec(), tempFile(), dto(QueryResult.of(List.of())))
     );
   }
 
@@ -27,10 +27,12 @@ public final class CsvSerializingTsdClientTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")))
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")))
         )
     );
@@ -40,10 +42,12 @@ public final class CsvSerializingTsdClientTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(1, List.of(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")))))
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(1, List.of(QueryResult.of(0, Instant.parse("2022-12-15T01:21:48Z"), Instant.parse("2022-12-15T09:21:48Z")))))
         )
     );
@@ -53,10 +57,12 @@ public final class CsvSerializingTsdClientTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(151.03030303030303))
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(151.03030303030303)))
     );
   }
@@ -65,17 +71,19 @@ public final class CsvSerializingTsdClientTestDataFactory {
     return Stream.of(
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.0}))
         ),
         Arguments.of(
             spec(),
+            tempFile(),
             dto(QueryResult.of(new Double[] {151.03030303030303, -77.}))
         )
     );
   }
 
   private static CsvSerializingQueryClientSpecification spec() {
-    return new CsvSerializingQueryClientSpecification(null, "", tempFile());
+    return new CsvSerializingQueryClientSpecification(null, "");
   }
 
   private static String tempFile() {

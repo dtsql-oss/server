@@ -3,6 +3,8 @@ package org.tsdl.client.impl.csv;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
@@ -21,32 +23,37 @@ class CsvSerializingTsdlClientTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsDataPoints_writesFileCorrectly")
-  void query_serviceReturnsDataPoints_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    executeTest(spec, serverResponse);
+  void query_serviceReturnsDataPoints_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
+                                                          QueryResultDto serverResponse) throws IOException {
+    executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriod_writesFileCorrectly")
-  void query_serviceReturnsPeriod_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    executeTest(spec, serverResponse);
+  void query_serviceReturnsPeriod_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile, QueryResultDto serverResponse)
+      throws IOException {
+    executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriodSet_writesFileCorrectly")
-  void query_serviceReturnsPeriodSet_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    executeTest(spec, serverResponse);
+  void query_serviceReturnsPeriodSet_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
+                                                         QueryResultDto serverResponse) throws IOException {
+    executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalar_writesFileCorrectly")
-  void query_serviceReturnsScalar_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    executeTest(spec, serverResponse);
+  void query_serviceReturnsScalar_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile, QueryResultDto serverResponse)
+      throws IOException {
+    executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalarList_writesFileCorrectly")
-  void query_serviceReturnsScalarList_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    executeTest(spec, serverResponse);
+  void query_serviceReturnsScalarList_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
+                                                          QueryResultDto serverResponse) throws IOException {
+    executeTest(spec, targetFile, serverResponse);
   }
 
   @Test
@@ -77,18 +84,18 @@ class CsvSerializingTsdlClientTest {
         .hasCauseInstanceOf(IllegalArgumentException.class);
   }
 
-  private void executeTest(CsvSerializingQueryClientSpecification spec, QueryResultDto serverResponse) {
-    var filePath = Path.of(spec.targetFile());
+  private void executeTest(CsvSerializingQueryClientSpecification spec, String targetFile, QueryResultDto serverResponse) throws IOException {
+    var filePath = Path.of(targetFile);
 
     try {
-      var result = csvClient.query(spec, serverResponse);
+      var result = csvClient.query(spec, serverResponse, new File(targetFile));
       assertThat(Files.exists(filePath)).isTrue(); // only check existence of file since CsvWriterTest already verifies correctness of contents
       assertThat(result).isInstanceOf(CsvSerializingTsdlClientResult.class);
     } finally {
       try {
         Files.delete(filePath);
       } catch (Exception e) {
-        log.warn("Could not delete temp CSV file '{}': {}", spec.targetFile(), e.getMessage());
+        log.warn("Could not delete temp CSV file '{}': {}", targetFile, e.getMessage());
       }
     }
   }

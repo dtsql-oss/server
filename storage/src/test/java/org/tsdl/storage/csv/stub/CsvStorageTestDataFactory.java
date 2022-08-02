@@ -18,6 +18,19 @@ public final class CsvStorageTestDataFactory {
   private CsvStorageTestDataFactory() {
   }
 
+  public static Stream<Arguments> fiveCsvRows() {
+    return Stream.of(
+        Arguments.of(List.of(
+                List.of(23, 1.0, formatInstant(Instant.now())),
+                List.of(24, 2.0, formatInstant(Instant.now())),
+                List.of(25, 3.5, formatInstant(Instant.now())),
+                List.of("CustomEOF"),
+                List.of(26, 3.5, formatInstant(Instant.now()))
+            )
+        )
+    );
+  }
+
   public static Stream<Arguments> threeCsvRows() {
     return Stream.of(
         Arguments.of(List.of(

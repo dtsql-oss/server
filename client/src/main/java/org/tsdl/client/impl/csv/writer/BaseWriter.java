@@ -11,7 +11,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.client.api.QueryClientSpecification;
 import org.tsdl.client.api.QueryResultWriter;
-import org.tsdl.client.util.TsdlClientException;
+import org.tsdl.client.util.TsdlClientIoException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.common.ThrowingRunnable;
@@ -27,17 +27,17 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
 
   @SuppressWarnings("unchecked") // type erasure - type compatibility is ensured by verifyTypes()
   @Override
-  public void write(QueryResult result, QueryClientSpecification specification) {
+  public void write(QueryResult result, QueryClientSpecification specification, String targetFile) {
     safeWriteOperation(() -> {
       verifyTypes(result, specification);
       Conditions.checkNotNull(Condition.ARGUMENT, result, "Result must not be null.");
       Conditions.checkNotNull(Condition.ARGUMENT, specification, "Specification must not be null.");
 
-      writeInternal((T) result, (U) specification);
+      writeInternal((T) result, (U) specification, targetFile);
     });
   }
 
-  protected abstract void writeInternal(T result, U specification) throws IOException;
+  protected abstract void writeInternal(T result, U specification, String targetFile) throws IOException;
 
   protected String formatNumber(Double value) {
     return TsdlUtil.formatNumber(value);
@@ -83,7 +83,7 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
     try {
       action.run();
     } catch (Exception e) {
-      throw new TsdlClientException("An error occurred during a write operation.", e);
+      throw new TsdlClientIoException("An error occurred during a write operation.", e);
     }
   }
 }
