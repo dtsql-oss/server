@@ -144,7 +144,7 @@ public final class InfluxDbStorageService extends BaseStorageService implements 
     return recordStream.getRecords().stream()
         .map(dataRecord -> DataPoint.of(
                 dataRecord.getTime(),
-                Double.valueOf(Objects.requireNonNull(dataRecord.getValue()).toString())
+                Double.parseDouble(Objects.requireNonNull(dataRecord.getValue()).toString())
             )
         );
   }

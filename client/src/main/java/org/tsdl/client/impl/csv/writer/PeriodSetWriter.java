@@ -18,7 +18,12 @@ public class PeriodSetWriter extends BaseWriter<TsdlPeriodSet, CsvSerializingQue
 
       csvWriter.writeRow("index", "empty", "start", "end");
       for (var periods : result.periods()) {
-        csvWriter.writeRow(periods.index().toString(), Boolean.toString(periods.isEmpty()), periods.start().toString(), periods.end().toString());
+        csvWriter.writeRow(
+            String.valueOf(periods.index()),
+            Boolean.toString(periods.isEmpty()),
+            periods.start().toString(),
+            periods.end().toString()
+        );
       }
 
       writeLogs(csvWriter, result.logs());

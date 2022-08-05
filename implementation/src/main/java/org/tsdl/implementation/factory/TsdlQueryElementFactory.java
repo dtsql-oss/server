@@ -36,7 +36,7 @@ public interface TsdlQueryElementFactory {
 
   SinglePointFilterConnective getConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters);
 
-  TsdlFilterArgument getFilterArgument(Double value);
+  TsdlFilterArgument getFilterArgument(double value);
 
   TsdlFilterArgument getFilterArgument(TsdlSample sample);
 

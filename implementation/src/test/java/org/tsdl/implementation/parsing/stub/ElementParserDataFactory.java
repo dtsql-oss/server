@@ -52,7 +52,8 @@ public final class ElementParserDataFactory {
         Arguments.of("min", AggregatorType.MINIMUM),
         Arguments.of("sum", AggregatorType.SUM),
         Arguments.of("count", AggregatorType.COUNT),
-        Arguments.of("integral", AggregatorType.INTEGRAL)
+        Arguments.of("integral", AggregatorType.INTEGRAL),
+        Arguments.of("stddev", AggregatorType.STANDARD_DEVIATION)
     );
   }
 

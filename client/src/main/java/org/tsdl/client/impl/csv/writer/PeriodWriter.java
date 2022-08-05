@@ -17,7 +17,7 @@ public class PeriodWriter extends BaseWriter<TsdlPeriod, CsvSerializingQueryClie
       writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("index", "empty", "start", "end");
-      csvWriter.writeRow(result.index().toString(), Boolean.toString(result.isEmpty()), result.start().toString(), result.end().toString());
+      csvWriter.writeRow(String.valueOf(result.index()), Boolean.toString(result.isEmpty()), result.start().toString(), result.end().toString());
 
       writeLogs(csvWriter, result.logs());
     }

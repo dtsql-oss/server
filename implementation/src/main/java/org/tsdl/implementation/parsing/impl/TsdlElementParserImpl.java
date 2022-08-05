@@ -121,7 +121,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Double parseNumber(String str) {
+  public double parseNumber(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     var decimalFormat = new DecimalFormat();
@@ -148,11 +148,11 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Long parseInteger(String str) {
+  public long parseInteger(String str) {
     var dbl = parseNumber(str);
     var isInteger = dbl == Math.floor(dbl); // double is not infinite by implementation of "parseDouble", so no !Double.isInfinite() check required
     if (isInteger) {
-      return dbl.longValue();
+      return (long) dbl;
     }
 
     throw new TsdlParseException("Expected double '%s' to be an integer.".formatted(dbl));

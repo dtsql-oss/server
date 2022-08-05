@@ -52,6 +52,7 @@ import org.tsdl.implementation.model.sample.aggregation.CountAggregator;
 import org.tsdl.implementation.model.sample.aggregation.IntegralAggregator;
 import org.tsdl.implementation.model.sample.aggregation.MaximumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.MinimumAggregator;
+import org.tsdl.implementation.model.sample.aggregation.StandardDeviationAggregator;
 import org.tsdl.implementation.model.sample.aggregation.SumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -141,7 +142,7 @@ class TsdlQueryParserTest {
         "count(\"2022-08-19T23:55:55.000Z\", \"2022-08-19T23:55:55.000Z\")", // first and second argument are equal
         "avg(\"2022-08-08T13:04:23.000Z\" \"2022-08-19T23:55:55.000Z\")", // no comma "," between first and second argument
         "min(\"2022-08-08T13:04:23.000Z\",,\"2022-08-19T23:55:55.000Z\")", // two commas "," between first and second argument
-        "max(\"2022-08-08T13:04:23.000Z\"\",\"2022-08-19T23:55:55.000Z\")", // superfluous quote (") at end of first argument
+        "stddev(\"2022-08-08T13:04:23.000Z\"\",\"2022-08-19T23:55:55.000Z\")", // superfluous quote (") at end of first argument
         "sum(\"test\",\"2022-08-19T23:55:55.000Z\")", // invalid first argument
     })
     void sampleDeclaration_knownAggregatorFunctionsWithInvalidTimeRange_throws(String aggregator) {
@@ -189,7 +190,8 @@ class TsdlQueryParserTest {
           Arguments.of("min", MinimumAggregator.class),
           Arguments.of("sum", SumAggregator.class),
           Arguments.of("count", CountAggregator.class),
-          Arguments.of("integral", IntegralAggregator.class)
+          Arguments.of("integral", IntegralAggregator.class),
+          Arguments.of("stddev", StandardDeviationAggregator.class)
       );
     }
 
@@ -224,8 +226,8 @@ class TsdlQueryParserTest {
               null, Instant.parse("2022-08-19T23:55:55.000Z"), IntegralAggregator.class
           ),
           Arguments.of(
-              "max(\"2022-08-08T13:04:23.000+01:00\",        \"\")",
-              Instant.parse("2022-08-08T13:04:23.000+01:00"), null, MaximumAggregator.class
+              "stddev(\"2022-08-08T13:04:23.000+01:00\",        \"\")",
+              Instant.parse("2022-08-08T13:04:23.000+01:00"), null, StandardDeviationAggregator.class
           ),
           Arguments.of(
               "avg(\"\",\"\")",
@@ -722,7 +724,8 @@ class TsdlQueryParserTest {
           min("2022-04-03T12:45:03.123Z","") AS s3,
           sum("","2022-07-03T12:45:03.123Z") AS s4,
           count("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s5,
-          integral("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s6
+          integral("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s6,
+          stddev() AS s7
 
         APPLY FILTER:
           AND(gt(s2), NOT(lt(3.5)),
@@ -745,9 +748,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.identifiers())
-          .hasSize(9)
+          .hasSize(10)
           .extracting(TsdlIdentifier::name)
-          .containsExactlyInAnyOrder("s1", "s2", "s3", "high", "low", "s4", "mid", "s5", "s6");
+          .containsExactlyInAnyOrder("s1", "s2", "s3", "high", "s7", "low", "s4", "mid", "s5", "s6");
     }
 
     @ValueSource(strings = FULL_FEATURE_QUERY)
@@ -786,7 +789,7 @@ class TsdlQueryParserTest {
 
       assertThat(query.samples())
           .asInstanceOf(InstanceOfAssertFactories.list(TsdlSample.class))
-          .hasSize(6)
+          .hasSize(7)
           .satisfies(samples -> {
             assertAggregator(samples.get(0), AverageAggregator.class, "s1", aggregator -> assertThat(aggregator)
                 .asInstanceOf(InstanceOfAssertFactories.type(AverageAggregator.class))
@@ -817,6 +820,11 @@ class TsdlQueryParserTest {
                 .asInstanceOf(InstanceOfAssertFactories.type(IntegralAggregator.class))
                 .extracting(IntegralAggregator::lowerBound, IntegralAggregator::upperBound)
                 .containsExactly(Optional.of(Instant.parse("2022-04-03T12:45:03.123Z")), Optional.of(Instant.parse("2022-07-03T12:45:03.123Z"))));
+
+            assertAggregator(samples.get(6), StandardDeviationAggregator.class, "s7", aggregator -> assertThat(aggregator)
+                .asInstanceOf(InstanceOfAssertFactories.type(StandardDeviationAggregator.class))
+                .extracting(StandardDeviationAggregator::lowerBound, StandardDeviationAggregator::upperBound)
+                .containsExactly(Optional.empty(), Optional.empty()));
           });
     }
 

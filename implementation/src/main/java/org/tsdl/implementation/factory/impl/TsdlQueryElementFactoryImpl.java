@@ -25,6 +25,7 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregato
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.IntegralAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.StandardDeviationAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
@@ -99,7 +100,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlFilterArgument getFilterArgument(Double value) {
+  public TsdlFilterArgument getFilterArgument(double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
     return new TsdlLiteralFilterArgumentImpl(value);
   }
@@ -176,6 +177,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
       case SUM -> new SumAggregatorImpl(lowerBound, upperBound);
       case COUNT -> new CountAggregatorImpl(lowerBound, upperBound);
       case INTEGRAL -> new IntegralAggregatorImpl(lowerBound, upperBound);
+      case STANDARD_DEVIATION -> new StandardDeviationAggregatorImpl(lowerBound, upperBound);
     };
   }
 }

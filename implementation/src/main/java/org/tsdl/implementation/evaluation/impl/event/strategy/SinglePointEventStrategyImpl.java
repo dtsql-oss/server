@@ -99,7 +99,7 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
   private void finalizePeriod(List<AnnotatedTsdlPeriod> periods, Map<TsdlIdentifier, Instant> eventMarkers,
                               Map<TsdlIdentifier, DataPoint> priorDataPoints, TsdlIdentifier eventId, Instant periodEnd,
                               DataPoint subsequentDataPoint) {
-    var finalizedPeriod = QueryResult.of(null, eventMarkers.get(eventId), periodEnd);
+    var finalizedPeriod = QueryResult.of(-1, eventMarkers.get(eventId), periodEnd);
     periods.add(new AnnotatedTsdlPeriodImpl(finalizedPeriod, eventId, priorDataPoints.get(eventId), subsequentDataPoint));
     eventMarkers.remove(eventId);
     priorDataPoints.remove(eventId);

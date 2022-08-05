@@ -21,7 +21,7 @@ class ApiGenerationTest extends BaseIntegrationTest {
   /**
    * This constant defines the file name (without extension) of the API specifications that are created by the
    * {@link ApiGenerationTest#downloadApiSpecification(String, String)} test. Changes to this constant also have to be propagated to places that
-   * reference these files (e.g. .gitignore to not have them version-controlled or CI configuration for build artifact generation).
+   * reference these files (e.g., .gitignore to not have them version-controlled or CI configuration for build artifact generation).
    */
   private static final String LOCAL_FILE_NAME = "service_api";
 

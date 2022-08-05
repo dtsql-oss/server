@@ -43,7 +43,8 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "min()", 25.75),
         Arguments.of(input, "max()", 75.52),
         Arguments.of(input, "count()", 5.0),
-        Arguments.of(input, "sum()", 239.32)
+        Arguments.of(input, "sum()", 239.32),
+        Arguments.of(input, "stddev()", 18.98234927505)
     );
   }
 
@@ -57,7 +58,7 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, "avg() AS s1,  min() AS s2", "s1,s2", new Double[] {47.864, 25.75}),
+        Arguments.of(input, "avg() AS s1,  min() AS s2, stddev() AS s3", "s1,s2,s3", new Double[] {47.864, 25.75, 18.98234927505}),
         Arguments.of(input, "max() AS s1", "s1", new Double[] {75.52}),
         Arguments.of(input, "count() AS s1, sum() AS sample3", "s1, sample3", new Double[] {5.0, 239.32})
     );
@@ -71,7 +72,7 @@ public final class QueryServiceDataFactory {
         dp("2022-05-24 20:37:47.234", 53.25),
         dp("2022-05-24 20:38:44.234", 57.55)
     );
-
+    // original 25.75, 27.25, 75.52, 53.25, 57.55
     return Stream.of(
         Arguments.of(input, "avg(\"2022-05-23T20:33:45.000Z\", \"2022-05-24T20:33:44.000Z\")", 0.0),
         Arguments.of(input, "max(\"2022-05-23T20:37:47.234Z\" , \"2022-05-24T20:33:45.234Z\")", 27.25),
@@ -81,7 +82,9 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "sum(\"\"\n ,  \"2022-05-24T20:36:46.234Z\")", 128.52),
         Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"\")", 53.25),
         Arguments.of(input, "sum(\"2022-05-24T20:35:46.234Z\",   \"\")", 186.32),
-        Arguments.of(input, "avg(\"\",   \"\")", 47.864)
+        Arguments.of(input, "avg(\"\",   \"\")", 47.864),
+        Arguments.of(input, "stddev(\"\", \"2022-05-24T20:37:00.000Z\")", 20.520566969506),
+        Arguments.of(input, "stddev(\"2022-05-24T20:33:45.100Z\", \"2022-05-24T20:38:00.000Z\")", 19.725746852499)
     );
   }
 
@@ -107,9 +110,10 @@ public final class QueryServiceDataFactory {
         ),
         Arguments.of(
             input,
-            "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1",
-            "s1",
-            new Double[] {102.77}
+            "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1, "
+                + "stddev(\"2022-05-24T20:33:45.100Z\", \"2022-05-24T20:38:00.000Z\") AS s2",
+            "s1, s2",
+            new Double[] {102.77, 19.725746852499}
         )
     );
   }

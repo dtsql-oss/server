@@ -71,6 +71,7 @@ AGGREGATOR_FUNCTION
   |  'sum'
   |  'count'
   |  'integral'
+  |  'stddev'
   ;
 
 DURATION_FOR  :  'FOR'  ;

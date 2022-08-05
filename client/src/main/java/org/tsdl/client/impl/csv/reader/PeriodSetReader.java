@@ -19,7 +19,7 @@ public class PeriodSetReader extends BaseReader<TsdlPeriodSet> {
           csvReader,
           3,
           row -> periods.add(QueryResult.of(
-              Integer.valueOf(row.getField(0)),
+              Integer.parseInt(row.getField(0)),
               Instant.parse(row.getField(2)),
               Instant.parse(row.getField(3))
           ))

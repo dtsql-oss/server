@@ -33,7 +33,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, decimalArgument, 0L, "Number of decimal places must be greater than or equal to 0.");
 
     this.args = args;
-    decimalPlaces = decimalArgument.intValue();
+    decimalPlaces = (int) decimalArgument;
   }
 
   @Override

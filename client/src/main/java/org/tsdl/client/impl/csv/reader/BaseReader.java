@@ -35,7 +35,7 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
 
   protected abstract T readInternal(String filePath) throws Exception;
 
-  protected Double parseNumber(String str) throws ParseException {
+  protected double parseNumber(String str) throws ParseException {
     return TsdlUtil.parseNumber(str);
   }
 

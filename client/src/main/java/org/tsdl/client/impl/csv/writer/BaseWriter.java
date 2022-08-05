@@ -39,7 +39,7 @@ public abstract class BaseWriter<T extends QueryResult, U extends QueryClientSpe
 
   protected abstract void writeInternal(T result, U specification, String targetFile) throws IOException;
 
-  protected String formatNumber(Double value) {
+  protected String formatNumber(double value) {
     return TsdlUtil.formatNumber(value);
   }
 

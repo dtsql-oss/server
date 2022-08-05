@@ -11,26 +11,27 @@ import org.tsdl.infrastructure.common.Conditions;
  */
 public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
   private final TsdlSample sample;
-  private Double value;
+  private double value;
 
-  public TsdlSampleFilterArgumentImpl(TsdlSample sample, Double value) {
+  public TsdlSampleFilterArgumentImpl(TsdlSample sample, double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, sample, "Sample of sample filter argument must not be null.");
     this.sample = sample;
     this.value = value;
   }
 
   public TsdlSampleFilterArgumentImpl(TsdlSample sample) {
-    this(sample, null);
+    this(sample, Double.NaN);
   }
 
   @Override
-  public Double value() {
-    Conditions.checkNotNull(Condition.STATE, value, "Argument value has not been set yet.");
+  public double value() {
+    Conditions.checkIsFalse(Condition.STATE, Double.isNaN(value), "Argument value has not been set yet.");
     return value;
   }
 
   @Override
-  public void setValue(Double value) {
+  public void setValue(double value) {
+    Conditions.checkIsFalse(Condition.ARGUMENT, Double.isNaN(value), "NaN is not a valid argument value.");
     this.value = value;
   }
 

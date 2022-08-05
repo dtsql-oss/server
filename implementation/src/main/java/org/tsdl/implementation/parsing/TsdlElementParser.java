@@ -30,9 +30,9 @@ public interface TsdlElementParser {
 
   EventDurationUnit parseEventDurationUnit(String str);
 
-  Double parseNumber(String str);
+  double parseNumber(String str);
 
-  Long parseInteger(String str);
+  long parseInteger(String str);
 
   String parseStringLiteral(String str);
 

@@ -26,7 +26,7 @@ public class TestDataPainterWindow extends JFrame {
   private final JSpinner numThickness = new JSpinner(new SpinnerNumberModel(5, 1, 20, 1));
 
   private final JSpinner numSampleRate = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
-  private final PainterFrame painter = new PainterFrame((Integer) numThickness.getValue(), (Integer) numSampleRate.getValue());
+  private final PainterFrame painter = new PainterFrame((int) numThickness.getValue(), (int) numSampleRate.getValue());
 
   private final JComboBox<String> cmbOutput = new JComboBox<>(new String[] {"CSV", "Java"});
 
@@ -57,13 +57,13 @@ public class TestDataPainterWindow extends JFrame {
     var thicknessPanel = new JPanel(new FlowLayout());
     thicknessPanel.add(lblThickness);
     thicknessPanel.add(numThickness);
-    numThickness.addChangeListener(e -> painter.setLineThickness((Integer) numThickness.getValue()));
+    numThickness.addChangeListener(e -> painter.setLineThickness((int) numThickness.getValue()));
 
     var lblSampleRate = new JLabel("Sample Rate:");
     var sampleRatePanel = new JPanel(new FlowLayout());
     sampleRatePanel.add(lblSampleRate);
     sampleRatePanel.add(numSampleRate);
-    numSampleRate.addChangeListener(e -> painter.setSampleRate((Integer) numSampleRate.getValue()));
+    numSampleRate.addChangeListener(e -> painter.setSampleRate((int) numSampleRate.getValue()));
 
 
     var lblOutput = new JLabel("Output Type:");

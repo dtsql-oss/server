@@ -20,7 +20,7 @@ public abstract class AbstractAggregator implements TsdlAggregator {
   private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
   private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
 
-  private Double sampleValue;
+  private double sampleValue;
 
   private final String descriptor;
 
@@ -75,7 +75,7 @@ public abstract class AbstractAggregator implements TsdlAggregator {
 
   @Override
   public boolean isComputed() {
-    return sampleValue != null;
+    return !Double.isNaN(sampleValue);
   }
 
   private List<DataPoint> getAggregatorInput(List<DataPoint> dataPoints) {

@@ -9,9 +9,9 @@ import org.tsdl.infrastructure.model.impl.TsdlPeriodImpl;
  */
 @JsonDeserialize(as = TsdlPeriodImpl.class)
 public interface TsdlPeriod extends QueryResult {
-  TsdlPeriod EMPTY = QueryResult.of(null, null, null, new TsdlLogEvent[0]);
+  TsdlPeriod EMPTY = QueryResult.of(-1, null, null, new TsdlLogEvent[0]);
 
-  Integer index();
+  int index();
 
   Instant start();
 

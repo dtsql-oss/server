@@ -142,7 +142,7 @@ public final class CsvStorageService extends BaseStorageService implements Stora
             var dateTime = row.getField(timeIndex);
             var value = row.getField(valueIndex);
 
-            return DataPoint.of(Instant.from(formatter.parse(dateTime)), Double.valueOf(value));
+            return DataPoint.of(Instant.from(formatter.parse(dateTime)), Double.parseDouble(value));
           }).toList();
     });
   }
