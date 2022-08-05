@@ -72,7 +72,7 @@ public final class QueryServiceDataFactory {
         dp("2022-05-24 20:37:47.234", 53.25),
         dp("2022-05-24 20:38:44.234", 57.55)
     );
-    // original 25.75, 27.25, 75.52, 53.25, 57.55
+
     return Stream.of(
         Arguments.of(input, "avg(\"2022-05-23T20:33:45.000Z\", \"2022-05-24T20:33:44.000Z\")", 0.0),
         Arguments.of(input, "max(\"2022-05-23T20:37:47.234Z\" , \"2022-05-24T20:33:45.234Z\")", 27.25),
@@ -83,7 +83,7 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"\")", 53.25),
         Arguments.of(input, "sum(\"2022-05-24T20:35:46.234Z\",   \"\")", 186.32),
         Arguments.of(input, "avg(\"\",   \"\")", 47.864),
-        Arguments.of(input, "stddev(\"\", \"2022-05-24T20:37:00.000Z\")", 20.520566969506),
+        Arguments.of(input, "stddev(\"\", \"2022-05-24T20:37:00.000Z\")", 23.116362170549),
         Arguments.of(input, "stddev(\"2022-05-24T20:33:45.100Z\", \"2022-05-24T20:38:00.000Z\")", 19.725746852499)
     );
   }

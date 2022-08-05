@@ -8,16 +8,13 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link MinimumAggregator}.
  */
-public class MinimumAggregatorImpl extends AbstractAggregator implements MinimumAggregator {
+public class MinimumAggregatorImpl extends AbstractSummaryAggregator implements MinimumAggregator {
   public MinimumAggregatorImpl(Instant lowerBound, Instant upperBound) {
     super(lowerBound, upperBound);
   }
 
   @Override
-  protected double aggregate(List<DataPoint> input) {
-    return input.stream()
-        .mapToDouble(DataPoint::value)
-        .min()
-        .orElse(0.0);
+  protected double onAggregate(List<DataPoint> input) {
+    return summaryStatistics.minimum();
   }
 }

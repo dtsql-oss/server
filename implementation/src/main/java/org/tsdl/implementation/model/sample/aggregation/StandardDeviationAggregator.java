@@ -5,9 +5,9 @@ import org.tsdl.implementation.parsing.enums.AggregatorType;
 /**
  * An aggregator calculating the population standard deviation of data point values.
  */
-public interface StandardDeviationAggregator extends TsdlAggregator {
+public interface StandardDeviationAggregator extends SummaryAggregator {
   @Override
   default AggregatorType type() {
-    return AggregatorType.AVERAGE;
+    return AggregatorType.STANDARD_DEVIATION;
   }
 }

@@ -3,10 +3,8 @@ package org.tsdl.implementation.evaluation;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.tsdl.implementation.evaluation.impl.TsdlPeriodAssembler;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
-import org.tsdl.implementation.parsing.TsdlQueryParser;
 import org.tsdl.infrastructure.api.QueryService;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -24,13 +22,13 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
  */
 @Slf4j
 public class TsdlQueryService implements QueryService {
-  private final TsdlQueryParser parser = TsdlComponentFactory.INSTANCE.queryParser();
-  private final TsdlResultCollector resultCollector = TsdlComponentFactory.INSTANCE.resultCollector();
-  private final TsdlPeriodAssembler periodAssembler = TsdlComponentFactory.INSTANCE.periodAssembler();
-  private final TsdlSamplesCalculator samplesCalculator = TsdlComponentFactory.INSTANCE.samplesCalculator();
-
   @Override
   public QueryResult query(List<DataPoint> data, String query) {
+    final var parser = TsdlComponentFactory.INSTANCE.queryParser();
+    final var resultCollector = TsdlComponentFactory.INSTANCE.resultCollector();
+    final var periodAssembler = TsdlComponentFactory.INSTANCE.periodAssembler();
+    final var samplesCalculator = TsdlComponentFactory.INSTANCE.samplesCalculator();
+
     try {
       Conditions.checkNotNull(Condition.ARGUMENT, data, "Data must not be null.");
       Conditions.checkNotNull(Condition.ARGUMENT, query, "Query string must not be null.");
@@ -39,6 +37,7 @@ public class TsdlQueryService implements QueryService {
       var parsedQuery = parser.parseQuery(query);
       var logEvents = new ArrayList<TsdlLogEvent>();
 
+      samplesCalculator.setSummaryStatisticsCalculator(parsedQuery.samples());
       var sampleValues = samplesCalculator.computeSampleValues(parsedQuery.samples(), data, logEvents);
       samplesCalculator.setConnectiveArgumentValues(parsedQuery, sampleValues);
 

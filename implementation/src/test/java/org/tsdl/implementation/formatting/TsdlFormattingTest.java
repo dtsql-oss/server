@@ -17,13 +17,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
+import org.tsdl.implementation.model.sample.aggregation.SummaryAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
-class TsdlFormattingTests {
+class TsdlFormattingTest {
   private static final TsdlQueryElementFactory ELEMENTS = TsdlComponentFactory.INSTANCE.elementFactory();
+  private static final TsdlComponentFactory COMPONENTS = TsdlComponentFactory.INSTANCE;
 
   @Nested
   @DisplayName("Sample Formatting Tests")
@@ -34,6 +36,10 @@ class TsdlFormattingTests {
                                                         String identifier, String[] args, String expectedResult)
         throws IOException {
       var sample = ELEMENTS.getSample(type, lowerBound, upperBound, ELEMENTS.getIdentifier(identifier), true, args);
+      if (sample.aggregator() instanceof SummaryAggregator summaryAggregator) {
+        summaryAggregator.setStatistics(COMPONENTS.summaryStatistics());
+      }
+
       sample.aggregator().compute(identifier, dps);
       formattingTestStream(sample, result -> assertThat(result).isEqualTo(expectedResult + "\n"));
     }
@@ -43,6 +49,10 @@ class TsdlFormattingTests {
     void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, Instant lowerBound, Instant upperBound,
                                                             String identifier, String[] args, String expectedResult) {
       var sample = ELEMENTS.getSample(type, lowerBound, upperBound, ELEMENTS.getIdentifier(identifier), true, args);
+      if (sample.aggregator() instanceof SummaryAggregator summaryAggregator) {
+        summaryAggregator.setStatistics(COMPONENTS.summaryStatistics());
+      }
+
       sample.aggregator().compute(identifier, dps);
       formattingTestCollection(sample, result -> assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.list(TsdlLogEvent.class))

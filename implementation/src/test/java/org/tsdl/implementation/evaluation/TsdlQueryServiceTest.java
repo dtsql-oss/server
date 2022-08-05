@@ -25,10 +25,12 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
 import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
+import org.tsdl.testutil.visualization.api.DisableTsdlTestVisualization;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 import org.tsdl.testutil.visualization.impl.TsdlTestVisualizer;
 
 @ExtendWith(TsdlTestVisualizer.class)
+@DisableTsdlTestVisualization
 class TsdlQueryServiceTest {
   private static final String DATA_ROOT = "data/query/";
   private static final QueryService queryService = new TsdlQueryService();
@@ -46,7 +48,7 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResultImpl.class))
           .extracting(SingularScalarResultImpl::value, InstanceOfAssertFactories.DOUBLE)
-          .isEqualTo(expectedResult);
+          .isEqualTo(expectedResult, withPrecision(0.001d));
     }
 
     @ParameterizedTest
@@ -59,8 +61,8 @@ class TsdlQueryServiceTest {
       var localResult = (SingularScalarResult) queryService.query(dps, queryLocal);
 
       assertThat(globalResult.value())
-          .isEqualTo(expectedResult)
-          .isEqualTo(localResult.value());
+          .isEqualTo(expectedResult, withPrecision(0.001d))
+          .isEqualTo(localResult.value(), withPrecision(0.001d));
     }
 
     @ParameterizedTest
@@ -76,8 +78,8 @@ class TsdlQueryServiceTest {
 
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
-          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
-          .containsExactly(expectedResults);
+          .extracting(r -> r.values().stream().mapToDouble(Double::doubleValue).toArray(), InstanceOfAssertFactories.DOUBLE_ARRAY)
+          .containsExactly(expectedResults, withPrecision(0.001d));
     }
 
     @ParameterizedTest
@@ -90,7 +92,7 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(SingularScalarResultImpl.class))
           .extracting(SingularScalarResultImpl::value, InstanceOfAssertFactories.DOUBLE)
-          .isEqualTo(expectedResult, withPrecision(0.01d));
+          .isEqualTo(expectedResult, withPrecision(0.001d));
     }
 
     @ParameterizedTest
@@ -106,8 +108,8 @@ class TsdlQueryServiceTest {
 
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
-          .extracting(MultipleScalarResult::values, InstanceOfAssertFactories.list(Double.class))
-          .containsExactly(expectedResults);
+          .extracting(r -> r.values().stream().mapToDouble(Double::doubleValue).toArray(), InstanceOfAssertFactories.DOUBLE_ARRAY)
+          .containsExactly(expectedResults, withPrecision(0.001d));
     }
 
     @ParameterizedTest

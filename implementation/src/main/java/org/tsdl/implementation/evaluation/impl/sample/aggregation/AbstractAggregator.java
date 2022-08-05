@@ -16,7 +16,7 @@ import org.tsdl.infrastructure.model.DataPoint;
  * and {@link TsdlAggregator#upperBound()} values.
  */
 @Slf4j
-public abstract class AbstractAggregator implements TsdlAggregator {
+abstract class AbstractAggregator implements TsdlAggregator {
   private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
   private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
 

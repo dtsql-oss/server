@@ -8,17 +8,13 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link StandardDeviationAggregator}.
  */
-public class StandardDeviationAggregatorImpl extends AbstractAggregator implements StandardDeviationAggregator {
+public class StandardDeviationAggregatorImpl extends AbstractSummaryAggregator implements StandardDeviationAggregator {
   public StandardDeviationAggregatorImpl(Instant lowerBound, Instant upperBound) {
     super(lowerBound, upperBound);
   }
 
   @Override
-  protected double aggregate(List<DataPoint> input) {
-    
-    return input.stream()
-        .mapToDouble(DataPoint::value)
-        .average()
-        .orElse(0.0);
+  protected double onAggregate(List<DataPoint> input) {
+    return summaryStatistics.populationStandardDeviation();
   }
 }

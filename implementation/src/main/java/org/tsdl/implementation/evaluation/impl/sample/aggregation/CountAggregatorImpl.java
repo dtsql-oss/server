@@ -8,13 +8,13 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link CountAggregator}.
  */
-public class CountAggregatorImpl extends AbstractAggregator implements CountAggregator {
+public class CountAggregatorImpl extends AbstractSummaryAggregator implements CountAggregator {
   public CountAggregatorImpl(Instant lowerBound, Instant upperBound) {
     super(lowerBound, upperBound);
   }
 
   @Override
-  protected double aggregate(List<DataPoint> input) {
-    return input.size();
+  protected double onAggregate(List<DataPoint> input) {
+    return summaryStatistics.count();
   }
 }
