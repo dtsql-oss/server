@@ -14,6 +14,7 @@ import org.tsdl.grammar.TsdlParserBaseListener;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
+import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -40,6 +41,7 @@ import org.tsdl.infrastructure.common.Conditions;
 public class TsdlListenerImpl extends TsdlParserBaseListener {
   private final TsdlElementParser elementParser = TsdlComponentFactory.INSTANCE.elementParser();
   private final TsdlQueryElementFactory elementFactory = TsdlComponentFactory.INSTANCE.elementFactory();
+  private final Calculus calculus = TsdlComponentFactory.INSTANCE.calculus();
   private final Set<TsdlIdentifier> declaredIdentifiers = new HashSet<>();
   private final Map<TsdlIdentifier, TsdlEvent> declaredEvents = new HashMap<>();
   private final Map<TsdlIdentifier, TsdlSample> declaredSamples = new HashMap<>();
@@ -181,7 +183,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
 
     var aggregator = switch (aggregatorType) {
-      case INTEGRAL -> elementFactory.getAggregator(aggregatorType, lowerBound, upperBound);
+      case INTEGRAL -> elementFactory.getAggregator(aggregatorType, lowerBound, upperBound, calculus);
       case AVERAGE, COUNT, MAXIMUM, MINIMUM, STANDARD_DEVIATION, SUM -> {
         var statistics = summaryStatisticsByBounds.computeIfAbsent(
             new AggregatorBounds(lowerBound, upperBound),

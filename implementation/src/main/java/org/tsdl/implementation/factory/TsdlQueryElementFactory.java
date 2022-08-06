@@ -2,6 +2,7 @@ package org.tsdl.implementation.factory;
 
 import java.time.Instant;
 import java.util.List;
+import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
@@ -44,7 +45,7 @@ public interface TsdlQueryElementFactory {
 
   TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
 
-  TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound);
+  TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, Calculus calculus);
 
   TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics);
 

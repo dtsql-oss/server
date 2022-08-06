@@ -58,28 +58,30 @@ class TsdlFormattingTest {
     @Test
     void tsdlFormatter_missingArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null, COMPONENTS.calculus()), id, true))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_tooManyArguments_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "3", "4"))
+      assertThatThrownBy(
+          () -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null, COMPONENTS.calculus()), id, true, "3", "4"))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_negativeArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "-3"))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null, COMPONENTS.calculus()), id, true, "-3"))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_invalidArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "3.4"))
+      assertThatThrownBy(
+          () -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null, COMPONENTS.calculus()), id, true, "3.4"))
           .isInstanceOf(TsdlParseException.class);
     }
   }

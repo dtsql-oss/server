@@ -28,6 +28,7 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggrega
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.StandardDeviationAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
+import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -130,11 +131,11 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound) {
+  public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, Calculus calculus) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
 
     if (type == AggregatorType.INTEGRAL) {
-      return new IntegralAggregatorImpl(lowerBound, upperBound);
+      return new IntegralAggregatorImpl(lowerBound, upperBound, calculus);
     }
 
     throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);

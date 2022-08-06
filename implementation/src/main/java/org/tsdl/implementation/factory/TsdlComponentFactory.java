@@ -5,6 +5,7 @@ import org.tsdl.implementation.evaluation.TsdlResultCollector;
 import org.tsdl.implementation.evaluation.TsdlSamplesCalculator;
 import org.tsdl.implementation.evaluation.impl.TsdlPeriodAssembler;
 import org.tsdl.implementation.factory.impl.TsdlComponentFactoryImpl;
+import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
@@ -28,6 +29,8 @@ public interface TsdlComponentFactory {
   TsdlQueryElementFactory elementFactory();
 
   SummaryStatistics summaryStatistics();
+
+  Calculus calculus();
 
   ANTLRErrorListener errorListener();
 }

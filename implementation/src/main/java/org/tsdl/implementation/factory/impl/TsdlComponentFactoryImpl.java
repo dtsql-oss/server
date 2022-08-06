@@ -9,7 +9,9 @@ import org.tsdl.implementation.evaluation.impl.TsdlSamplesCalculatorImpl;
 import org.tsdl.implementation.evaluation.impl.result.TsdlResultCollectorImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
+import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
+import org.tsdl.implementation.math.impl.CalculusImpl;
 import org.tsdl.implementation.math.impl.SummaryStatisticsImpl;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.TsdlErrorListener;
@@ -54,6 +56,11 @@ public class TsdlComponentFactoryImpl implements TsdlComponentFactory {
   @Override
   public SummaryStatistics summaryStatistics() {
     return new SummaryStatisticsImpl();
+  }
+
+  @Override
+  public Calculus calculus() {
+    return new CalculusImpl();
   }
 
   @Override
