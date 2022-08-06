@@ -37,7 +37,6 @@ public class TsdlQueryService implements QueryService {
       var parsedQuery = parser.parseQuery(query);
       var logEvents = new ArrayList<TsdlLogEvent>();
 
-      samplesCalculator.setSummaryStatisticsCalculator(parsedQuery.samples());
       var sampleValues = samplesCalculator.computeSampleValues(parsedQuery.samples(), data, logEvents);
       samplesCalculator.setConnectiveArgumentValues(parsedQuery, sampleValues);
 

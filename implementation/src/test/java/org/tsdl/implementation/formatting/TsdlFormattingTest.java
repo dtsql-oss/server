@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
-import org.tsdl.implementation.model.sample.aggregation.SummaryAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -33,12 +32,9 @@ class TsdlFormattingTest {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgs")
     void tsdlFormatter_outputStreamWithDecimalArguments(List<DataPoint> dps, AggregatorType type, Instant lowerBound, Instant upperBound,
-                                                        String identifier, String[] args, String expectedResult)
-        throws IOException {
-      var sample = ELEMENTS.getSample(type, lowerBound, upperBound, ELEMENTS.getIdentifier(identifier), true, args);
-      if (sample.aggregator() instanceof SummaryAggregator summaryAggregator) {
-        summaryAggregator.setStatistics(COMPONENTS.summaryStatistics());
-      }
+                                                        String identifier, String[] args, String expectedResult) throws IOException {
+      var aggregator = ELEMENTS.getAggregator(type, lowerBound, upperBound, COMPONENTS.summaryStatistics());
+      var sample = ELEMENTS.getSample(aggregator, ELEMENTS.getIdentifier(identifier), true, args);
 
       sample.aggregator().compute(identifier, dps);
       formattingTestStream(sample, result -> assertThat(result).isEqualTo(expectedResult + "\n"));
@@ -48,10 +44,8 @@ class TsdlFormattingTest {
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgs")
     void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, Instant lowerBound, Instant upperBound,
                                                             String identifier, String[] args, String expectedResult) {
-      var sample = ELEMENTS.getSample(type, lowerBound, upperBound, ELEMENTS.getIdentifier(identifier), true, args);
-      if (sample.aggregator() instanceof SummaryAggregator summaryAggregator) {
-        summaryAggregator.setStatistics(COMPONENTS.summaryStatistics());
-      }
+      var aggregator = ELEMENTS.getAggregator(type, lowerBound, upperBound, COMPONENTS.summaryStatistics());
+      var sample = ELEMENTS.getSample(aggregator, ELEMENTS.getIdentifier(identifier), true, args);
 
       sample.aggregator().compute(identifier, dps);
       formattingTestCollection(sample, result -> assertThat(result)
@@ -64,28 +58,28 @@ class TsdlFormattingTest {
     @Test
     void tsdlFormatter_missingArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, null, null, id, true))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_tooManyArguments_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, null, null, id, true, "3", "4"))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "3", "4"))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_negativeArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, null, null, id, true, "-3"))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "-3"))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void tsdlFormatter_invalidArgument_throws() {
       var id = ELEMENTS.getIdentifier("id");
-      assertThatThrownBy(() -> ELEMENTS.getSample(AggregatorType.AVERAGE, null, null, id, true, "3.4"))
+      assertThatThrownBy(() -> ELEMENTS.getSample(ELEMENTS.getAggregator(AggregatorType.INTEGRAL, null, null), id, true, "3.4"))
           .isInstanceOf(TsdlParseException.class);
     }
   }

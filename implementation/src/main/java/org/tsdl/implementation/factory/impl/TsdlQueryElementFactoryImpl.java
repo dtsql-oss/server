@@ -28,6 +28,7 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggrega
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.StandardDeviationAggregatorImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
+import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -112,9 +113,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
-                              String... formatterArgs) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type of sample must not be null.");
+  public TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for sample must not be null.");
     if (!includeFormatter) {
       Conditions.checkSizeExactly(Condition.ARGUMENT,
@@ -123,12 +122,37 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
           "If no output formatter is attached to a sample, there must not be any formatting arguments.");
     }
 
-    var aggregator = getAggregator(type, lowerBound, upperBound);
     return new TsdlSampleImpl(
         aggregator,
         identifier,
         includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null
     );
+  }
+
+  @Override
+  public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+
+    if (type == AggregatorType.INTEGRAL) {
+      return new IntegralAggregatorImpl(lowerBound, upperBound);
+    }
+
+    throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+  }
+
+  @Override
+  public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+
+    return switch (type) {
+      case AVERAGE -> new AverageAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      case MAXIMUM -> new MaximumAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      case MINIMUM -> new MinimumAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      case SUM -> new SumAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      case COUNT -> new CountAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      case STANDARD_DEVIATION -> new StandardDeviationAggregatorImpl(lowerBound, upperBound, summaryStatistics);
+      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+    };
   }
 
   @Override
@@ -165,19 +189,5 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   public YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifiers) {
     Conditions.checkNotNull(Condition.ARGUMENT, format, "Result format must not be null.");
     return new YieldStatementImpl(format, identifiers);
-  }
-
-  private TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
-
-    return switch (type) {
-      case AVERAGE -> new AverageAggregatorImpl(lowerBound, upperBound);
-      case MAXIMUM -> new MaximumAggregatorImpl(lowerBound, upperBound);
-      case MINIMUM -> new MinimumAggregatorImpl(lowerBound, upperBound);
-      case SUM -> new SumAggregatorImpl(lowerBound, upperBound);
-      case COUNT -> new CountAggregatorImpl(lowerBound, upperBound);
-      case INTEGRAL -> new IntegralAggregatorImpl(lowerBound, upperBound);
-      case STANDARD_DEVIATION -> new StandardDeviationAggregatorImpl(lowerBound, upperBound);
-    };
   }
 }

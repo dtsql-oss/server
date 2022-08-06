@@ -2,6 +2,7 @@ package org.tsdl.implementation.factory;
 
 import java.time.Instant;
 import java.util.List;
+import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
@@ -16,6 +17,7 @@ import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgumen
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
@@ -40,8 +42,11 @@ public interface TsdlQueryElementFactory {
 
   TsdlFilterArgument getFilterArgument(TsdlSample sample);
 
-  TsdlSample getSample(AggregatorType type, Instant lowerBound, Instant upperBound, TsdlIdentifier identifier, boolean includeFormatter,
-                       String... formatterArgs);
+  TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
+
+  TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound);
+
+  TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics);
 
   TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, EventDuration duration);
 

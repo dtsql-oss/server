@@ -25,12 +25,10 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
 import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
-import org.tsdl.testutil.visualization.api.DisableTsdlTestVisualization;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 import org.tsdl.testutil.visualization.impl.TsdlTestVisualizer;
 
 @ExtendWith(TsdlTestVisualizer.class)
-@DisableTsdlTestVisualization
 class TsdlQueryServiceTest {
   private static final String DATA_ROOT = "data/query/";
   private static final QueryService queryService = new TsdlQueryService();
