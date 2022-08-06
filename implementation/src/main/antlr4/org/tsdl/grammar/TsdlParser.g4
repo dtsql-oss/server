@@ -41,7 +41,7 @@ eventDeclaration
   ;
 
 durationSpecification
-  : DURATION_FOR WHITESPACE DURATION_RANGE WHITESPACE TIME_UNIT
+  : EVENT_DURATION WHITESPACE TIME_UNIT
   ;
 
 chooseDeclaration
@@ -53,7 +53,7 @@ choiceStatement
   ;
 
 timeToleranceSpecification
-  : TIME_TOLERANCE_WITHIN WHITESPACE DURATION_RANGE WHITESPACE TIME_UNIT
+  : TIME_TOLERANCE WHITESPACE TIME_UNIT
   ;
 
 yieldDeclaration
@@ -151,6 +151,7 @@ singlePointFilterDeclaration
 singlePointFilter
   :  thresholdFilter
   |  temporalFilter
+  |  deviationFilter
   ;
 
 negatedSinglePointFilter
@@ -169,4 +170,13 @@ thresholdFilter
 thresholdFilterArgument
   :  NUMBER
   |  IDENTIFIER
+  ;
+
+deviationFilter
+  :  DEVIATION_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? deviationFilterArguments WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
+deviationFilterArguments
+  :  AROUND_FILTER_TYPE LIST_SEPARATOR thresholdFilterArgument LIST_SEPARATOR NUMBER
   ;
