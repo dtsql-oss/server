@@ -75,7 +75,7 @@ TEMPORAL_RELATION
   |  'follows'
   ;
 
-AGGREGATOR_FUNCTION
+VALUE_AGGREGATOR_FUNCTION
   :  'avg'
   |  'max'
   |  'min'
@@ -83,6 +83,15 @@ AGGREGATOR_FUNCTION
   |  'count'
   |  'integral'
   |  'stddev'
+  ;
+
+TEMPORAL_AGGREGATOR_FUNCTION
+  :  'avg_t'
+  |  'max_t'
+  |  'min_t'
+  |  'sum_t'
+  |  'count_t'
+  |  'stddev_t'
   ;
 
 // INT >= 0 (app validation)

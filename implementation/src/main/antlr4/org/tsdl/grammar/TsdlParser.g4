@@ -117,12 +117,32 @@ identifiers
   ;
 
 aggregatorFunctionDeclaration
-  :  AGGREGATOR_FUNCTION PARENTHESIS_OPEN WHITESPACE? timeRange? WHITESPACE? PARENTHESIS_CLOSE
+  :  valueAggregatorDeclaration
+  |  temporalAggregatorDeclaration
+  ;
+
+valueAggregatorDeclaration
+  :  VALUE_AGGREGATOR_FUNCTION PARENTHESIS_OPEN WHITESPACE? timeRange? WHITESPACE? PARENTHESIS_CLOSE
   ;
 
 timeRange
   :  STRING_LITERAL LIST_SEPARATOR STRING_LITERAL  // expected: ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30.123+04:00' (to be validated by application)
   ;
+
+// expected string literal: T1/T2, both ISO-8601 UTC timestamps, e.g., '2011-12-03T10:15:30.123+04:00/2011-12-04T14:45:30.123Z' (app validation)
+temporalAggregatorDeclaration
+  :  TEMPORAL_AGGREGATOR_FUNCTION PARENTHESIS_OPEN WHITESPACE? intervalList WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// filter argument (STRING_LITERAL): ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)
+intervalList
+:  intervals LIST_SEPARATOR STRING_LITERAL     // either two or more events
+|  STRING_LITERAL                              // or exactly one
+;
+
+intervals
+:  STRING_LITERAL (LIST_SEPARATOR STRING_LITERAL)*   // one interval plus [0..n] additional intervals
+;
 
 identifierDeclaration
   :  AS WHITESPACE IDENTIFIER

@@ -162,7 +162,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
-    var aggregatorType = elementParser.parseAggregatorType(ctx.aggregatorFunctionDeclaration().AGGREGATOR_FUNCTION().getText());
+    var aggregatorType = elementParser.parseAggregatorType(
+        ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().VALUE_AGGREGATOR_FUNCTION().getText()
+    );
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var includeEcho = ctx.echoStatement() != null;
     var echoArguments = includeEcho && ctx.echoStatement().echoArgumentList() != null
@@ -171,8 +173,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
     Instant lowerBound = null;
     Instant upperBound = null;
-    if (ctx.aggregatorFunctionDeclaration().timeRange() != null) {
-      var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().timeRange());
+    if (ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().timeRange() != null) {
+      var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().timeRange());
       Conditions.checkSizeExactly(Condition.STATE, timeRange, 2, "Time range must consist of exactly two timestamps.");
 
       lowerBound = timeRange[0];
@@ -312,7 +314,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       return null;
     }
 
-    var bounds = ctx.DURATION_RANGE().getText().trim().split(",");
+    var bounds = ctx.EVENT_DURATION().getText().substring("FOR".length()).trim().split(",");
     Conditions.checkSizeExactly(Condition.STATE, bounds, 2, "There must be exactly two bounds for an event duration, separated by ','.");
 
     var lowerBound = elementParser.parseEventDurationBound(bounds[0], true);
