@@ -3,6 +3,7 @@ package org.tsdl.implementation.parsing.impl;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
@@ -164,19 +166,31 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
-    var aggregatorType = elementParser.parseAggregatorType(
-        ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().VALUE_AGGREGATOR_FUNCTION().getText()
-    );
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var includeEcho = ctx.echoStatement() != null;
     var echoArguments = includeEcho && ctx.echoStatement().echoArgumentList() != null
         ? parseEchoArguments(ctx.echoStatement().echoArgumentList())
         : new String[0];
 
+    TsdlAggregator aggregator;
+    if (ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration() != null) {
+      aggregator = parseValueAggregator(ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration());
+    } else if (ctx.aggregatorFunctionDeclaration().temporalAggregatorDeclaration() != null) {
+      aggregator = parseTemporalAggregator(ctx.aggregatorFunctionDeclaration().temporalAggregatorDeclaration());
+    } else {
+      throw new TsdlParseException("Cannot parse TsdlAggregator, neither 'valueAggregatorDeclaration' nor 'temporalAggregatorDeclaration' rule.");
+    }
+
+    return elementFactory.getSample(aggregator, identifier, includeEcho, echoArguments);
+  }
+
+  private TsdlAggregator parseValueAggregator(TsdlParser.ValueAggregatorDeclarationContext ctx) {
+    var aggregatorType = elementParser.parseAggregatorType(ctx.VALUE_AGGREGATOR_FUNCTION().getText());
+
     Instant lowerBound = null;
     Instant upperBound = null;
-    if (ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().timeRange() != null) {
-      var timeRange = parseTimeRange(ctx.aggregatorFunctionDeclaration().valueAggregatorDeclaration().timeRange());
+    if (ctx.timeRange() != null) {
+      var timeRange = parseTimeRange(ctx.timeRange());
       Conditions.checkSizeExactly(Condition.STATE, timeRange, 2, "Time range must consist of exactly two timestamps.");
 
       lowerBound = timeRange[0];
@@ -186,7 +200,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       }
     }
 
-    var aggregator = switch (aggregatorType) {
+    return switch (aggregatorType) {
       case INTEGRAL -> elementFactory.getAggregator(aggregatorType, lowerBound, upperBound, calculus);
       case AVERAGE, COUNT, MAXIMUM, MINIMUM, STANDARD_DEVIATION, SUM -> {
         var statistics = summaryStatisticsByBounds.computeIfAbsent(
@@ -195,15 +209,42 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         );
         yield elementFactory.getAggregator(aggregatorType, lowerBound, upperBound, statistics);
       }
+      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", aggregatorType);
     };
+  }
 
-    return elementFactory.getSample(aggregator, identifier, includeEcho, echoArguments);
+  private TsdlAggregator parseTemporalAggregator(TsdlParser.TemporalAggregatorDeclarationContext ctx) {
+    var aggregatorType = elementParser.parseAggregatorType(ctx.TEMPORAL_AGGREGATOR_FUNCTION().getText());
+    var timePeriods = parseIntervalList(ctx.intervalList());
+    var unit = elementParser.parseEventDurationUnit(ctx.TIME_UNIT().getText());
+
+    return switch (aggregatorType) {
+      case TEMPORAL_AVERAGE, TEMPORAL_COUNT, TEMPORAL_MAXIMUM, TEMPORAL_MINIMUM, TEMPORAL_STANDARD_DEVIATION, TEMPORAL_SUM ->
+          elementFactory.getAggregator(aggregatorType, timePeriods, unit);
+      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", aggregatorType);
+    };
+  }
+
+  private List<TimePeriod> parseIntervalList(TsdlParser.IntervalListContext ctx) {
+    var intervalList = new ArrayList<TimePeriod>();
+
+    if (ctx.intervals() != null) {
+      var intervals = ctx.intervals().STRING_LITERAL();
+      intervals.forEach(timePeriod -> intervalList.add(elementParser.parseTimePeriod(timePeriod.getText())));
+    }
+
+    if (ctx.STRING_LITERAL() != null) {
+      var lastInterval = ctx.STRING_LITERAL();
+      intervalList.add(elementParser.parseTimePeriod(lastInterval.getText()));
+    }
+
+    return Collections.unmodifiableList(intervalList);
   }
 
   private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
     // the empty string literal '""' stands for a non-existing bound, e.g., so that only a lower bound may be specified
     return ctx.STRING_LITERAL().stream()
-        .map(literal -> "\"\"".equals(literal.getText()) ? null : elementParser.parseDateLiteral(literal.getText()))
+        .map(literal -> "\"\"".equals(literal.getText()) ? null : elementParser.parseDate(literal.getText(), true))
         .toArray(Instant[]::new);
   }
 
@@ -315,7 +356,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private SinglePointFilter parseTemporalFilter(TsdlParser.TemporalFilterContext ctx) {
     var filterType = elementParser.parseTemporalFilterType(ctx.TEMPORAL_FILTER_TYPE().getText());
-    var filterArgument = elementParser.parseDateLiteral(ctx.STRING_LITERAL().getText());
+    var filterArgument = elementParser.parseDate(ctx.STRING_LITERAL().getText(), true);
     return elementFactory.getTemporalFilter(filterType, filterArgument);
   }
 

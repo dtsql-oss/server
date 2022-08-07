@@ -11,9 +11,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.DeviationFilterType;
@@ -178,9 +179,38 @@ class TsdlElementParserTest {
         IllegalArgumentException.class);
   }
 
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validTimePeriodInputs")
+  void parseTimePeriod_validRepresentations_ok(String representation, TimePeriod expected) {
+    assertThat(PARSER.parseTimePeriod(representation)).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z", // missing quotes
+      "\" 2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z\"", // superfluous space
+      "\"2022-07-13T23:04:06.124Z/2022-07-13T23:04:06.123Z\"", // start after end
+      "\"2022-07-13T23:04:06.122Z 2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.122Z-2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.122Z--2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z/ \"", // trailing content
+      "\" /2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z\"", // preceding content
+      "\"fake/2022-07-13T23:04:06.123Z\"", // fake content
+      "\"2022-07-13 23:04:06.123Z/2022-07-13T23:05:06Z\"", // invalid timestamp
+  })
+  void parseTimePeriod_invalidRepresentations_throws(String representation) {
+    assertThatThrownBy(() -> PARSER.parseTimePeriod(representation)).isInstanceOf(TsdlParseException.class);
+  }
+
+  @Test
+  void parseTimePeriod_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseTimePeriod(null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationUnitInputs")
-  void parseEventDurationUnit_validRepresentations_ok(String representation, EventDurationUnit member) {
+  void parseEventDurationUnit_validRepresentations_ok(String representation, ParsableTsdlTimeUnit member) {
     assertThat(PARSER.parseEventDurationUnit(representation)).isEqualTo(member);
   }
 
@@ -238,8 +268,8 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validParseDateLiteralInputs")
-  void parseDateLiteral_validLiteral_parsesCorrectly(String str, Instant expected) {
-    assertThat(PARSER.parseDateLiteral(str)).isEqualTo(expected);
+  void parseDateLiteral_validLiteral_parsesCorrectly(String str, Instant expected, boolean literal) {
+    assertThat(PARSER.parseDate(str, literal)).isEqualTo(expected);
   }
 
   @ParameterizedTest
@@ -247,11 +277,11 @@ class TsdlElementParserTest {
       "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\"", "\"2015-11-05 12:35:45Z\""
   })
   void parseDateLiteral_invalidLiteral_throws(String str) {
-    assertThatThrownBy(() -> PARSER.parseDateLiteral(str)).isInstanceOf(TsdlParseException.class);
+    assertThatThrownBy(() -> PARSER.parseDate(str, true)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
   void parseDateLiteral_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseDateLiteral(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDate(null, true)).isInstanceOf(IllegalArgumentException.class);
   }
 }

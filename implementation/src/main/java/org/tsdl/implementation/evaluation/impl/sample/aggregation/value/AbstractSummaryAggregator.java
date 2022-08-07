@@ -1,4 +1,4 @@
-package org.tsdl.implementation.evaluation.impl.sample.aggregation;
+package org.tsdl.implementation.evaluation.impl.sample.aggregation.value;
 
 import java.time.Instant;
 import java.util.List;
@@ -8,13 +8,13 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
-abstract class AbstractSummaryAggregator extends AbstractAggregator implements TsdlAggregator {
+abstract class AbstractSummaryAggregator extends AbstractValueAggregator implements TsdlAggregator {
   protected SummaryStatistics summaryStatistics;
 
   protected abstract double onAggregate(List<DataPoint> input);
 
   /**
-   * Initializes a {@link AbstractAggregator} instance.
+   * Initializes a {@link AbstractValueAggregator} instance.
    */
   public AbstractSummaryAggregator(Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
     super(lowerBound, upperBound);

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.common.TsdlFormattable;
+import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -31,9 +31,8 @@ class TsdlFormattingTest {
   class SampleFormatting {
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgs")
-    void tsdlFormatter_outputStreamWithDecimalArguments(List<DataPoint> dps, AggregatorType type, Instant lowerBound, Instant upperBound,
-                                                        String identifier, String[] args, String expectedResult) throws IOException {
-      var aggregator = ELEMENTS.getAggregator(type, lowerBound, upperBound, COMPONENTS.summaryStatistics());
+    void tsdlFormatter_outputStreamWithDecimalArguments(List<DataPoint> dps, TsdlAggregator aggregator, String identifier, String[] args,
+                                                        String expectedResult) throws IOException {
       var sample = ELEMENTS.getSample(aggregator, ELEMENTS.getIdentifier(identifier), true, args);
 
       sample.aggregator().compute(identifier, dps);
@@ -42,9 +41,8 @@ class TsdlFormattingTest {
 
     @ParameterizedTest
     @MethodSource("org.tsdl.implementation.formatting.stub.FormattingDataFactory#sampleArgs")
-    void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, AggregatorType type, Instant lowerBound, Instant upperBound,
-                                                            String identifier, String[] args, String expectedResult) {
-      var aggregator = ELEMENTS.getAggregator(type, lowerBound, upperBound, COMPONENTS.summaryStatistics());
+    void tsdlFormatter_collectionTargetWithDecimalArguments(List<DataPoint> dps, TsdlAggregator aggregator, String identifier, String[] args,
+                                                            String expectedResult) {
       var sample = ELEMENTS.getSample(aggregator, ELEMENTS.getIdentifier(identifier), true, args);
 
       sample.aggregator().compute(identifier, dps);

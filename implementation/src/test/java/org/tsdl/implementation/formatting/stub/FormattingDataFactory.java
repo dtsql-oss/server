@@ -6,11 +6,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
+import org.tsdl.implementation.factory.TsdlComponentFactory;
+import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.infrastructure.model.DataPoint;
 
 @SuppressWarnings("unused") // only referenced by string literals, therefore usage unrecognized
 public final class FormattingDataFactory {
+  private static final TsdlQueryElementFactory ELEMENTS = TsdlComponentFactory.INSTANCE.elementFactory();
+  private static final TsdlComponentFactory COMPONENTS = TsdlComponentFactory.INSTANCE;
+
   private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter
       .ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
       .withZone(ZoneOffset.UTC);
@@ -28,45 +33,36 @@ public final class FormattingDataFactory {
     return Stream.of(
         Arguments.of(
             dps,
-            AggregatorType.COUNT,
-            null,
-            null,
+            ELEMENTS.getAggregator(AggregatorType.COUNT, null, null, COMPONENTS.summaryStatistics()),
             "myCount",
             new String[] {"0"},
             "sample count() with ID 'myCount' := 3"
         ),
         Arguments.of(
             dps,
-            AggregatorType.SUM,
-            null,
-            null,
+            ELEMENTS.getAggregator(AggregatorType.SUM, null, null, COMPONENTS.summaryStatistics()),
             "mySum",
             new String[] {"2.0"},
             "sample sum() with ID 'mySum' := 128.52"
         ),
         Arguments.of(
             dps,
-            AggregatorType.MINIMUM,
-            Instant.parse("2022-05-24T20:33:45.000Z"),
-            null,
+            ELEMENTS.getAggregator(AggregatorType.MINIMUM, Instant.parse("2022-05-24T20:33:45.000Z"), null, COMPONENTS.summaryStatistics()),
             "myMin",
             new String[] {"1"},
             "sample min(\"2022-05-24T20:33:45Z\", \"\") with ID 'myMin' := 25.8"
         ),
         Arguments.of(
             dps,
-            AggregatorType.MAXIMUM,
-            null,
-            Instant.parse("2022-05-24T20:36:44.234Z"),
+            ELEMENTS.getAggregator(AggregatorType.MAXIMUM, null, Instant.parse("2022-05-24T20:36:44.234Z"), COMPONENTS.summaryStatistics()),
             "myMax",
             new String[] {"3"},
             "sample max(\"\", \"2022-05-24T20:36:44.234Z\") with ID 'myMax' := 75.520"
         ),
         Arguments.of(
             dps,
-            AggregatorType.AVERAGE,
-            Instant.parse("2022-05-24T20:33:45.000Z"),
-            Instant.parse("2022-05-24T20:37:44.234Z"),
+            ELEMENTS.getAggregator(AggregatorType.AVERAGE, Instant.parse("2022-05-24T20:33:45.000Z"), Instant.parse("2022-05-24T20:37:44.234Z"),
+                COMPONENTS.summaryStatistics()),
             "myAvg",
             new String[] {"1"},
             "sample avg(\"2022-05-24T20:33:45Z\", \"2022-05-24T20:37:44.234Z\") with ID 'myAvg' := 42.8"

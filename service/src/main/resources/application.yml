@@ -3,6 +3,10 @@ logging:
   file-name: "server"
   directory: "./logs"
 
+spring:
+  banner:
+    location: banner.txt
+
 springdoc:
   api-docs:
     enabled: true

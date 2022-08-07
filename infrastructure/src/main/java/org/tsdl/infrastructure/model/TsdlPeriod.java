@@ -2,6 +2,7 @@ package org.tsdl.infrastructure.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.time.Instant;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.model.impl.TsdlPeriodImpl;
 
 /**
@@ -20,6 +21,8 @@ public interface TsdlPeriod extends QueryResult {
   boolean isEmpty();
 
   boolean contains(Instant timestamp);
+
+  double duration(TsdlTimeUnit unit);
 
   @Override
   default QueryResultType type() {

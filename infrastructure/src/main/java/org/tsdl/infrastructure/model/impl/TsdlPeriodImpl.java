@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.QueryResult;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
@@ -27,7 +28,7 @@ public record TsdlPeriodImpl(int index, Instant start, Instant end, List<TsdlLog
 
       Conditions.checkNotNull(Condition.ARGUMENT, start, "Period start must not be null.");
       Conditions.checkNotNull(Condition.ARGUMENT, end, "Period end must not be null.");
-      Conditions.checkIsTrue(Condition.ARGUMENT, !start.isAfter(end), "Period start must not be after end.");
+      Conditions.checkIsFalse(Condition.ARGUMENT, start.isAfter(end), "Period start must not be after end.");
     }
 
     Conditions.checkNotNull(Condition.ARGUMENT, logs, "Logs must not be null.");
@@ -41,6 +42,11 @@ public record TsdlPeriodImpl(int index, Instant start, Instant end, List<TsdlLog
   @Override
   public boolean contains(Instant timestamp) {
     return TsdlUtil.isWithinRange(timestamp, start, end);
+  }
+
+  @Override
+  public double duration(TsdlTimeUnit unit) {
+    return TsdlUtil.getTimespan(start, end, unit);
   }
 
   @Override

@@ -7,15 +7,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.event.EventDuration;
-import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
 import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.common.TsdlTimeUnit;
-import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
@@ -69,7 +68,7 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
     return satisfiesLowerBound && satisfiesUpperBound;
   }
 
-  private double getDurationInUnit(TsdlPeriod period, EventDurationUnit unit) {
+  private double getDurationInUnit(TsdlPeriod period, ParsableTsdlTimeUnit unit) {
     var tsdlTimeUnit = switch (unit) {
       case WEEKS -> TsdlTimeUnit.WEEKS;
       case DAYS -> TsdlTimeUnit.DAYS;
@@ -79,6 +78,6 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
       case MILLISECONDS -> TsdlTimeUnit.MILLISECONDS;
     };
 
-    return TsdlUtil.getTimespan(period.start(), period.end(), tsdlTimeUnit);
+    return period.duration(tsdlTimeUnit);
   }
 }

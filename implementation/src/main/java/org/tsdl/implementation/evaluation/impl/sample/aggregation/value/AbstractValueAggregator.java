@@ -1,4 +1,4 @@
-package org.tsdl.implementation.evaluation.impl.sample.aggregation;
+package org.tsdl.implementation.evaluation.impl.sample.aggregation.value;
 
 import java.time.Instant;
 import java.util.List;
@@ -6,17 +6,18 @@ import java.util.Optional;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
  * Abstract base class for {@link TsdlAggregator} implementations that encapsulates common tasks such as logging and preparing a list of
- * {@link DataPoint} actually to be processed by a concrete {@link TsdlAggregator} implementation, based on its {@link TsdlAggregator#lowerBound()}
- * and {@link TsdlAggregator#upperBound()} values.
+ * {@link DataPoint} actually to be processed by a concrete {@link TsdlAggregator} implementation, based on its {@link ValueAggregator#lowerBound()}
+ * and {@link ValueAggregator#upperBound()} values.
  */
 @Slf4j
-abstract class AbstractAggregator implements TsdlAggregator {
+abstract class AbstractValueAggregator implements ValueAggregator {
   private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
   private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
 
@@ -29,9 +30,9 @@ abstract class AbstractAggregator implements TsdlAggregator {
   private final Instant upperBound;
 
   /**
-   * Initializes a {@link AbstractAggregator} instance.
+   * Initializes a {@link AbstractValueAggregator} instance.
    */
-  public AbstractAggregator(Instant lowerBound, Instant upperBound) {
+  public AbstractValueAggregator(Instant lowerBound, Instant upperBound) {
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
     this.descriptor = "%s sample from %s until %s".formatted(

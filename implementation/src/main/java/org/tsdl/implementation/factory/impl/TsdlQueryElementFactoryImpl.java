@@ -22,22 +22,28 @@ import org.tsdl.implementation.evaluation.impl.filter.threshold.GreaterThanFilte
 import org.tsdl.implementation.evaluation.impl.filter.threshold.LowerThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.CountAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.IntegralAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.MaximumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.MinimumAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.StandardDeviationAggregatorImpl;
-import org.tsdl.implementation.evaluation.impl.sample.aggregation.SumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalAverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalCountAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalMaximumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalMinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalStandardDeviationAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalSumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.AverageAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.CountAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.IntegralAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.MaximumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.MinimumAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.StandardDeviationAggregatorImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.SumAggregatorImpl;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
@@ -47,6 +53,7 @@ import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.DeviationFilterType;
@@ -156,6 +163,23 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
+  public TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, periods, "Time periods must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, unit, "Time unit must not be null.");
+
+    return switch (type) {
+      case TEMPORAL_AVERAGE -> new TemporalAverageAggregatorImpl(periods, unit);
+      case TEMPORAL_COUNT -> new TemporalCountAggregatorImpl(periods, unit);
+      case TEMPORAL_MAXIMUM -> new TemporalMaximumAggregatorImpl(periods, unit);
+      case TEMPORAL_MINIMUM -> new TemporalMinimumAggregatorImpl(periods, unit);
+      case TEMPORAL_STANDARD_DEVIATION -> new TemporalStandardDeviationAggregatorImpl(periods, unit);
+      case TEMPORAL_SUM -> new TemporalSumAggregatorImpl(periods, unit);
+      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+    };
+  }
+
+  @Override
   public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
 
@@ -181,7 +205,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, EventDurationUnit unit) {
+  public EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, ParsableTsdlTimeUnit unit) {
     Conditions.checkNotNull(Condition.ARGUMENT, unit, "The unit of the event duration must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, lowerBound, "The lower bound of an event must not be null. Use 0 (inclusive) instead.");
     Conditions.checkNotNull(Condition.ARGUMENT, upperBound, "The upper bound of an event must not be null. Use Long.MAX_VALUE instead.");

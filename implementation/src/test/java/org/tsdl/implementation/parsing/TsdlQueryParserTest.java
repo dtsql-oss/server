@@ -21,17 +21,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.model.choice.relation.FollowsOperator;
 import org.tsdl.implementation.model.choice.relation.PrecedesOperator;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.connective.AndConnective;
 import org.tsdl.implementation.model.connective.OrConnective;
 import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
@@ -49,14 +50,18 @@ import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
-import org.tsdl.implementation.model.sample.aggregation.AverageAggregator;
-import org.tsdl.implementation.model.sample.aggregation.CountAggregator;
-import org.tsdl.implementation.model.sample.aggregation.IntegralAggregator;
-import org.tsdl.implementation.model.sample.aggregation.MaximumAggregator;
-import org.tsdl.implementation.model.sample.aggregation.MinimumAggregator;
-import org.tsdl.implementation.model.sample.aggregation.StandardDeviationAggregator;
-import org.tsdl.implementation.model.sample.aggregation.SumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAverageAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalMaximumAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.AverageAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.CountAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.IntegralAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.MaximumAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.MinimumAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.StandardDeviationAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.SumAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
@@ -129,8 +134,8 @@ class TsdlQueryParserTest {
             assertThat(sample.aggregator()).isInstanceOf(clazz);
             assertThat(sample.formatter()).isNotPresent();
             assertThat(sample.aggregator())
-                .asInstanceOf(InstanceOfAssertFactories.type(TsdlAggregator.class))
-                .extracting(TsdlAggregator::lowerBound, TsdlAggregator::upperBound)
+                .asInstanceOf(InstanceOfAssertFactories.type(ValueAggregator.class))
+                .extracting(ValueAggregator::lowerBound, ValueAggregator::upperBound)
                 .containsExactly(Optional.ofNullable(lower), Optional.ofNullable(upper));
           });
     }
@@ -184,6 +189,83 @@ class TsdlQueryParserTest {
       var queryString = "WITH SAMPLES: %s AS s1 YIELD: data points".formatted(aggregator);
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("sampleDeclarationTemporalSamplesArguments")
+    void sampleDeclaration_temporalAggregators(String aggregatorDefinition, TemporalAggregator expected) {
+      var queryString = "WITH SAMPLES: %s AS s1 YIELD: data points".formatted(aggregatorDefinition);
+
+      var queryResult = PARSER.parseQuery(queryString);
+
+      assertThat(queryResult.samples())
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(TsdlSample.class))
+          .extracting(TsdlSample::aggregator, InstanceOfAssertFactories.type(TemporalAggregator.class))
+          .isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "avg_t(millis, \"2022-07-03T12:46:03.123Z/2022-07-03T12:45:03.123Z\")", // end before start
+        "avg_t(millis, \"2022-07-03T12:45:03.123Z--2022-07-03T12:46:03.123Z\")", // wrong range separator
+        "avg_t(milliseconds, \"2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z\")", // wrong unit
+        "avg_t(\"2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z\", millis)", // unit at wrong position
+        "avg_t(millis, \"07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z\")", // invalid start timestamp
+        "avg_t(millis, \"2022-07-03T12:45:03.123Z/12:46:03.123Z\")", // invalid end timestamp
+        "avg_t(millis, 2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z)", // missing quotes
+        "avg_t(millis, \"2022-07-03T12:45:03.123Z//2022-07-03T12:46:03.123Z\")", // double range separator
+        "avg_t(millis)" // no ranges
+    })
+    void sampleDeclaration_invalidTemporalAggregators(String aggregatorDefinition) {
+      var queryString = "WITH SAMPLES: %s AS s1 YIELD: data points".formatted(aggregatorDefinition);
+
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
+    }
+
+    private static Stream<Arguments> sampleDeclarationTemporalSamplesArguments() {
+      return Stream.of(
+          Arguments.of(
+              "avg_t(millis, \"2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z\")",
+              ELEMENTS.getAggregator(
+                  AggregatorType.TEMPORAL_AVERAGE,
+                  List.of(new TimePeriodImpl(Instant.parse("2022-07-03T12:45:03.123Z"), Instant.parse("2022-07-03T12:46:03.123Z"))),
+                  ParsableTsdlTimeUnit.MILLISECONDS
+              )
+          ),
+          Arguments.of(
+              """
+                  min_t(seconds,
+                            "2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z",
+                            "2022-07-03T12:47:03.123Z/2022-07-03T12:48:03.123Z")
+                  """,
+              ELEMENTS.getAggregator(
+                  AggregatorType.TEMPORAL_MINIMUM,
+                  List.of(
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:45:03.123Z"), Instant.parse("2022-07-03T12:46:03.123Z")),
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:47:03.123Z"), Instant.parse("2022-07-03T12:48:03.123Z"))
+                  ),
+                  ParsableTsdlTimeUnit.SECONDS
+              )
+          ),
+          Arguments.of(
+              """
+                  stddev_t(weeks,
+                            "2022-07-03T12:49:03.123Z/2022-07-03T12:50:03.123Z",
+                            "2022-07-03T12:51:03.123Z/2022-07-03T12:52:03.123Z",
+                            "2022-07-03T12:53:03.123Z/2022-07-03T12:54:03.123Z")
+                  """,
+              ELEMENTS.getAggregator(
+                  AggregatorType.TEMPORAL_STANDARD_DEVIATION,
+                  List.of(
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:49:03.123Z"), Instant.parse("2022-07-03T12:50:03.123Z")),
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:51:03.123Z"), Instant.parse("2022-07-03T12:52:03.123Z")),
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:53:03.123Z"), Instant.parse("2022-07-03T12:54:03.123Z"))
+                  ),
+                  ParsableTsdlTimeUnit.WEEKS
+              )
+          )
+      );
     }
 
     private static Stream<Arguments> sampleDeclarationSamplesArguments() {
@@ -673,18 +755,18 @@ class TsdlQueryParserTest {
       Function<Object[], EventDuration> creator = obj -> ELEMENTS.getEventDuration(
           EventDurationBound.of((long) obj[0], (boolean) obj[1]),
           EventDurationBound.of((long) obj[2], (boolean) obj[3]),
-          (EventDurationUnit) obj[4]
+          (ParsableTsdlTimeUnit) obj[4]
       );
 
       return Stream.of(
-          Arguments.of("[1,2) days", creator.apply(new Object[] {1L, true, 2L, false, EventDurationUnit.DAYS})),
-          Arguments.of("[ 500000  ,] millis", creator.apply(new Object[] {500000L, true, Long.MAX_VALUE, true, EventDurationUnit.MILLISECONDS})),
-          Arguments.of("[1,1] seconds", creator.apply(new Object[] {1L, true, 1L, true, EventDurationUnit.SECONDS})),
-          Arguments.of("   [,] days", creator.apply(new Object[] {0L, true, Long.MAX_VALUE, true, EventDurationUnit.DAYS})),
-          Arguments.of("   (,) days", creator.apply(new Object[] {0L, false, Long.MAX_VALUE, false, EventDurationUnit.DAYS})),
-          Arguments.of("\t(,23] weeks", creator.apply(new Object[] {0L, false, 23L, true, EventDurationUnit.WEEKS})),
-          Arguments.of("(1 , 2)   minutes", creator.apply(new Object[] {1L, false, 2L, false, EventDurationUnit.MINUTES})),
-          Arguments.of("\n   [2\t, \r132)   hours", creator.apply(new Object[] {2L, true, 132L, false, EventDurationUnit.HOURS}))
+          Arguments.of("[1,2) days", creator.apply(new Object[] {1L, true, 2L, false, ParsableTsdlTimeUnit.DAYS})),
+          Arguments.of("[ 500000  ,] millis", creator.apply(new Object[] {500000L, true, Long.MAX_VALUE, true, ParsableTsdlTimeUnit.MILLISECONDS})),
+          Arguments.of("[1,1] seconds", creator.apply(new Object[] {1L, true, 1L, true, ParsableTsdlTimeUnit.SECONDS})),
+          Arguments.of("   [,] days", creator.apply(new Object[] {0L, true, Long.MAX_VALUE, true, ParsableTsdlTimeUnit.DAYS})),
+          Arguments.of("   (,) days", creator.apply(new Object[] {0L, false, Long.MAX_VALUE, false, ParsableTsdlTimeUnit.DAYS})),
+          Arguments.of("\t(,23] weeks", creator.apply(new Object[] {0L, false, 23L, true, ParsableTsdlTimeUnit.WEEKS})),
+          Arguments.of("(1 , 2)   minutes", creator.apply(new Object[] {1L, false, 2L, false, ParsableTsdlTimeUnit.MINUTES})),
+          Arguments.of("\n   [2\t, \r132)   hours", creator.apply(new Object[] {2L, true, 132L, false, ParsableTsdlTimeUnit.HOURS}))
       );
     }
   }
@@ -846,7 +928,12 @@ class TsdlQueryParserTest {
           sum("","2022-07-03T12:45:03.123Z") AS s4,
           count("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s5,
           integral("2022-04-03T12:45:03.123Z", "2022-07-03T12:45:03.123Z") AS s6,
-          stddev() AS s7
+          stddev() AS s7,
+          avg_t(millis, "2022-07-03T12:45:03.123Z/2022-07-03T12:46:03.123Z") AS s8,
+          max_t(weeks,
+                "2022-07-03T12:49:03.123Z/2022-07-03T12:50:03.123Z",
+                "2022-07-03T12:51:03.123Z/2022-07-03T12:52:03.123Z",
+                "2022-07-03T12:53:03.123Z/2022-07-03T12:54:03.123Z") AS s9
 
         APPLY FILTER:
           AND(
@@ -875,9 +962,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.identifiers())
-          .hasSize(10)
+          .hasSize(12)
           .extracting(TsdlIdentifier::name)
-          .containsExactlyInAnyOrder("s1", "s2", "s3", "high", "s7", "low", "s4", "mid", "s5", "s6");
+          .containsExactlyInAnyOrder("s1", "s2", "s3", "s8", "s9", "high", "s7", "low", "s4", "mid", "s5", "s6");
     }
 
     @ValueSource(strings = FULL_FEATURE_QUERY)
@@ -932,7 +1019,7 @@ class TsdlQueryParserTest {
 
       assertThat(query.samples())
           .asInstanceOf(InstanceOfAssertFactories.list(TsdlSample.class))
-          .hasSize(7)
+          .hasSize(9)
           .satisfies(samples -> {
             assertAggregator(samples.get(0), AverageAggregator.class, "s1", aggregator -> assertThat(aggregator)
                 .asInstanceOf(InstanceOfAssertFactories.type(AverageAggregator.class))
@@ -968,6 +1055,28 @@ class TsdlQueryParserTest {
                 .asInstanceOf(InstanceOfAssertFactories.type(StandardDeviationAggregator.class))
                 .extracting(StandardDeviationAggregator::lowerBound, StandardDeviationAggregator::upperBound)
                 .containsExactly(Optional.empty(), Optional.empty()));
+
+            assertAggregator(samples.get(7), TemporalAverageAggregator.class, "s8", aggregator -> assertThat(aggregator)
+                .asInstanceOf(InstanceOfAssertFactories.type(TemporalAverageAggregator.class))
+                .extracting(TemporalAverageAggregator::unit, TemporalAverageAggregator::periods)
+                .containsExactly(
+                    ParsableTsdlTimeUnit.MILLISECONDS,
+                    List.of(new TimePeriodImpl(Instant.parse("2022-07-03T12:45:03.123Z"), Instant.parse("2022-07-03T12:46:03.123Z")))
+                )
+            );
+
+            assertAggregator(samples.get(8), TemporalMaximumAggregator.class, "s9", aggregator -> assertThat(aggregator)
+                .asInstanceOf(InstanceOfAssertFactories.type(TemporalMaximumAggregator.class))
+                .extracting(TemporalMaximumAggregator::unit, TemporalMaximumAggregator::periods)
+                .containsExactly(
+                    ParsableTsdlTimeUnit.WEEKS,
+                    List.of(
+                        new TimePeriodImpl(Instant.parse("2022-07-03T12:49:03.123Z"), Instant.parse("2022-07-03T12:50:03.123Z")),
+                        new TimePeriodImpl(Instant.parse("2022-07-03T12:51:03.123Z"), Instant.parse("2022-07-03T12:52:03.123Z")),
+                        new TimePeriodImpl(Instant.parse("2022-07-03T12:53:03.123Z"), Instant.parse("2022-07-03T12:54:03.123Z"))
+                    )
+                )
+            );
           });
     }
 
@@ -1002,7 +1111,7 @@ class TsdlQueryParserTest {
                         ELEMENTS.getEventDuration(
                             EventDurationBound.of(3, false),
                             EventDurationBound.of(Long.MAX_VALUE, true),
-                            EventDurationUnit.WEEKS
+                            ParsableTsdlTimeUnit.WEEKS
                         )
                     )
                 );

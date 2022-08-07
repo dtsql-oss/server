@@ -131,7 +131,7 @@ timeRange
 
 // expected string literal: T1/T2, both ISO-8601 UTC timestamps, e.g., '2011-12-03T10:15:30.123+04:00/2011-12-04T14:45:30.123Z' (app validation)
 temporalAggregatorDeclaration
-  :  TEMPORAL_AGGREGATOR_FUNCTION PARENTHESIS_OPEN WHITESPACE? intervalList WHITESPACE? PARENTHESIS_CLOSE
+  :  TEMPORAL_AGGREGATOR_FUNCTION PARENTHESIS_OPEN WHITESPACE? TIME_UNIT LIST_SEPARATOR intervalList WHITESPACE? PARENTHESIS_CLOSE
   ;
 
 // filter argument (STRING_LITERAL): ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)

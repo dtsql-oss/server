@@ -10,10 +10,12 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.model.common.Identifiable;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
@@ -124,9 +126,32 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public EventDurationUnit parseEventDurationUnit(String str) {
+  public ParsableTsdlTimeUnit parseEventDurationUnit(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
-    return parseEnumMember(EventDurationUnit.class, str);
+    return parseEnumMember(ParsableTsdlTimeUnit.class, str);
+  }
+
+  @Override
+  public TimePeriod parseTimePeriod(String str) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+
+    var stringValue = parseStringLiteral(str);
+    var dateStrings = stringValue.split("/");
+
+    if (dateStrings.length != 2) {
+      throw new TsdlParseException(
+          "Time period must consist of exactly two ISO8601 timestamps separated by a '/' (i.e., \"T1/T2\"), but '%s' does not".formatted(stringValue)
+      );
+    }
+
+    var startDate = parseDate(dateStrings[0], false);
+    var endDate = parseDate(dateStrings[1], false);
+
+    if (startDate.isAfter(endDate)) {
+      throw new TsdlParseException("Start of time period must not be after end.");
+    }
+
+    return new TimePeriodImpl(startDate, endDate);
   }
 
   @Override
@@ -180,10 +205,10 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Instant parseDateLiteral(String str) {
+  public Instant parseDate(String str, boolean literal) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
-    var stringValue = parseStringLiteral(str);
+    var stringValue = literal ? parseStringLiteral(str) : str;
     try {
       return Instant.parse(stringValue);
     } catch (DateTimeParseException e) {

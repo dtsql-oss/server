@@ -2,11 +2,13 @@ package org.tsdl.implementation.evaluation.impl.common.formatting;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -50,8 +52,13 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     var sampleName = obj.identifier().name();
     var aggregatorFunction = obj.aggregator().type().representation();
     var value = obj.aggregator().value();
-    var lowerBound = obj.aggregator().lowerBound().orElse(null);
-    var upperBound = obj.aggregator().upperBound().orElse(null);
+
+    Instant lowerBound = null;
+    Instant upperBound = null;
+    if (obj.aggregator() instanceof ValueAggregator valueAggregator) {
+      lowerBound = valueAggregator.lowerBound().orElse(null);
+      upperBound = valueAggregator.upperBound().orElse(null);
+    }
 
     var formattedString = "sample %s(%s) with ID '%s' := %s".formatted(
         aggregatorFunction,

@@ -1,11 +1,11 @@
-package org.tsdl.implementation.evaluation.impl.sample.aggregation;
+package org.tsdl.implementation.evaluation.impl.sample.aggregation.value;
 
 import java.time.Instant;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.tsdl.implementation.math.SummaryStatistics;
-import org.tsdl.implementation.model.sample.aggregation.CountAggregator;
+import org.tsdl.implementation.model.sample.aggregation.value.CountAggregator;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
