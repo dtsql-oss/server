@@ -6,6 +6,7 @@ import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
@@ -14,9 +15,18 @@ import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
  * Provides methods for parsing elements/components of {@link org.tsdl.implementation.model.TsdlQuery}.
  */
 public interface TsdlElementParser {
+  /**
+   * Represents different kinds of duration bounds.
+   */
+  enum DurationBoundType {
+    LOWER_BOUND, UPPER_BOUND
+  }
+
   ConnectiveIdentifier parseConnectiveIdentifier(String str);
 
   ThresholdFilterType parseThresholdFilterType(String str);
+
+  DeviationFilterType parseDeviationFilterType(String str, String type);
 
   TemporalFilterType parseTemporalFilterType(String str);
 
@@ -26,7 +36,7 @@ public interface TsdlElementParser {
 
   TemporalRelationType parseTemporalRelationType(String str);
 
-  EventDurationBound parseEventDurationBound(String str, boolean lowerBound);
+  EventDurationBound parseEventDurationBound(String str, DurationBoundType boundType);
 
   EventDurationUnit parseEventDurationUnit(String str);
 

@@ -17,12 +17,14 @@ import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlUtil;
 
 /**
  * Default implementation of {@link TsdlElementParser}.
@@ -40,6 +42,13 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   public ThresholdFilterType parseThresholdFilterType(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
     return parseEnumMember(ThresholdFilterType.class, str);
+  }
+
+  @Override
+  public DeviationFilterType parseDeviationFilterType(String str, String type) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+    Conditions.checkNotNull(Condition.ARGUMENT, type, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+    return parseEnumMember(DeviationFilterType.class, "%s_%s".formatted(str, type));
   }
 
   @Override
@@ -76,7 +85,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public EventDurationBound parseEventDurationBound(String str, boolean lowerBound) {
+  public EventDurationBound parseEventDurationBound(String str, DurationBoundType boundType) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     final var inclusiveBounds = Set.of('[', ']');
@@ -85,21 +94,21 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     final var upperParentheses = Set.of(']', ')');
 
     var trimmedStr = str.trim();
-
-    var parenthesis = lowerBound ? trimmedStr.charAt(0) : trimmedStr.charAt(trimmedStr.length() - 1);
+    var isLowerBound = boundType == DurationBoundType.LOWER_BOUND;
+    var parenthesis = isLowerBound ? trimmedStr.charAt(0) : trimmedStr.charAt(trimmedStr.length() - 1);
     if (!inclusiveBounds.contains(parenthesis) && !exclusiveBounds.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid duration parenthesis. Valid options: '(', '[', ']', ')'".formatted(parenthesis));
-    } else if (lowerBound && !lowerParentheses.contains(parenthesis)) {
+    } else if (isLowerBound && !lowerParentheses.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid parenthesis for duration lower bounds. Valid options: '(', '['".formatted(parenthesis));
-    } else if (!lowerBound && !upperParentheses.contains(parenthesis)) {
+    } else if (!isLowerBound && !upperParentheses.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid parenthesis for duration upper bounds. Valid options: ')', ']'".formatted(parenthesis));
     }
 
     var inclusive = inclusiveBounds.contains(parenthesis); // otherwise firstChar must be in exclusive list due to assertion above
-    var valueString = lowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
+    var valueString = isLowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
 
     long value;
-    if ("".equals(valueString) && lowerBound) {
+    if ("".equals(valueString) && isLowerBound) {
       value = 0;
     } else if ("".equals(valueString)) {
       value = Long.MAX_VALUE;
@@ -150,8 +159,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   @Override
   public long parseInteger(String str) {
     var dbl = parseNumber(str);
-    var isInteger = dbl == Math.floor(dbl); // double is not infinite by implementation of "parseDouble", so no !Double.isInfinite() check required
-    if (isInteger) {
+    if (TsdlUtil.isMathematicalInteger(dbl)) {
       return (long) dbl;
     }
 

@@ -22,12 +22,14 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlLiteralFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
@@ -264,6 +266,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       return parseThresholdFilter(ctx.thresholdFilter());
     } else if (ctx.temporalFilter() != null) {
       return parseTemporalFilter(ctx.temporalFilter());
+    } else if (ctx.deviationFilter() != null) {
+      return parseDeviationFilter(ctx.deviationFilter());
     } else {
       throw new TsdlParseException("Cannot parse SinglePointFilter, unknown rule - neither 'thresholdFilter' nor 'temporalFilter'.");
     }
@@ -271,20 +275,42 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private SinglePointFilter parseThresholdFilter(TsdlParser.ThresholdFilterContext ctx) {
     var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
-    TsdlFilterArgument filterArgument;
-
-    if (ctx.thresholdFilterArgument().IDENTIFIER() != null) {
-      var identifier = requireIdentifier(ctx.thresholdFilterArgument().IDENTIFIER(), IdentifierType.SAMPLE);
-      var referencedSample = declaredSamples.get(identifier);
-      filterArgument = elementFactory.getFilterArgument(referencedSample);
-    } else if (ctx.thresholdFilterArgument().NUMBER() != null) {
-      var literalValue = elementParser.parseNumber(ctx.thresholdFilterArgument().NUMBER().getText());
-      filterArgument = elementFactory.getFilterArgument(literalValue);
-    } else {
-      throw new TsdlParseException("Cannot parse SinglePointFilter, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
-    }
+    var filterArgument = parseFilterArgument(ctx.filterArgument());
 
     return elementFactory.getThresholdFilter(filterType, filterArgument);
+  }
+
+  private SinglePointFilter parseDeviationFilter(TsdlParser.DeviationFilterContext ctx) {
+    var filterType = elementParser.parseDeviationFilterType(
+        ctx.DEVIATION_FILTER_TYPE().getText(),
+        ctx.deviationFilterArguments().AROUND_FILTER_TYPE().getText()
+    );
+    var reference = parseFilterArgument(ctx.deviationFilterArguments().filterArgument().get(0));
+    var deviation = parseFilterArgument(ctx.deviationFilterArguments().filterArgument().get(1));
+
+    if (deviation instanceof TsdlLiteralFilterArgument deviationArg) {
+      var maximumDeviation = deviationArg.value();
+      if (filterType == DeviationFilterType.AROUND_RELATIVE && !(maximumDeviation >= 0.0 && maximumDeviation <= 100.0)) {
+        throw new TsdlParseException("For relative 'around' filters, the maximum deviation must be between 0 and 100 because it is a percentage.");
+      } else if (filterType == DeviationFilterType.AROUND_ABSOLUTE && maximumDeviation < 0) {
+        throw new TsdlParseException("For absolute 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
+      }
+    }
+
+    return elementFactory.getDeviationFilter(filterType, reference, deviation);
+  }
+
+  TsdlFilterArgument parseFilterArgument(TsdlParser.FilterArgumentContext ctx) {
+    if (ctx.IDENTIFIER() != null) {
+      var identifier = requireIdentifier(ctx.IDENTIFIER(), IdentifierType.SAMPLE);
+      var referencedSample = declaredSamples.get(identifier);
+      return elementFactory.getFilterArgument(referencedSample);
+    } else if (ctx.NUMBER() != null) {
+      var literalValue = elementParser.parseNumber(ctx.NUMBER().getText());
+      return elementFactory.getFilterArgument(literalValue);
+    } else {
+      throw new TsdlParseException("Cannot parse TsdlFilterArgument, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
+    }
   }
 
   private SinglePointFilter parseTemporalFilter(TsdlParser.TemporalFilterContext ctx) {
@@ -317,8 +343,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var bounds = ctx.EVENT_DURATION().getText().substring("FOR".length()).trim().split(",");
     Conditions.checkSizeExactly(Condition.STATE, bounds, 2, "There must be exactly two bounds for an event duration, separated by ','.");
 
-    var lowerBound = elementParser.parseEventDurationBound(bounds[0], true);
-    var upperBound = elementParser.parseEventDurationBound(bounds[1], false);
+    var lowerBound = elementParser.parseEventDurationBound(bounds[0], TsdlElementParser.DurationBoundType.LOWER_BOUND);
+    var upperBound = elementParser.parseEventDurationBound(bounds[1], TsdlElementParser.DurationBoundType.UPPER_BOUND);
 
     if (lowerBound.value() > upperBound.value()) {
       throw new TsdlParseException("The lower bound of an event duration must be less than or equal to its upper bound.");

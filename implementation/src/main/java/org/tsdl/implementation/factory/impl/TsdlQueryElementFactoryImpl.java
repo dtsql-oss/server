@@ -12,12 +12,14 @@ import org.tsdl.implementation.evaluation.impl.event.EventDurationImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
 import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.deviation.AbsoluteAroundFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.deviation.RelativeAroundFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.BeforeFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.threshold.GreaterThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.threshold.LowerThanFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlLiteralFilterArgumentImpl;
-import org.tsdl.implementation.evaluation.impl.filter.threshold.argument.TsdlSampleFilterArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.AverageAggregatorImpl;
@@ -40,13 +42,14 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
@@ -72,6 +75,17 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     return switch (type) {
       case GT -> new GreaterThanFilterImpl(argument);
       case LT -> new LowerThanFilterImpl(argument);
+    };
+  }
+
+  @Override
+  public SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlFilterArgument reference, TsdlFilterArgument maximumDeviation) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of deviation filter must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, reference, "Reference value of deviation filter must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumDeviation, "Maximum deviation of deviation filter must not be null.");
+    return switch (type) {
+      case AROUND_ABSOLUTE -> new AbsoluteAroundFilterImpl(reference, maximumDeviation);
+      case AROUND_RELATIVE -> new RelativeAroundFilterImpl(reference, maximumDeviation);
     };
   }
 

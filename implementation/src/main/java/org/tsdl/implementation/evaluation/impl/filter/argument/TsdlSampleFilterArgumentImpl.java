@@ -1,7 +1,8 @@
-package org.tsdl.implementation.evaluation.impl.filter.threshold.argument;
+package org.tsdl.implementation.evaluation.impl.filter.argument;
 
-import java.util.Objects;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlSampleFilterArgument;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -9,6 +10,8 @@ import org.tsdl.infrastructure.common.Conditions;
 /**
  * Default implementation of {@link TsdlSampleFilterArgument}.
  */
+@EqualsAndHashCode
+@ToString
 public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
   private final TsdlSample sample;
   private double value;
@@ -38,22 +41,5 @@ public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
   @Override
   public TsdlSample sample() {
     return sample;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    var that = (TsdlSampleFilterArgumentImpl) o;
-    return Objects.equals(value, that.value) && Objects.equals(sample, that.sample);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(value, sample);
   }
 }

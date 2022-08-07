@@ -14,13 +14,14 @@ import org.tsdl.implementation.model.event.EventDurationUnit;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
@@ -32,6 +33,8 @@ public interface TsdlQueryElementFactory {
   TsdlIdentifier getIdentifier(String name);
 
   SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument);
+
+  SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlFilterArgument reference, TsdlFilterArgument maximumDeviation);
 
   SinglePointFilter getTemporalFilter(TemporalFilterType type, Instant argument);
 

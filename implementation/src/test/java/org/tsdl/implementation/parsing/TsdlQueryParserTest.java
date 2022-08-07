@@ -37,13 +37,15 @@ import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.deviation.AbsoluteAroundFilter;
+import org.tsdl.implementation.model.filter.deviation.RelativeAroundFilter;
 import org.tsdl.implementation.model.filter.temporal.AfterFilter;
 import org.tsdl.implementation.model.filter.temporal.BeforeFilter;
 import org.tsdl.implementation.model.filter.temporal.TemporalFilter;
 import org.tsdl.implementation.model.filter.threshold.GreaterThanFilter;
 import org.tsdl.implementation.model.filter.threshold.LowerThanFilter;
 import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlSampleFilterArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -55,6 +57,7 @@ import org.tsdl.implementation.model.sample.aggregation.MinimumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.StandardDeviationAggregator;
 import org.tsdl.implementation.model.sample.aggregation.SumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
+import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
@@ -283,6 +286,48 @@ class TsdlQueryParserTest {
     }
 
     @Test
+    void filterDeclaration_conjunctiveRelativeDeviationFilterWithOneArgument() {
+      var queryString = """
+          APPLY FILTER:
+                      AND(around(rel  ,  23,75.45))
+                    YIELD: data points""";
+
+      var query = PARSER.parseQuery(queryString);
+
+      assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .isPresent().get()
+          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1);
+
+      assertThat(query.filter())
+          .isPresent().get()
+          .extracting(connective -> connective.filters().get(0), InstanceOfAssertFactories.type(RelativeAroundFilter.class))
+          .extracting(RelativeAroundFilter::referenceValue, RelativeAroundFilter::maximumDeviation)
+          .containsExactly(ELEMENTS.getFilterArgument(23.0), ELEMENTS.getFilterArgument(75.45));
+    }
+
+    @Test
+    void filterDeclaration_disjunctiveNegatedAbsoluteDeviationFilterWithOneArgument() {
+      var queryString = """
+          APPLY FILTER:
+                      OR(NOT(around( abs  ,  23, 2345.3)))
+                    YIELD: data points""";
+
+      var query = PARSER.parseQuery(queryString);
+
+      assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .isPresent().get()
+          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
+          .extracting(AbsoluteAroundFilter::referenceValue, AbsoluteAroundFilter::maximumDeviation)
+          .containsExactly(ELEMENTS.getFilterArgument(23.0), ELEMENTS.getFilterArgument(2345.3));
+    }
+
+    @Test
     void filterDeclaration_conjunctiveTemporalFilterWithOneArgument() {
       var queryString = """
           APPLY FILTER:
@@ -429,6 +474,82 @@ class TsdlQueryParserTest {
           .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
           .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
           .isEqualTo("average");
+    }
+
+    @Test
+    void filterDeclaration_deviationFilterWithSamplesAsArguments() {
+      var queryString = """
+          WITH SAMPLES:
+                      avg() AS average,
+                      stddev() AS standardDeviation
+                    APPLY FILTER:
+                      AND(around(abs, average, standardDeviation))
+                    YIELD: data points""";
+
+      var query = PARSER.parseQuery(queryString);
+
+      assertThat(query.filter())
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .isPresent().get()
+          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .hasSize(1)
+          .element(0, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
+          .extracting(
+              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
+              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
+              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
+              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
+          )
+          .containsExactly("average", AggregatorType.AVERAGE, "standardDeviation", AggregatorType.STANDARD_DEVIATION);
+    }
+
+    @Test
+    void filterDeclaration_relativeDeviationFilterWithInvalidPercentage_throws() {
+      var queryString = """
+          APPLY FILTER:
+            AND(around(rel, 23, 102))
+          YIELD: data points""";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParseException.class)
+          .hasMessageContaining("between 0 and 100");
+    }
+
+    @Test
+    void filterDeclaration_absoluteDeviationFilterWithNegtaiveValue_throws() {
+      var queryString = """
+          APPLY FILTER:
+            AND(around(abs, 23, -0.1))
+          YIELD: data points""";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
+          .isInstanceOf(TsdlParseException.class)
+          .hasMessageContaining("absolute value");
+    }
+
+    @Test
+    void filterDeclaration_invalidType_throws() {
+      var queryString = """
+          APPLY FILTER:
+            AND(around(absolute, 23, -0.1))
+          YIELD: data points""";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
+    }
+
+    @Test
+    void filterDeclaration_invalidReferenceArgument_throws() {
+      var queryString = """
+          APPLY FILTER:
+            AND(around(rel, test, -0.1))
+          YIELD: data points""";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
+    }
+
+    @Test
+    void filterDeclaration_invalidDeviationArgument_throws() {
+      var queryString = """
+          APPLY FILTER:
+            AND(around(rel, 23, invalid))
+          YIELD: data points""";
+      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
     }
   }
 
@@ -728,8 +849,14 @@ class TsdlQueryParserTest {
           stddev() AS s7
 
         APPLY FILTER:
-          AND(gt(s2), NOT(lt(3.5)),
-          NOT(before("2022-07-03T12:45:03.123Z")),after("2022-07-03T12:45:03.123Z"))
+          AND(
+               gt(s2),
+               NOT(lt(3.5)),
+               NOT(before("2022-07-03T12:45:03.123Z")),
+               after("2022-07-03T12:45:03.123Z"),
+               NOT(around(rel, 20, 34)),
+               around(abs, s1, s7)
+             )
 
         USING EVENTS:
           AND(lt(3.5)) FOR (3,] weeks  AS low,
@@ -762,7 +889,7 @@ class TsdlQueryParserTest {
           .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
           .isPresent().get()
           .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
-          .hasSize(4)
+          .hasSize(6)
           .satisfies(filterArguments -> {
             assertThat(filterArguments.get(0))
                 .asInstanceOf(InstanceOfAssertFactories.type(GreaterThanFilter.class))
@@ -779,6 +906,22 @@ class TsdlQueryParserTest {
 
             assertThat(filterArguments.get(3))
                 .isEqualTo(ELEMENTS.getTemporalFilter(TemporalFilterType.AFTER, Instant.parse("2022-07-03T12:45:03.123Z")));
+
+            assertThat(filterArguments.get(4))
+                .asInstanceOf(InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
+                .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(RelativeAroundFilter.class))
+                .extracting(filter -> filter.referenceValue().value(), filter -> filter.maximumDeviation().value())
+                .containsExactly(20.0, 34.0);
+
+            assertThat(filterArguments.get(5))
+                .asInstanceOf(InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
+                .extracting(
+                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
+                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
+                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
+                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
+                )
+                .containsExactly("s1", AggregatorType.AVERAGE, "s7", AggregatorType.STANDARD_DEVIATION);
           });
     }
 
@@ -941,9 +1084,6 @@ class TsdlQueryParserTest {
       assertThat(query.choice()).isNotPresent();
       assertThat(query.identifiers()).isEmpty();
       assertThat(query.result()).isNotNull();
-    }
-
-    private void accept(TsdlAggregator a) {
     }
   }
 }

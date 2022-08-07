@@ -184,10 +184,10 @@ temporalFilter
   ;
 
 thresholdFilter
-  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? thresholdFilterArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? filterArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
-thresholdFilterArgument
+filterArgument
   :  NUMBER
   |  IDENTIFIER
   ;
@@ -198,5 +198,5 @@ deviationFilter
 
 // NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
 deviationFilterArguments
-  :  AROUND_FILTER_TYPE LIST_SEPARATOR thresholdFilterArgument LIST_SEPARATOR NUMBER
+  :  AROUND_FILTER_TYPE LIST_SEPARATOR filterArgument LIST_SEPARATOR filterArgument
   ;

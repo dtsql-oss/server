@@ -1,6 +1,6 @@
-package org.tsdl.implementation.evaluation.impl.filter.threshold.argument;
+package org.tsdl.implementation.evaluation.impl.filter.argument;
 
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlLiteralFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlLiteralFilterArgument;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 

@@ -96,8 +96,8 @@ public class QueryValidationApplication extends JFrame {
   }
 
   private JComponent createTopPanel() {
-    var topPanel = new JPanel(new BorderLayout());
-    var headerPanel = new JPanel(new BorderLayout());
+    final var topPanel = new JPanel(new BorderLayout());
+    final var headerPanel = new JPanel(new BorderLayout());
 
     var chkInstantValidation = new JCheckBox("Validate on text change");
     chkInstantValidation.addActionListener(e -> {

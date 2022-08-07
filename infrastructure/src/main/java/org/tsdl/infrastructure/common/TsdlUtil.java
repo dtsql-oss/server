@@ -77,4 +77,11 @@ public final class TsdlUtil {
 
     return timespanMillis * MILLIS_TO_UNIT_CONVERSION_FACTOR.get(unit);
   }
+
+  /**
+   * Determines whether {@code value} represents a mathematical integer.
+   */
+  public static boolean isMathematicalInteger(double value) {
+    return !Double.isNaN(value) && !Double.isInfinite(value) && value == Math.rint(value);
+  }
 }
