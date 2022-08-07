@@ -13,7 +13,7 @@ public interface InverseBinaryTemporalOperator extends BinaryTemporalOperator {
 
   @Override
   default TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
-    var baseOperatorInstance = baseOperator().instantiate(operand2(), operand1());
+    var baseOperatorInstance = baseOperator().instantiate(operand2(), operand1(), tolerance().orElse(null));
     return baseOperatorInstance.evaluate(periods);
   }
 }

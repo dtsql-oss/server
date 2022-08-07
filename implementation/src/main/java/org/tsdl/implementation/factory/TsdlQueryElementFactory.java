@@ -7,10 +7,10 @@ import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDuration;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
-import org.tsdl.implementation.model.event.EventDuration;
-import org.tsdl.implementation.model.event.EventDurationBound;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
@@ -55,11 +55,11 @@ public interface TsdlQueryElementFactory {
 
   TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics);
 
-  TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, EventDuration duration);
+  TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, TsdlDuration duration);
 
-  EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, ParsableTsdlTimeUnit unit);
+  TsdlDuration getDuration(TsdlDurationBound lowerBound, TsdlDurationBound upperBound, ParsableTsdlTimeUnit unit);
 
-  TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events);
+  TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events, TsdlDuration tolerance);
 
   YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifier);
 }

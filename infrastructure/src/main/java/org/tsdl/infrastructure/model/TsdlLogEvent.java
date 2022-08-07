@@ -6,7 +6,7 @@ import org.tsdl.infrastructure.model.impl.TsdlLogEventImpl;
 
 
 /**
- * A log event, typically induced by an outputformatter triggered by an 'echo' instruction.
+ * A log event, typically induced by an output formatter triggered by an 'echo' instruction.
  */
 @JsonDeserialize(as = TsdlLogEventImpl.class)
 public interface TsdlLogEvent {

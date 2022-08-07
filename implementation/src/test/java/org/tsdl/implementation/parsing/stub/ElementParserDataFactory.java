@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
-import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
@@ -85,17 +85,17 @@ public final class ElementParserDataFactory {
 
   public static Stream<Arguments> validEventDurationBoundInputs() {
     return Stream.of(
-        Arguments.of("[5", TsdlElementParser.DurationBoundType.LOWER_BOUND, EventDurationBound.of(5, true)),
-        Arguments.of("[ 5", TsdlElementParser.DurationBoundType.LOWER_BOUND, EventDurationBound.of(5, true)),
-        Arguments.of("[   0", TsdlElementParser.DurationBoundType.LOWER_BOUND, EventDurationBound.of(0, true)),
-        Arguments.of("   2345)   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(2345, false)),
-        Arguments.of("   7   )", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(7, false)),
-        Arguments.of("   5]   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(5, true)),
-        Arguments.of("   (   035   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, EventDurationBound.of(35, false)),
-        Arguments.of("   [\n   35   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, EventDurationBound.of(35, true)),
-        Arguments.of("35   \r]\n", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(35, true)),
-        Arguments.of(" ] ", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(Long.MAX_VALUE, true)),
-        Arguments.of(")", TsdlElementParser.DurationBoundType.UPPER_BOUND, EventDurationBound.of(Long.MAX_VALUE, false))
+        Arguments.of("[5", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("[ 5", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("[   0", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(0, true)),
+        Arguments.of("   2345)   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(2345, false)),
+        Arguments.of("   7   )", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(7, false)),
+        Arguments.of("   5]   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("   (   035   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(35, false)),
+        Arguments.of("   [\n   35   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(35, true)),
+        Arguments.of("35   \r]\n", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(35, true)),
+        Arguments.of(" ] ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(Long.MAX_VALUE, true)),
+        Arguments.of(")", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(Long.MAX_VALUE, false))
     );
   }
 

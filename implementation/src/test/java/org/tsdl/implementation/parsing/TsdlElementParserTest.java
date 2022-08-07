@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
-import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
@@ -153,7 +153,7 @@ class TsdlElementParserTest {
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationBoundInputs")
   void parseEventDurationBound_validRepresentations_ok(String representation, TsdlElementParser.DurationBoundType boundType,
-                                                       EventDurationBound expected) {
+                                                       TsdlDurationBound expected) {
     assertThat(PARSER.parseEventDurationBound(representation, boundType)).isEqualTo(expected);
   }
 

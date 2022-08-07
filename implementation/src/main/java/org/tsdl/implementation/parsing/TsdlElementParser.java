@@ -2,7 +2,7 @@ package org.tsdl.implementation.parsing;
 
 import java.time.Instant;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
-import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
@@ -37,7 +37,7 @@ public interface TsdlElementParser {
 
   TemporalRelationType parseTemporalRelationType(String str);
 
-  EventDurationBound parseEventDurationBound(String str, DurationBoundType boundType);
+  TsdlDurationBound parseEventDurationBound(String str, DurationBoundType boundType);
 
   ParsableTsdlTimeUnit parseEventDurationUnit(String str);
 

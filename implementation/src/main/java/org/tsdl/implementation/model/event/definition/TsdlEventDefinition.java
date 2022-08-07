@@ -1,8 +1,8 @@
 package org.tsdl.implementation.model.event.definition;
 
 import java.util.Optional;
+import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
-import org.tsdl.implementation.model.event.EventDuration;
 
 /**
  * Definition of an event.
@@ -10,5 +10,5 @@ import org.tsdl.implementation.model.event.EventDuration;
 public interface TsdlEventDefinition {
   TsdlIdentifier identifier();
 
-  Optional<EventDuration> duration();
+  Optional<TsdlDuration> duration();
 }

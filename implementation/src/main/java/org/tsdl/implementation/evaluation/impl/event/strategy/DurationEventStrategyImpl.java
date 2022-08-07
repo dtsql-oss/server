@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
-import org.tsdl.implementation.model.event.EventDuration;
+import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
 import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
@@ -56,7 +56,7 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
     return Collections.unmodifiableList(validPeriods);
   }
 
-  private boolean satisfiesDurationConstraint(TsdlPeriod period, EventDuration duration) {
+  private boolean satisfiesDurationConstraint(TsdlPeriod period, TsdlDuration duration) {
     var unitAdjustedDuration = getDurationInUnit(period, duration.unit());
     var satisfiesLowerBound = duration.lowerBound().inclusive()
         ? unitAdjustedDuration >= duration.lowerBound().value()

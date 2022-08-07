@@ -4,11 +4,11 @@ import java.time.Instant;
 import java.util.List;
 import org.tsdl.implementation.evaluation.impl.choice.relation.FollowsOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorImpl;
+import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
-import org.tsdl.implementation.evaluation.impl.event.EventDurationImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
 import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
@@ -40,10 +40,10 @@ import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDuration;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
-import org.tsdl.implementation.model.event.EventDuration;
-import org.tsdl.implementation.model.event.EventDurationBound;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
@@ -195,7 +195,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, EventDuration duration) {
+  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, TsdlDuration duration) {
     Conditions.checkNotNull(Condition.ARGUMENT, definition, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
     return new TsdlEventImpl(
@@ -205,22 +205,22 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public EventDuration getEventDuration(EventDurationBound lowerBound, EventDurationBound upperBound, ParsableTsdlTimeUnit unit) {
+  public TsdlDuration getDuration(TsdlDurationBound lowerBound, TsdlDurationBound upperBound, ParsableTsdlTimeUnit unit) {
     Conditions.checkNotNull(Condition.ARGUMENT, unit, "The unit of the event duration must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, lowerBound, "The lower bound of an event must not be null. Use 0 (inclusive) instead.");
     Conditions.checkNotNull(Condition.ARGUMENT, upperBound, "The upper bound of an event must not be null. Use Long.MAX_VALUE instead.");
-    return new EventDurationImpl(lowerBound, upperBound, unit);
+    return new TsdlDurationImpl(lowerBound, upperBound, unit);
   }
 
   @Override
-  public TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> operands) {
+  public TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> operands, TsdlDuration tolerance) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of temporal relation must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, operands, "Operands of temporal relation must not be null.");
     Conditions.checkSizeExactly(Condition.ARGUMENT, operands, 2, "Only binary temporal operators are supported at the moment.");
 
     return switch (type) {
-      case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1));
-      case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1));
+      case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1), tolerance);
+      case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1), tolerance);
     };
   }
 

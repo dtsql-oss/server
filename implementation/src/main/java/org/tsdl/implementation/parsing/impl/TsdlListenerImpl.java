@@ -18,9 +18,9 @@ import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
+import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
-import org.tsdl.implementation.model.event.EventDuration;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
@@ -115,7 +115,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterChooseDeclaration(TsdlParser.ChooseDeclarationContext ctx) {
+  public void enterChoiceDeclaration(TsdlParser.ChoiceDeclarationContext ctx) {
     var choiceStatement = ctx.choiceStatement();
 
     var chosenEvents = new ArrayList<TsdlEvent>();
@@ -126,7 +126,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
 
     var relationType = elementParser.parseTemporalRelationType(choiceStatement.TEMPORAL_RELATION().getText());
-    var operator = elementFactory.getChoice(relationType, chosenEvents);
+    var duration = parseDuration(choiceStatement.timeToleranceSpecification());
+    var operator = elementFactory.getChoice(relationType, chosenEvents, duration);
 
     queryBuilder.choiceValue(operator);
   }
@@ -267,7 +268,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
     var connective = parseSinglePointFilterConnective(ctx.filterConnective());
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
-    var duration = parseEventDuration(ctx.durationSpecification());
+    var duration = parseDuration(ctx.durationSpecification());
     return elementFactory.getSinglePointEvent(connective, identifier, duration);
   }
 
@@ -376,12 +377,24 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private EventDuration parseEventDuration(TsdlParser.DurationSpecificationContext ctx) {
+  private TsdlDuration parseDuration(TsdlParser.TimeToleranceSpecificationContext ctx) {
     if (ctx == null) {
       return null;
     }
 
-    var bounds = ctx.EVENT_DURATION().getText().substring("FOR".length()).trim().split(",");
+    return parseDuration(ctx.TIME_TOLERANCE().getText().substring("WITHIN".length()), ctx.TIME_UNIT().getText());
+  }
+
+  private TsdlDuration parseDuration(TsdlParser.DurationSpecificationContext ctx) {
+    if (ctx == null) {
+      return null;
+    }
+
+    return parseDuration(ctx.EVENT_DURATION().getText().substring("FOR".length()), ctx.TIME_UNIT().getText());
+  }
+
+  private TsdlDuration parseDuration(String durationSpecificationWithoutPrefix, String timeUnit) {
+    var bounds = durationSpecificationWithoutPrefix.trim().split(",");
     Conditions.checkSizeExactly(Condition.STATE, bounds, 2, "There must be exactly two bounds for an event duration, separated by ','.");
 
     var lowerBound = elementParser.parseEventDurationBound(bounds[0], TsdlElementParser.DurationBoundType.LOWER_BOUND);
@@ -395,9 +408,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       throw new TsdlParseException("If the lower and upper bound of an event are equal, both of them have to be inclusive, i.e., use '[' and ']'.");
     }
 
-    var unit = elementParser.parseEventDurationUnit(ctx.TIME_UNIT().getText());
+    var unit = elementParser.parseEventDurationUnit(timeUnit);
 
-    return elementFactory.getEventDuration(lowerBound, upperBound, unit);
+    return elementFactory.getDuration(lowerBound, upperBound, unit);
   }
 
   private TsdlIdentifier parseIdentifier(TerminalNode node) {

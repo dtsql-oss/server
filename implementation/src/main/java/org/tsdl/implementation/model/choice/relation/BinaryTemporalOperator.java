@@ -1,5 +1,7 @@
 package org.tsdl.implementation.model.choice.relation;
 
+import java.util.Optional;
+import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.event.TsdlEvent;
 
 /**
@@ -9,6 +11,8 @@ public interface BinaryTemporalOperator extends TemporalOperator {
   TsdlEvent operand1();
 
   TsdlEvent operand2();
+
+  Optional<TsdlDuration> tolerance();
 
   @Override
   default int cardinality() {

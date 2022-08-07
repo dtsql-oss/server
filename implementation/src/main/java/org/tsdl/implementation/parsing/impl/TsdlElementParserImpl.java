@@ -13,7 +13,7 @@ import java.util.Set;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.model.common.Identifiable;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
-import org.tsdl.implementation.model.event.EventDurationBound;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.TsdlElementParser;
@@ -87,7 +87,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public EventDurationBound parseEventDurationBound(String str, DurationBoundType boundType) {
+  public TsdlDurationBound parseEventDurationBound(String str, DurationBoundType boundType) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     final var inclusiveBounds = Set.of('[', ']');
@@ -122,7 +122,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
       throw new TsdlParseException("The value of an event duration bound must be greater than or equal to 0, but was %s".formatted(value));
     }
 
-    return EventDurationBound.of(value, inclusive);
+    return TsdlDurationBound.of(value, inclusive);
   }
 
   @Override
