@@ -15,13 +15,22 @@ public final class TsdlUtil {
   private TsdlUtil() {
   }
 
-  private static final Map<TsdlTimeUnit, Double> MILLIS_TO_UNIT_CONVERSION_FACTOR = Map.of(
+  private static final Map<TsdlTimeUnit, Double> UNIT_TO_MILLIS_CONVERSION_FACTOR = Map.of(
       TsdlTimeUnit.MILLISECONDS, 1.0,
-      TsdlTimeUnit.SECONDS, 1.0 / 1000,
-      TsdlTimeUnit.MINUTES, 1.0 / (1000 * 60),
-      TsdlTimeUnit.HOURS, 1.0 / (1000 * 60 * 60),
-      TsdlTimeUnit.DAYS, 1.0 / (1000 * 60 * 60 * 24),
-      TsdlTimeUnit.WEEKS, 1.0 / (1000 * 60 * 60 * 24 * 7)
+      TsdlTimeUnit.SECONDS, (double) 1000,
+      TsdlTimeUnit.MINUTES, (double) (1000 * 60),
+      TsdlTimeUnit.HOURS, (double) (1000 * 60 * 60),
+      TsdlTimeUnit.DAYS, (double) (1000 * 60 * 60 * 24),
+      TsdlTimeUnit.WEEKS, (double) (1000 * 60 * 60 * 24 * 7)
+  );
+
+  private static final Map<TsdlTimeUnit, Double> MILLIS_TO_UNIT_CONVERSION_FACTOR = Map.of(
+      TsdlTimeUnit.MILLISECONDS, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.MILLISECONDS),
+      TsdlTimeUnit.SECONDS, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.SECONDS),
+      TsdlTimeUnit.MINUTES, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.MINUTES),
+      TsdlTimeUnit.HOURS, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.HOURS),
+      TsdlTimeUnit.DAYS, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.DAYS),
+      TsdlTimeUnit.WEEKS, 1.0 / UNIT_TO_MILLIS_CONVERSION_FACTOR.get(TsdlTimeUnit.WEEKS)
   );
 
   private static final DecimalFormat VALUE_FORMATTER;
@@ -76,6 +85,27 @@ public final class TsdlUtil {
     );
 
     return timespanMillis * MILLIS_TO_UNIT_CONVERSION_FACTOR.get(unit);
+  }
+
+  /**
+   * Converts a decimal value from one into another unit.
+   *
+   * @param value       the value to be converted
+   * @param currentUnit the current unit of the value to be converted
+   * @param targetUnit  the target unit the value should be converted to
+   * @return the value in the target unit
+   */
+  public static double convertUnit(double value, TsdlTimeUnit currentUnit, TsdlTimeUnit targetUnit) {
+    Conditions.checkIsTrue(
+        Condition.STATE,
+        UNIT_TO_MILLIS_CONVERSION_FACTOR.containsKey(currentUnit) && MILLIS_TO_UNIT_CONVERSION_FACTOR.containsKey(targetUnit),
+        "At least one of the units '%s' and '%s' is unknown.",
+        currentUnit,
+        targetUnit
+    );
+
+    var valueMillis = value * UNIT_TO_MILLIS_CONVERSION_FACTOR.get(currentUnit);
+    return valueMillis * MILLIS_TO_UNIT_CONVERSION_FACTOR.get(targetUnit);
   }
 
   /**

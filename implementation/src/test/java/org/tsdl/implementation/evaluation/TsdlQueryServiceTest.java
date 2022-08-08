@@ -169,6 +169,135 @@ class TsdlQueryServiceTest {
           .extracting(SingularScalarResult::value, InstanceOfAssertFactories.DOUBLE)
           .isEqualTo(123_525d);
     }
+
+    @ParameterizedTest
+    @TsdlTestVisualization(skipVisualization = true)
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series10.csv", skipHeaders = 5)
+    )
+    void querySample_yieldTemporalAggregatesOfOnePeriod(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg_t(minutes, "%1$s") AS s1,
+            max_t(seconds, "%1$s") AS s2,
+            min_t( hours,
+                   "%1$s" ) AS s3,
+            sum_t(millis, "%1$s") AS s4,
+            count_t(days, "%1$s") AS s5,
+            stddev_t(weeks, "%1$s") AS s6
+                    
+          YIELD: samples s1, s2, s3, s4, s5, s6
+          """.formatted("2022-08-08T10:35:48.932Z/2022-08-08T12:35:48.932Z");
+
+      var queryResult = queryService.query(dps, query);
+
+      // period has length of
+      // 7_200_000 millis, 7200 s, 120 min, 2 h, 0.0833333 days, 0.011904761 weeks
+      assertThat(queryResult)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(result -> result.values().stream().mapToDouble(Double::doubleValue).toArray(), InstanceOfAssertFactories.DOUBLE_ARRAY)
+          .containsExactly(new Double[] {
+                  //CHECKSTYLE.OFF: Indentation - false positive or IntelliJ auto-format configuration problem. to be fixed later
+                  120.0, // avg
+                  7200.0, // max
+                  2.0, // min
+                  7_200_000.0, // sum
+                  1.0, // count
+                  0.0 // stddev
+                  //CHECKSTYLE.ON: Indentation
+              },
+              withPrecision(0.00000001)
+          );
+    }
+
+    @ParameterizedTest
+    @TsdlTestVisualization(skipVisualization = true)
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series10.csv", skipHeaders = 5)
+    )
+    void querySample_yieldTemporalAggregatesOfThreePeriods(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg_t(minutes, "%1$s", "%2$s", "%3$s") AS s1,
+            max_t(seconds, "%1$s", "%2$s", "%3$s") AS s2,
+            min_t( hours,
+                   "%1$s" , "%2$s", "%3$s" ) AS s3,
+            sum_t(millis, "%1$s", "%2$s", "%3$s") AS s4,
+            count_t(days, "%1$s", "%2$s", "%3$s") AS s5,
+            stddev_t(weeks, "%1$s", "%2$s", "%3$s") AS s6
+                    
+          YIELD: samples s1, s2, s3, s4, s5, s6
+          """.formatted(
+          "2022-08-08T10:35:48.932Z/2022-08-08T12:35:48.932Z", // [0]
+          "2022-08-08T13:50:48.932Z/2022-08-08T14:20:48.932Z", // [1]
+          "2022-08-08T22:20:48.932Z/2022-08-09T12:50:48.932Z" // [2]
+      );
+
+      var queryResult = queryService.query(dps, query);
+
+      // periods have length of
+      // [0]: 7_200_000 millis, 7200 s, 120 min, 2 h, 0.0833333 days, 0.011904761 weeks
+      // [1]: 1_800_000 millis, 1800 s, 30 min, 0.5 h, 0.0208333333 days, 0.00297619 weeks
+      // [2]: 52_200_000 millis, 52200 s, 870 min, 14.5 h, 0.604166666 days, 0.086309523
+      assertThat(queryResult)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(result -> result.values().stream().mapToDouble(Double::doubleValue).toArray(), InstanceOfAssertFactories.DOUBLE_ARRAY)
+          .containsExactly(new Double[] {
+                  //CHECKSTYLE.OFF: Indentation - false positive or IntelliJ auto-format configuration problem. to be fixed later
+                  340.0, // avg
+                  52200.0, // max
+                  0.5, // min
+                  61_200_000.0, // sum
+                  3.0, // count
+                  0.0373574808 // stddev
+                  //CHECKSTYLE.ON: Indentation
+              },
+              withPrecision(0.00000001)
+          );
+    }
+
+    @ParameterizedTest
+    @TsdlTestVisualization(skipVisualization = true)
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series10.csv", skipHeaders = 5)
+    )
+    void querySample_yieldTemporalAggregatesOfDifferentPeriodLists(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES:
+            avg_t(minutes, "%1$s", "%2$s", "%3$s") AS s1,
+            sum_t(seconds, "%4$s", "%5$s") AS s3,
+            stddev_t(weeks, "%1$s", "%2$s", "%3$s") AS s2
+                    
+          YIELD: samples s1, s2, s3
+          """.formatted(
+          "2022-08-08T10:35:48.932Z/2022-08-08T12:35:48.932Z", // [0]
+          "2022-08-08T13:50:48.932Z/2022-08-08T14:20:48.932Z", // [1]
+          "2022-08-08T22:20:48.932Z/2022-08-09T12:50:48.932Z", // [2]
+          "2022-08-09T09:20:48.932Z/2022-08-09T12:05:48.932Z", // [3]
+          "2022-08-08T08:50:48.932Z/2022-08-08T16:50:48.932Z" // [4]
+      );
+
+      var queryResult = queryService.query(dps, query);
+
+      // periods have length of
+      // [0]: 7_200_000 millis, 7200 s, 120 min, 2 h, 0.0833333 days, 0.011904761 weeks
+      // [1]: 1_800_000 millis, 1800 s, 30 min, 0.5 h, 0.0208333333 days, 0.00297619 weeks
+      // [2]: 52_200_000 millis, 52200 s, 870 min, 14.5 h, 0.604166666 days, 0.086309523 weeks
+      // [3]: 9_900_000 millis, 9900 s, 165 min, 2.75 h, 0.114583333 days, 0.016369047 weeks
+      // [4]: 28_800_000 millis, 28800 s, 480 min, 8 h, 0.3333333333333 days, 0.047619047 weeks
+      assertThat(queryResult)
+          .asInstanceOf(InstanceOfAssertFactories.type(MultipleScalarResult.class))
+          .extracting(result -> result.values().stream().mapToDouble(Double::doubleValue).toArray(), InstanceOfAssertFactories.DOUBLE_ARRAY)
+          .containsExactly(new Double[] {
+                  //CHECKSTYLE.OFF: Indentation - false positive or IntelliJ auto-format configuration problem. to be fixed later
+                  340.0, // avg
+                  0.0373574808, // stddev
+                  38700.0 // sum
+                  //CHECKSTYLE.ON: Indentation
+              },
+              withPrecision(0.00000001)
+          );
+    }
   }
 
   @Nested

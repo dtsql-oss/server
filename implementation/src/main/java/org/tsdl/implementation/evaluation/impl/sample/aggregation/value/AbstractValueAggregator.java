@@ -21,13 +21,13 @@ abstract class AbstractValueAggregator implements ValueAggregator {
   private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
   private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
 
-  private double sampleValue;
+  private double sampleValue = Double.NaN;
 
   private final String descriptor;
 
-  private final Instant lowerBound;
+  protected final Instant lowerBound;
 
-  private final Instant upperBound;
+  protected final Instant upperBound;
 
   /**
    * Initializes a {@link AbstractValueAggregator} instance.
@@ -35,7 +35,7 @@ abstract class AbstractValueAggregator implements ValueAggregator {
   public AbstractValueAggregator(Instant lowerBound, Instant upperBound) {
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
-    this.descriptor = "%s sample from %s until %s".formatted(
+    this.descriptor = "%s from %s until %s".formatted(
         type(),
         lowerBound().isPresent() ? lowerBound().get() : "<beginning>",
         upperBound().isPresent() ? upperBound().get() : "<end>"
@@ -47,13 +47,13 @@ abstract class AbstractValueAggregator implements ValueAggregator {
   @Override
   public double compute(String sampleIdentifier, List<DataPoint> dataPoints) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoints, "Aggregator input must not be null");
-    log.info("Calculating {} called '{}' over {} data points.", descriptor, sampleIdentifier, dataPoints.size());
+    log.info("Calculating sample '{}' ({}) over {} data points.", sampleIdentifier, descriptor, dataPoints.size());
 
     var valueStream = getAggregatorInput(dataPoints);
     sampleValue = aggregate(valueStream);
     Conditions.checkNotNull(Condition.STATE, sampleValue, "Sample computation failed, aggregate value must not be null.");
 
-    log.info("Calculated {} called '{}' to be {}.", descriptor, sampleIdentifier, sampleValue);
+    log.info("Calculated sample '{}' ({}) to be {}.", sampleIdentifier, descriptor, sampleValue);
 
     return sampleValue;
   }

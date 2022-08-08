@@ -33,14 +33,14 @@ public final class FormattingDataFactory {
     return Stream.of(
         Arguments.of(
             dps,
-            ELEMENTS.getAggregator(AggregatorType.COUNT, null, null, COMPONENTS.summaryStatistics()),
+            ELEMENTS.getAggregator(AggregatorType.COUNT, null, (Instant) null, COMPONENTS.summaryStatistics()),
             "myCount",
             new String[] {"0"},
             "sample count() with ID 'myCount' := 3"
         ),
         Arguments.of(
             dps,
-            ELEMENTS.getAggregator(AggregatorType.SUM, null, null, COMPONENTS.summaryStatistics()),
+            ELEMENTS.getAggregator(AggregatorType.SUM, (Instant) null, null, COMPONENTS.summaryStatistics()),
             "mySum",
             new String[] {"2.0"},
             "sample sum() with ID 'mySum' := 128.52"

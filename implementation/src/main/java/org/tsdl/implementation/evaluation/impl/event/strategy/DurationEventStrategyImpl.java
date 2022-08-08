@@ -7,14 +7,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
-import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
 import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
-import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
@@ -57,7 +55,7 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
   }
 
   private boolean satisfiesDurationConstraint(TsdlPeriod period, TsdlDuration duration) {
-    var unitAdjustedDuration = getDurationInUnit(period, duration.unit());
+    var unitAdjustedDuration = period.duration(duration.unit().modelEquivalent());
     var satisfiesLowerBound = duration.lowerBound().inclusive()
         ? unitAdjustedDuration >= duration.lowerBound().value()
         : unitAdjustedDuration > duration.lowerBound().value();
@@ -66,18 +64,5 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
         : unitAdjustedDuration < duration.upperBound().value();
 
     return satisfiesLowerBound && satisfiesUpperBound;
-  }
-
-  private double getDurationInUnit(TsdlPeriod period, ParsableTsdlTimeUnit unit) {
-    var tsdlTimeUnit = switch (unit) {
-      case WEEKS -> TsdlTimeUnit.WEEKS;
-      case DAYS -> TsdlTimeUnit.DAYS;
-      case HOURS -> TsdlTimeUnit.HOURS;
-      case MINUTES -> TsdlTimeUnit.MINUTES;
-      case SECONDS -> TsdlTimeUnit.SECONDS;
-      case MILLISECONDS -> TsdlTimeUnit.MILLISECONDS;
-    };
-
-    return period.duration(tsdlTimeUnit);
   }
 }

@@ -65,6 +65,10 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
             continue;
           }
 
+          if ("".equals(line.trim())) {
+            continue;
+          }
+
           var split = line.split(";");
           Conditions.checkSizeExactly(Condition.STATE, split, 2, "Line is not of form 'time;value': '%s'", line);
           var date = split[0].trim();

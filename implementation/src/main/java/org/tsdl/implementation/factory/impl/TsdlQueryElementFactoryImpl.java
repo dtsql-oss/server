@@ -163,18 +163,18 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit) {
+  public TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Time periods must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, unit, "Time unit must not be null.");
 
     return switch (type) {
-      case TEMPORAL_AVERAGE -> new TemporalAverageAggregatorImpl(periods, unit);
-      case TEMPORAL_COUNT -> new TemporalCountAggregatorImpl(periods, unit);
-      case TEMPORAL_MAXIMUM -> new TemporalMaximumAggregatorImpl(periods, unit);
-      case TEMPORAL_MINIMUM -> new TemporalMinimumAggregatorImpl(periods, unit);
-      case TEMPORAL_STANDARD_DEVIATION -> new TemporalStandardDeviationAggregatorImpl(periods, unit);
-      case TEMPORAL_SUM -> new TemporalSumAggregatorImpl(periods, unit);
+      case TEMPORAL_AVERAGE -> new TemporalAverageAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_COUNT -> new TemporalCountAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_MAXIMUM -> new TemporalMaximumAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_MINIMUM -> new TemporalMinimumAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_STANDARD_DEVIATION -> new TemporalStandardDeviationAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_SUM -> new TemporalSumAggregatorImpl(periods, unit, summaryStatistics);
       default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
     };
   }

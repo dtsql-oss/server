@@ -43,6 +43,24 @@ import org.tsdl.infrastructure.common.Conditions;
  * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
  */
 public class TsdlListenerImpl extends TsdlParserBaseListener {
+  private enum IdentifierType {
+    EVENT, SAMPLE
+  }
+
+  /**
+   * <p>
+   * Different samples may have different lower and upper bounds. Therefore, we may reuse {@link SummaryStatistics} instances only if both lower and
+   * upper bound are equal. For instance, all global samples may share the same instance as well as local samples with the same bounds, but local
+   * samples with differing bounds may not.
+   * </p>
+   * <p>
+   * This record encapsulates the lower and upper bound of a {@link TsdlAggregator}, enabling support for memorizing {@link SummaryStatistics}
+   * instances that may be reused.
+   * </p>
+   */
+  private record AggregatorBounds(Instant lowerBound, Instant upperBound) {
+  }
+
   private final TsdlElementParser elementParser = TsdlComponentFactory.INSTANCE.elementParser();
   private final TsdlQueryElementFactory elementFactory = TsdlComponentFactory.INSTANCE.elementFactory();
   private final Calculus calculus = TsdlComponentFactory.INSTANCE.calculus();
@@ -52,6 +70,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private final TsdlQueryImpl.TsdlQueryImplBuilder queryBuilder = TsdlQueryImpl.builder();
 
   private final Map<AggregatorBounds, SummaryStatistics> summaryStatisticsByBounds = new HashMap<>();
+
+  private final Map<List<TimePeriod>, SummaryStatistics> summaryStatisticsByPeriods = new HashMap<>();
 
   @Override
   public void enterIdentifierDeclaration(TsdlParser.IdentifierDeclarationContext ctx) {
@@ -220,8 +240,10 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var unit = elementParser.parseEventDurationUnit(ctx.TIME_UNIT().getText());
 
     return switch (aggregatorType) {
-      case TEMPORAL_AVERAGE, TEMPORAL_COUNT, TEMPORAL_MAXIMUM, TEMPORAL_MINIMUM, TEMPORAL_STANDARD_DEVIATION, TEMPORAL_SUM ->
-          elementFactory.getAggregator(aggregatorType, timePeriods, unit);
+      case TEMPORAL_AVERAGE, TEMPORAL_COUNT, TEMPORAL_MAXIMUM, TEMPORAL_MINIMUM, TEMPORAL_STANDARD_DEVIATION, TEMPORAL_SUM -> {
+        var statistics = summaryStatisticsByPeriods.computeIfAbsent(timePeriods, k -> TsdlComponentFactory.INSTANCE.summaryStatistics());
+        yield elementFactory.getAggregator(aggregatorType, timePeriods, unit, statistics);
+      }
       default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", aggregatorType);
     };
   }
@@ -421,23 +443,5 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return queryBuilder
         .identifiers(declaredIdentifiers)
         .build();
-  }
-
-  private enum IdentifierType {
-    EVENT, SAMPLE
-  }
-
-  /**
-   * <p>
-   * Different samples may have different lower and upper bounds. Therefore, we may reuse {@link SummaryStatistics} instances only if both lower and
-   * upper bound are equal. For instance, all global samples may share the same instance as well as local samples with the same bounds, but local
-   * samples with differing bounds may not.
-   * </p>
-   * <p>
-   * This record encapsulates the lower and upper bound of a {@link TsdlAggregator}, enabling support for memorizing {@link SummaryStatistics}
-   * instances that may be reused.
-   * </p>
-   */
-  private record AggregatorBounds(Instant lowerBound, Instant upperBound) {
   }
 }

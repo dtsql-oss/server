@@ -37,7 +37,7 @@ public class CalculusImpl implements Calculus {
   private double doubleTrapezoidalArea(DataPoint dp1, DataPoint dp2) {
     var a = dp1.value();
     var c = dp2.value();
-    var h = TsdlUtil.getTimespan(dp1.timestamp(), dp2.timestamp(), TsdlTimeUnit.SECONDS);
+    var h = TsdlUtil.getTimespan(dp1.timestamp(), dp2.timestamp(), TsdlTimeUnit.SECONDS); // seconds due to definition of SI units
     Conditions.checkIsTrue(
         Condition.STATE,
         h >= 0,

@@ -51,7 +51,7 @@ public interface TsdlQueryElementFactory {
 
   TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, Calculus calculus);
 
-  TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit);
+  TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics);
 
   TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics);
 

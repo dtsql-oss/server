@@ -9,9 +9,7 @@ import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 abstract class AbstractSummaryAggregator extends AbstractValueAggregator implements TsdlAggregator {
-  protected SummaryStatistics summaryStatistics;
-
-  protected abstract double onAggregate(List<DataPoint> input);
+  protected final SummaryStatistics summaryStatistics;
 
   /**
    * Initializes a {@link AbstractValueAggregator} instance.
@@ -22,9 +20,10 @@ abstract class AbstractSummaryAggregator extends AbstractValueAggregator impleme
     this.summaryStatistics = summaryStatistics;
   }
 
+  protected abstract double onAggregate(List<DataPoint> input);
+
   @Override
   protected double aggregate(List<DataPoint> input) {
-    Conditions.checkNotNull(Condition.STATE, summaryStatistics, "Summary statistics calculator must be set before sample calculation.");
     summaryStatistics.ingest(() -> input.stream().map(DataPoint::value).toList());
     return onAggregate(input);
   }

@@ -202,7 +202,11 @@ class TsdlQueryParserTest {
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(TsdlSample.class))
           .extracting(TsdlSample::aggregator, InstanceOfAssertFactories.type(TemporalAggregator.class))
-          .isEqualTo(expected);
+          .satisfies(aggregator -> {
+            assertThat(aggregator.periods()).isEqualTo(expected.periods());
+            assertThat(aggregator.unit()).isEqualTo(expected.unit());
+            assertThat(aggregator.type()).isEqualTo(expected.type());
+          });
     }
 
     @ParameterizedTest
@@ -230,7 +234,8 @@ class TsdlQueryParserTest {
               ELEMENTS.getAggregator(
                   AggregatorType.TEMPORAL_AVERAGE,
                   List.of(new TimePeriodImpl(Instant.parse("2022-07-03T12:45:03.123Z"), Instant.parse("2022-07-03T12:46:03.123Z"))),
-                  ParsableTsdlTimeUnit.MILLISECONDS
+                  ParsableTsdlTimeUnit.MILLISECONDS,
+                  TsdlComponentFactory.INSTANCE.summaryStatistics()
               )
           ),
           Arguments.of(
@@ -245,7 +250,8 @@ class TsdlQueryParserTest {
                       new TimePeriodImpl(Instant.parse("2022-07-03T12:45:03.123Z"), Instant.parse("2022-07-03T12:46:03.123Z")),
                       new TimePeriodImpl(Instant.parse("2022-07-03T12:47:03.123Z"), Instant.parse("2022-07-03T12:48:03.123Z"))
                   ),
-                  ParsableTsdlTimeUnit.SECONDS
+                  ParsableTsdlTimeUnit.SECONDS,
+                  TsdlComponentFactory.INSTANCE.summaryStatistics()
               )
           ),
           Arguments.of(
@@ -262,7 +268,8 @@ class TsdlQueryParserTest {
                       new TimePeriodImpl(Instant.parse("2022-07-03T12:51:03.123Z"), Instant.parse("2022-07-03T12:52:03.123Z")),
                       new TimePeriodImpl(Instant.parse("2022-07-03T12:53:03.123Z"), Instant.parse("2022-07-03T12:54:03.123Z"))
                   ),
-                  ParsableTsdlTimeUnit.WEEKS
+                  ParsableTsdlTimeUnit.WEEKS,
+                  TsdlComponentFactory.INSTANCE.summaryStatistics()
               )
           )
       );
