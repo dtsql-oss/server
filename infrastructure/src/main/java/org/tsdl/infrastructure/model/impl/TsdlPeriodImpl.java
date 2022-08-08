@@ -50,6 +50,11 @@ public record TsdlPeriodImpl(int index, Instant start, Instant end, List<TsdlLog
   }
 
   @Override
+  public TsdlPeriod withIndex(int index) {
+    return new TsdlPeriodImpl(index, start, end, logs);
+  }
+
+  @Override
   public QueryResult withLogs(List<TsdlLogEvent> logs) {
     return new TsdlPeriodImpl(index, start, end, logs);
   }

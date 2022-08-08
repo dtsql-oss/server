@@ -17,6 +17,9 @@ public record AbsoluteAroundFilterImpl(TsdlFilterArgument referenceValue, TsdlFi
 
   @Override
   public boolean evaluate(DataPoint dataPoint) {
-    throw new UnsupportedOperationException();
+    Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");
+
+    var absoluteDifference = Math.abs(dataPoint.value() - referenceValue.value());
+    return absoluteDifference <= maximumDeviation.value();
   }
 }

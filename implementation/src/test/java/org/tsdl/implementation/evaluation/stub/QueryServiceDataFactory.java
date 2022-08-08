@@ -29,6 +29,21 @@ public final class QueryServiceDataFactory {
     );
   }
 
+  public static Stream<Arguments> dataPoints_1() {
+    return Stream.of(
+        Arguments.of(
+            List.of(
+                dp("2022-05-24 20:33:45.000", 25.75),
+                dp("2022-05-25 20:33:45.234", 27.25),
+                dp("2022-05-26 20:36:44.234", 75.52),
+                dp("2022-05-27 20:36:44.234", 100.25),
+                dp("2022-05-28 20:36:44.234", 50.24),
+                dp("2022-05-29 20:36:44.234", 27.44)
+            )
+        )
+    );
+  }
+
   public static Stream<Arguments> globalAggregates() {
     final var input = List.of(
         dp("2022-05-24 20:33:45.000", 25.75),

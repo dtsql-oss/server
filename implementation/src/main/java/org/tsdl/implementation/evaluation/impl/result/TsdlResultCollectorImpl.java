@@ -1,6 +1,7 @@
 package org.tsdl.implementation.evaluation.impl.result;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -11,6 +12,7 @@ import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.QueryResult;
+import org.tsdl.infrastructure.model.TsdlLogEvent;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 import org.tsdl.infrastructure.model.TsdlPeriodSet;
 
@@ -25,21 +27,20 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
   @Override
   public QueryResult collect(YieldStatement result, List<DataPoint> dataPoints, TsdlPeriodSet periodSet, boolean noPeriodDefinitions,
                              Map<TsdlIdentifier, Double> samples) {
-
-
+    var indexedPeriodSet = normalizePeriodIndices(periodSet);
     switch (result.format()) {
       case ALL_PERIODS:
-        return periodSet;
+        return indexedPeriodSet;
 
       case LONGEST_PERIOD:
-        return findSpecialPeriod(periodSet.periods(), SpecialPeriod.MAXIMUM);
+        return findSpecialPeriod(indexedPeriodSet.periods(), SpecialPeriod.MAXIMUM);
 
       case SHORTEST_PERIOD:
-        return findSpecialPeriod(periodSet.periods(), SpecialPeriod.MINIMUM);
+        return findSpecialPeriod(indexedPeriodSet.periods(), SpecialPeriod.MINIMUM);
 
       case DATA_POINTS:
         var pointsInPeriods = dataPoints.stream()
-            .filter(dp -> noPeriodDefinitions || anyPeriodContains(periodSet.periods(), dp.timestamp()))
+            .filter(dp -> noPeriodDefinitions || anyPeriodContains(indexedPeriodSet.periods(), dp.timestamp()))
             .toList();
         return QueryResult.of(pointsInPeriods);
 
@@ -54,6 +55,21 @@ public class TsdlResultCollectorImpl implements TsdlResultCollector {
       default:
         throw Conditions.exception(Condition.ARGUMENT, "Unknown result format '%s'", result);
     }
+  }
+
+  private TsdlPeriodSet normalizePeriodIndices(TsdlPeriodSet periodSet) {
+    if (!periodSet.periods().stream().allMatch(period -> period.index() == -1)) {
+      return periodSet;
+    }
+
+    var indexedPeriods = new ArrayList<TsdlPeriod>(periodSet.totalPeriods());
+    var tsdlPeriods = periodSet.periods();
+    for (var i = 0; i < tsdlPeriods.size(); i++) {
+      var currentPeriod = tsdlPeriods.get(i);
+      indexedPeriods.add(currentPeriod.withIndex(i));
+    }
+
+    return QueryResult.of(periodSet.totalPeriods(), indexedPeriods, periodSet.logs().toArray(TsdlLogEvent[]::new));
   }
 
   private TsdlPeriod findSpecialPeriod(List<TsdlPeriod> periods, SpecialPeriod type) {

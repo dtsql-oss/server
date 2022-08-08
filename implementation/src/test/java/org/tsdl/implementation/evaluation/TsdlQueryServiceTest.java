@@ -1,6 +1,7 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
 import java.time.Instant;
@@ -25,6 +26,7 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
 import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
 import org.tsdl.testutil.creation.provider.TsdlTestSource;
 import org.tsdl.testutil.creation.provider.TsdlTestSources;
+import org.tsdl.testutil.visualization.api.DisableTsdlTestVisualization;
 import org.tsdl.testutil.visualization.api.TsdlTestVisualization;
 import org.tsdl.testutil.visualization.impl.TsdlTestVisualizer;
 
@@ -297,6 +299,86 @@ class TsdlQueryServiceTest {
               },
               withPrecision(0.00000001)
           );
+    }
+  }
+
+  @Nested
+  @DisplayName("event tests")
+  class QueryEvent {
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series11.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryEvent_aroundAbsolute_detectsPeriods(List<DataPoint> dps) {
+      // [138, 178]
+      var query = """
+          USING EVENTS: AND(around(abs, 158, 20)) FOR [1,] hours AS tunnel
+          YIELD: all periods
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(2);
+            assertThat(periodSet.isEmpty()).isFalse();
+            assertThat(periodSet.periods())
+                .elements(0, 1)
+                .containsExactly(
+                    QueryResult.of(0, Instant.parse("2022-08-09T07:52:27.627Z"), Instant.parse("2022-08-09T20:22:27.627Z")),
+                    QueryResult.of(1, Instant.parse("2022-08-10T10:52:27.627Z"), Instant.parse("2022-08-10T16:22:27.627Z"))
+                );
+          });
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series11.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryEvent_aroundRelativeWithSample_detectsPeriods(List<DataPoint> dps) {
+      // [155.83, 181.84]
+      var query = """
+          WITH SAMPLES: avg() AS myAVg, stddev("2022-08-10T10:52:27.627Z", "2022-08-10T16:22:27.627Z") AS myStdDev
+          USING EVENTS: AND(around(rel, myAVg, myStdDev)) FOR [1,] hours AS tunnel
+          YIELD: all periods
+          """;
+
+      var result = queryService.query(dps, query);
+
+      assertThat(result.type()).isEqualTo(QueryResultType.PERIOD_SET);
+      assertThat(result)
+          .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
+          .satisfies(periodSet -> {
+            assertThat(periodSet.totalPeriods()).isEqualTo(2);
+            assertThat(periodSet.isEmpty()).isFalse();
+            assertThat(periodSet.periods())
+                .elements(0, 1)
+                .containsExactly(
+                    QueryResult.of(0, Instant.parse("2022-08-09T14:07:27.627Z"), Instant.parse("2022-08-09T19:52:27.627Z")),
+                    QueryResult.of(1, Instant.parse("2022-08-10T11:37:27.627Z"), Instant.parse("2022-08-10T16:22:27.627Z"))
+                );
+          });
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series11.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryEvent_aroundRelativeWithSampleWithInvalidPercentageRange_throws(List<DataPoint> dps) {
+      var query = """
+          WITH SAMPLES: avg() AS myAVg, max() AS myMax
+          USING EVENTS: AND(around(rel, myAVg, myMax)) FOR [1,] hours AS tunnel
+          YIELD: all periods
+          """;
+
+      assertThatThrownBy(() -> queryService.query(dps, query))
+          .isInstanceOf(TsdlEvaluationException.class)
+          .hasMessageContaining("between 0 and 100");
     }
   }
 
@@ -691,6 +773,7 @@ class TsdlQueryServiceTest {
 
   @Nested
   @DisplayName("filter tests")
+  @DisableTsdlTestVisualization
   class QueryFilter {
 
     @ParameterizedTest
@@ -889,6 +972,62 @@ class TsdlQueryServiceTest {
     void queryFilter_mixValueAndTimeFilters(List<DataPoint> dataPoints) {
       filterTest("WITH SAMPLES: max() AS myMax APPLY FILTER: AND(NOT(before(\"2022-05-24T20:33:45.234Z\")), lt(myMax)) YIELD: data points",
           dataPoints, List.of(dataPoints.get(1)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_aroundAbsoluteFilter(List<DataPoint> dataPoints) {
+      filterTest("APPLY FILTER: AND(around(abs, 50.1, 24.35)) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(4), dataPoints.get(5)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_negatedAroundAbsoluteFilter(List<DataPoint> dataPoints) {
+      filterTest("APPLY FILTER: AND(NOT(around(abs, 50.1, 24.35))) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(2), dataPoints.get(3)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_aroundRelativeFilter(List<DataPoint> dataPoints) {
+      filterTest("APPLY FILTER: AND(around(rel, 50.1, 50.8)) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2), dataPoints.get(4), dataPoints.get(5)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_negatedAroundRelativeFilter(List<DataPoint> dataPoints) {
+      filterTest("APPLY FILTER: AND(NOT(around(rel, 50.1, 50.8))) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(3)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_aroundAbsoluteFilterWithSampleArgument(List<DataPoint> dataPoints) {
+      filterTest("WITH SAMPLES: avg() AS s APPLY FILTER: AND(around(abs, 50.1, s)) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2), dataPoints.get(3), dataPoints.get(4), dataPoints.get(5)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_negatedAroundAbsoluteFilterWithSampleArgument(List<DataPoint> dataPoints) {
+      filterTest("WITH SAMPLES: avg() AS s APPLY FILTER: AND(NOT(around(abs, 50.1, s))) YIELD: data points", dataPoints,
+          List.of());
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_aroundRelativeFilterWithSampleArgument(List<DataPoint> dataPoints) {
+      filterTest("WITH SAMPLES: stddev() AS s APPLY FILTER: AND(around(rel, 50.1, s)) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(4)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.tsdl.implementation.evaluation.stub.QueryServiceDataFactory#dataPoints_1")
+    void queryFilter_negatedAroundRelativeFilterWithSampleArgument(List<DataPoint> dataPoints) {
+      filterTest("WITH SAMPLES: stddev() AS s APPLY FILTER: AND(NOT(around(rel, 50.1, s))) YIELD: data points", dataPoints,
+          List.of(dataPoints.get(0), dataPoints.get(1), dataPoints.get(2), dataPoints.get(3), dataPoints.get(5)));
     }
 
     private void filterTest(String query, List<DataPoint> input, List<DataPoint> expectedResult) {

@@ -38,7 +38,7 @@ public class TsdlQueryService implements QueryService {
       var logEvents = new ArrayList<TsdlLogEvent>();
 
       var sampleValues = samplesCalculator.computeSampleValues(parsedQuery.samples(), data, logEvents);
-      samplesCalculator.setConnectiveArgumentValues(parsedQuery, sampleValues);
+      samplesCalculator.setConnectiveArgumentValues(parsedQuery.filter().orElse(null), parsedQuery.events(), sampleValues);
 
       log.info("Applying query filters to {} initial data points.", data.size());
       var relevantDataPoints = parsedQuery.filter().isPresent()

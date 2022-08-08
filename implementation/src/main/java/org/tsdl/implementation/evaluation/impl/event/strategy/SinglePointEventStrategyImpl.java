@@ -37,6 +37,7 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
     var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
     var priorDataPoints = new HashMap<TsdlIdentifier, DataPoint>();
     var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
+
     for (var i = 0; i < dataPoints.size(); i++) {
       var currentDataPoint = dataPoints.get(i);
       var previousDataPoint = i > 0 ? dataPoints.get(i - 1) : null;
