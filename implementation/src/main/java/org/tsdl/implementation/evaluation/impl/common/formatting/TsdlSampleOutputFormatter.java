@@ -2,14 +2,17 @@ package org.tsdl.implementation.evaluation.impl.common.formatting;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.Instant;
+import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregator;
 import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
+import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
@@ -42,39 +45,66 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
   public String format(TsdlSample obj) {
     Conditions.checkNotNull(Condition.ARGUMENT, obj, "Sample to format must not be null.");
 
+    var sampleName = obj.identifier().name();
+    var aggregatorFunction = obj.aggregator().type().representation();
+    var formattedValue = getDecimalFormat().format(obj.aggregator().value());
+
+    var descriptor = switch (obj.aggregator()) {
+      case ValueAggregator v -> getSampleDescriptor(v, aggregatorFunction);
+      case TemporalAggregator t -> getSampleDescriptor(t, aggregatorFunction);
+      default -> throw Conditions.exception(Condition.STATE, "Cannot format sample '%s', unrecognized aggregator type.", sampleName);
+    };
+
+    var suffix = switch (obj.aggregator()) {
+      case ValueAggregator ignored -> "";
+      case TemporalAggregator t && t.type() != AggregatorType.TEMPORAL_COUNT -> t.unit().representation();
+      case TemporalAggregator t && t.type() == AggregatorType.TEMPORAL_COUNT -> /* noinspection DuplicateBranchesInSwitch */ "";
+      default -> throw Conditions.exception(Condition.STATE, "Cannot format sample '%s', unrecognized aggregator type.", sampleName);
+    };
+
+    var formattedString = "sample '%s' %s := %s%s".formatted(
+        sampleName,
+        descriptor,
+        formattedValue,
+        suffix != null && !"".equals(suffix) ? " " + suffix : ""
+    );
+
+    log.debug(formattedString);
+    return formattedString;
+  }
+
+  private String getSampleDescriptor(ValueAggregator valueAggregator, String aggregatorFunction) {
+    var lowerBound = valueAggregator.lowerBound().orElse(null);
+    var upperBound = valueAggregator.upperBound().orElse(null);
+    var localSampleArguments = String.join(
+        ", ",
+        "\"" + (lowerBound != null ? lowerBound.toString() : "") + "\"",
+        "\"" + (upperBound != null ? upperBound.toString() : "") + "\""
+    );
+
+    return "%s(%s)".formatted(
+        aggregatorFunction,
+        lowerBound == null && upperBound == null ? "" : localSampleArguments
+    );
+  }
+
+  private String getSampleDescriptor(TemporalAggregator temporalAggregator, String aggregatorFunction) {
+    var unit = temporalAggregator.type() != AggregatorType.TEMPORAL_COUNT ? temporalAggregator.unit().representation() + ", " : "";
+    var temporalSampleArguments = temporalAggregator.periods().stream()
+        .map(p -> "\"%s/%s\"".formatted(p.start(), p.end()))
+        .collect(Collectors.joining(", "));
+
+    return "%s(%s%s)".formatted(aggregatorFunction, unit, temporalSampleArguments);
+  }
+
+  private NumberFormat getDecimalFormat() {
     var format = "0" + (decimalPlaces > 0 ? String.format(".%s", "0".repeat(decimalPlaces)) : "");
     var decimalFormat = new DecimalFormat(format);
     var symbols = new DecimalFormatSymbols(Locale.US);
     symbols.setDecimalSeparator('.');
     decimalFormat.setDecimalFormatSymbols(symbols);
     decimalFormat.setGroupingUsed(false);
-
-    var sampleName = obj.identifier().name();
-    var aggregatorFunction = obj.aggregator().type().representation();
-    var value = obj.aggregator().value();
-
-    Instant lowerBound = null;
-    Instant upperBound = null;
-    if (obj.aggregator() instanceof ValueAggregator valueAggregator) {
-      lowerBound = valueAggregator.lowerBound().orElse(null);
-      upperBound = valueAggregator.upperBound().orElse(null);
-    }
-
-    var formattedString = "sample %s(%s) with ID '%s' := %s".formatted(
-        aggregatorFunction,
-        lowerBound == null && upperBound == null
-            ? ""
-            : String.join(
-                ", ",
-                "\"" + (lowerBound != null ? lowerBound.toString() : "") + "\"",
-                "\"" + (upperBound != null ? upperBound.toString() : "") + "\""
-            ),
-        sampleName,
-        decimalFormat.format(value)
-    );
-
-    log.debug(formattedString);
-    return formattedString;
+    return decimalFormat;
   }
 
   @Override

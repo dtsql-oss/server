@@ -1302,17 +1302,19 @@ class TsdlQueryServiceTest {
           .hasSize(2)
           .extracting(TsdlLogEvent::message)
           .isEqualTo(List.of(
-              "sample avg() with ID 'm1' := 2.000",
-              "sample max() with ID 'm2' := 3"
+              "sample 'm1' avg() := 2.000",
+              "sample 'm2' max() := 3"
           ));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"data points", "all periods", "shortest period", "longest period", "sample m1", "sample m2", "samples m1", "samples m2",
         "samples m1, m2", "samples m2,m1"})
-    void queryIntegration_queryWithLocalSampleEchos_collectsLogMessages(String yield) {
+    void queryIntegration_queryWithLocalAndTemporalSampleEchos_collectsLogMessages(String yield) {
       var query = """
-          WITH SAMPLES: avg("2022-07-31T08:12:59.123Z","") AS m1 -> echo(3), max("","2022-07-31T10:12:59.123Z") AS m2 -> echo(0)
+          WITH SAMPLES: avg("2022-07-31T08:12:59.123Z","") AS m1 -> echo(3), max("","2022-07-31T10:12:59.123Z") AS m2 -> echo(0),
+                        avg_t(days, "2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m3 -> echo(3),
+                        count_t(minutes, "2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m4 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
                     CHOOSE: low precedes high
                     YIELD: %s""".formatted(yield);
@@ -1325,11 +1327,13 @@ class TsdlQueryServiceTest {
       var result = queryService.query(input, query);
 
       assertThat(result.logs())
-          .hasSize(2)
+          .hasSize(4)
           .extracting(TsdlLogEvent::message)
           .isEqualTo(List.of(
-              "sample avg(\"2022-07-31T08:12:59.123Z\", \"\") with ID 'm1' := 2.000",
-              "sample max(\"\", \"2022-07-31T10:12:59.123Z\") with ID 'm2' := 3"
+              "sample 'm1' avg(\"2022-07-31T08:12:59.123Z\", \"\") := 2.000",
+              "sample 'm2' max(\"\", \"2022-07-31T10:12:59.123Z\") := 3",
+              "sample 'm3' avg_t(days, \"2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z\") := 0.042 days",
+              "sample 'm4' count_t(\"2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z\") := 1"
           ));
     }
 
