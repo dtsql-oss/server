@@ -2,7 +2,6 @@ package org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal;
 
 import java.util.List;
 import org.tsdl.implementation.math.SummaryStatistics;
-import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalCountAggregator;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -12,8 +11,8 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 public class TemporalCountAggregatorImpl extends AbstractTemporalAggregator implements TemporalCountAggregator {
 
-  public TemporalCountAggregatorImpl(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
-    super(periods, unit, summaryStatistics);
+  public TemporalCountAggregatorImpl(List<TimePeriod> periods, SummaryStatistics summaryStatistics) {
+    super(periods, summaryStatistics);
   }
 
   @Override

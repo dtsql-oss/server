@@ -10,7 +10,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link TemporalStandardDeviationAggregator}.
  */
-public class TemporalStandardDeviationAggregatorImpl extends AbstractTemporalAggregator implements TemporalStandardDeviationAggregator {
+public class TemporalStandardDeviationAggregatorImpl extends AbstractTemporalAggregatorWithUnit implements TemporalStandardDeviationAggregator {
 
   public TemporalStandardDeviationAggregatorImpl(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     super(periods, unit, summaryStatistics);

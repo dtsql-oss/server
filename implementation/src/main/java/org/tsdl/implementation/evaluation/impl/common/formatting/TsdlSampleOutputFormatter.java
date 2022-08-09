@@ -10,9 +10,9 @@ import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregatorWithUnit;
 import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
-import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
@@ -57,8 +57,8 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
 
     var suffix = switch (obj.aggregator()) {
       case ValueAggregator ignored -> "";
-      case TemporalAggregator t && t.type() != AggregatorType.TEMPORAL_COUNT -> t.unit().representation();
-      case TemporalAggregator t && t.type() == AggregatorType.TEMPORAL_COUNT -> /* noinspection DuplicateBranchesInSwitch */ "";
+      case TemporalAggregatorWithUnit tu -> tu.unit().representation();
+      case TemporalAggregator ignored -> /* noinspection DuplicateBranchesInSwitch */ ""; // no unit -> no suffix
       default -> throw Conditions.exception(Condition.STATE, "Cannot format sample '%s', unrecognized aggregator type.", sampleName);
     };
 
@@ -89,7 +89,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
   }
 
   private String getSampleDescriptor(TemporalAggregator temporalAggregator, String aggregatorFunction) {
-    var unit = temporalAggregator.type() != AggregatorType.TEMPORAL_COUNT ? temporalAggregator.unit().representation() + ", " : "";
+    var unit = temporalAggregator instanceof TemporalAggregatorWithUnit t ? t.unit().representation() + ", " : "";
     var temporalSampleArguments = temporalAggregator.periods().stream()
         .map(p -> "\"%s/%s\"".formatted(p.start(), p.end()))
         .collect(Collectors.joining(", "));

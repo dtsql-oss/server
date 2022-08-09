@@ -154,7 +154,7 @@ class TsdlElementParserTest {
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationBoundInputs")
   void parseEventDurationBound_validRepresentations_ok(String representation, TsdlElementParser.DurationBoundType boundType,
                                                        TsdlDurationBound expected) {
-    assertThat(PARSER.parseEventDurationBound(representation, boundType)).isEqualTo(expected);
+    assertThat(PARSER.parseDurationBound(representation, boundType)).isEqualTo(expected);
   }
 
   @ParameterizedTest
@@ -170,12 +170,12 @@ class TsdlElementParserTest {
       "],LOWER_BOUND",
   })
   void parseEventDurationBound_invalidRepresentations_throws(String representation, TsdlElementParser.DurationBoundType boundType) {
-    assertThatThrownBy(() -> PARSER.parseEventDurationBound(representation, boundType)).isInstanceOf(TsdlParseException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationBound(representation, boundType)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
   void parseEventDurationBound_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseEventDurationBound(null, TsdlElementParser.DurationBoundType.UPPER_BOUND)).isInstanceOf(
+    assertThatThrownBy(() -> PARSER.parseDurationBound(null, TsdlElementParser.DurationBoundType.UPPER_BOUND)).isInstanceOf(
         IllegalArgumentException.class);
   }
 
@@ -211,18 +211,18 @@ class TsdlElementParserTest {
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationUnitInputs")
   void parseEventDurationUnit_validRepresentations_ok(String representation, ParsableTsdlTimeUnit member) {
-    assertThat(PARSER.parseEventDurationUnit(representation)).isEqualTo(member);
+    assertThat(PARSER.parseDurationUnit(representation)).isEqualTo(member);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"years", "DAYS", "Minutes", "", "   ", "minutes ", " seconds", "milliseconds", "milli"})
   void parseEventDurationUnit_invalidRepresentations_throws(String representation) {
-    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(representation)).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationUnit(representation)).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
   void parseEventDurationUnit_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationUnit(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest

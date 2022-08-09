@@ -54,6 +54,14 @@ public final class Conditions {
     checkEquals(conditionType, obj1, obj2, "Operands must be equal.");
   }
 
+  public static void checkNull(Condition conditionType, Object value, String messageTemplate, Object... messageArguments) {
+    checkIsTrue(conditionType, value == null, messageTemplate, messageArguments);
+  }
+
+  public static void checkNull(Condition conditionType, Object value) {
+    checkNull(conditionType, value, "Operand must be null.");
+  }
+
   @NonNull
   public static <T> T checkNotNull(Condition conditionType, T value, String messageTemplate, Object... messageArguments) {
     checkIsTrue(conditionType, value != null, messageTemplate, messageArguments);

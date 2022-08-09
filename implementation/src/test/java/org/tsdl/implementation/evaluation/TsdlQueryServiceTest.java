@@ -184,7 +184,7 @@ class TsdlQueryServiceTest {
             min_t( hours,
                    "%1$s" ) AS s3,
             sum_t(millis, "%1$s") AS s4,
-            count_t(days, "%1$s") AS s5,
+            count_t("%1$s") AS s5,
             stddev_t(weeks, "%1$s") AS s6
                     
           YIELD: samples s1, s2, s3, s4, s5, s6
@@ -224,7 +224,7 @@ class TsdlQueryServiceTest {
             min_t( hours,
                    "%1$s" , "%2$s", "%3$s" ) AS s3,
             sum_t(millis, "%1$s", "%2$s", "%3$s") AS s4,
-            count_t(days, "%1$s", "%2$s", "%3$s") AS s5,
+            count_t("%1$s", "%2$s", "%3$s") AS s5,
             stddev_t(weeks, "%1$s", "%2$s", "%3$s") AS s6
                     
           YIELD: samples s1, s2, s3, s4, s5, s6
@@ -1314,7 +1314,7 @@ class TsdlQueryServiceTest {
       var query = """
           WITH SAMPLES: avg("2022-07-31T08:12:59.123Z","") AS m1 -> echo(3), max("","2022-07-31T10:12:59.123Z") AS m2 -> echo(0),
                         avg_t(days, "2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m3 -> echo(3),
-                        count_t(minutes, "2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m4 -> echo(0)
+                        count_t("2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m4 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
                     CHOOSE: low precedes high
                     YIELD: %s""".formatted(yield);

@@ -12,7 +12,7 @@ public interface TsdlDuration {
 
   /**
    * <p>
-   * Precondition: {@code value} is in unit {@link #unit()}
+   * Precondition: {@code value} is in unit {@link #unit()}.
    * </p>
    * <p>
    * Determines whether a given {@code value} is in the range/duration given represented by this {@link TsdlDuration} instance.

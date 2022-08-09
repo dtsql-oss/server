@@ -1,7 +1,6 @@
 package org.tsdl.implementation.model.sample.aggregation.temporal;
 
 import java.util.List;
-import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 
 /**
@@ -9,6 +8,4 @@ import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
  */
 public interface TemporalAggregator extends TsdlAggregator {
   List<TimePeriod> periods();
-
-  ParsableTsdlTimeUnit unit();
 }

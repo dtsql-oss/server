@@ -10,7 +10,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link TemporalMaximumAggregator}.
  */
-public class TemporalMaximumAggregatorImpl extends AbstractTemporalAggregator implements TemporalMaximumAggregator {
+public class TemporalMaximumAggregatorImpl extends AbstractTemporalAggregatorWithUnit implements TemporalMaximumAggregator {
 
   public TemporalMaximumAggregatorImpl(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     super(periods, unit, summaryStatistics);

@@ -166,11 +166,15 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   public TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Time periods must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, unit, "Time unit must not be null.");
+    if (type != AggregatorType.TEMPORAL_COUNT) {
+      Conditions.checkNotNull(Condition.ARGUMENT, unit, "Time unit must not be null if type is not '%s'.", AggregatorType.TEMPORAL_COUNT);
+    } else {
+      Conditions.checkNull(Condition.ARGUMENT, unit, "For type '%s', unit must be null", AggregatorType.TEMPORAL_COUNT);
+    }
 
     return switch (type) {
       case TEMPORAL_AVERAGE -> new TemporalAverageAggregatorImpl(periods, unit, summaryStatistics);
-      case TEMPORAL_COUNT -> new TemporalCountAggregatorImpl(periods, unit, summaryStatistics);
+      case TEMPORAL_COUNT -> new TemporalCountAggregatorImpl(periods, summaryStatistics);
       case TEMPORAL_MAXIMUM -> new TemporalMaximumAggregatorImpl(periods, unit, summaryStatistics);
       case TEMPORAL_MINIMUM -> new TemporalMinimumAggregatorImpl(periods, unit, summaryStatistics);
       case TEMPORAL_STANDARD_DEVIATION -> new TemporalStandardDeviationAggregatorImpl(periods, unit, summaryStatistics);

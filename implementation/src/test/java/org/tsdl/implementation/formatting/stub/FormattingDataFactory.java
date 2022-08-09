@@ -116,7 +116,7 @@ public final class FormattingDataFactory {
                 AggregatorType.TEMPORAL_COUNT,
                 List.of(new TimePeriodImpl(Instant.parse("2022-05-24T20:33:45.000Z"), Instant.parse("2022-05-24T20:37:44.234Z")),
                     new TimePeriodImpl(Instant.parse("2022-05-24T20:33:45.000Z"), Instant.parse("2022-05-24T20:33:45.234Z"))),
-                ParsableTsdlTimeUnit.MILLISECONDS,
+                null,
                 COMPONENTS.summaryStatistics()
             ),
             "myTemporalCount",

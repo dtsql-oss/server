@@ -10,7 +10,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link TemporalAverageAggregator}.
  */
-public class TemporalAverageAggregatorImpl extends AbstractTemporalAggregator implements TemporalAverageAggregator {
+public class TemporalAverageAggregatorImpl extends AbstractTemporalAggregatorWithUnit implements TemporalAverageAggregator {
 
   public TemporalAverageAggregatorImpl(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     super(periods, unit, summaryStatistics);

@@ -87,7 +87,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public TsdlDurationBound parseEventDurationBound(String str, DurationBoundType boundType) {
+  public TsdlDurationBound parseDurationBound(String str, DurationBoundType boundType) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     final var inclusiveBounds = Set.of('[', ']');
@@ -126,7 +126,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public ParsableTsdlTimeUnit parseEventDurationUnit(String str) {
+  public ParsableTsdlTimeUnit parseDurationUnit(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
     return parseEnumMember(ParsableTsdlTimeUnit.class, str);
   }

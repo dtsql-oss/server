@@ -53,6 +53,7 @@ import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregatorWithUnit;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAverageAggregator;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalMaximumAggregator;
 import org.tsdl.implementation.model.sample.aggregation.value.AverageAggregator;
@@ -197,15 +198,17 @@ class TsdlQueryParserTest {
     void sampleDeclaration_temporalAggregators(String aggregatorDefinition, TemporalAggregator expected) {
       var queryString = "WITH SAMPLES: %s AS s1 YIELD: data points".formatted(aggregatorDefinition);
 
-      var queryResult = PARSER.parseQuery(queryString);
+      var parsedQuery = PARSER.parseQuery(queryString);
 
-      assertThat(queryResult.samples())
+      assertThat(parsedQuery.samples())
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(TsdlSample.class))
           .extracting(TsdlSample::aggregator, InstanceOfAssertFactories.type(TemporalAggregator.class))
           .satisfies(aggregator -> {
             assertThat(aggregator.periods()).isEqualTo(expected.periods());
-            assertThat(aggregator.unit()).isEqualTo(expected.unit());
+            if (aggregator instanceof TemporalAggregatorWithUnit withUnit && expected instanceof TemporalAggregatorWithUnit expectedWithUnit) {
+              assertThat(withUnit.unit()).isEqualTo(expectedWithUnit.unit());
+            }
             assertThat(aggregator.type()).isEqualTo(expected.type());
           });
     }
@@ -270,6 +273,23 @@ class TsdlQueryParserTest {
                       new TimePeriodImpl(Instant.parse("2022-07-03T12:53:03.123Z"), Instant.parse("2022-07-03T12:54:03.123Z"))
                   ),
                   ParsableTsdlTimeUnit.WEEKS,
+                  TsdlComponentFactory.INSTANCE.summaryStatistics()
+              )
+          ),
+          Arguments.of(
+              """
+                  count_t(  "2022-07-03T12:49:03.123Z/2022-07-03T12:50:03.123Z",
+                            "2022-07-03T12:51:03.123Z/2022-07-03T12:52:03.123Z",
+                            "2022-07-03T12:53:03.123Z/2022-07-03T12:54:03.123Z")
+                  """,
+              ELEMENTS.getAggregator(
+                  AggregatorType.TEMPORAL_COUNT,
+                  List.of(
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:49:03.123Z"), Instant.parse("2022-07-03T12:50:03.123Z")),
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:51:03.123Z"), Instant.parse("2022-07-03T12:52:03.123Z")),
+                      new TimePeriodImpl(Instant.parse("2022-07-03T12:53:03.123Z"), Instant.parse("2022-07-03T12:54:03.123Z"))
+                  ),
+                  null,
                   TsdlComponentFactory.INSTANCE.summaryStatistics()
               )
           )

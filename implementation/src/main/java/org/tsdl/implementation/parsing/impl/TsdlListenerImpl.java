@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.tsdl.grammar.TsdlParser;
 import org.tsdl.grammar.TsdlParserBaseListener;
@@ -235,15 +236,23 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlAggregator parseTemporalAggregator(TsdlParser.TemporalAggregatorDeclarationContext ctx) {
-    var aggregatorType = elementParser.parseAggregatorType(ctx.TEMPORAL_AGGREGATOR_FUNCTION().getText());
+    var aggregatorWithUnit = ctx.TEMPORAL_AGGREGATOR_FUNCTION() != null;
+
+    var aggregatorFunction = aggregatorWithUnit
+        ? ctx.TEMPORAL_AGGREGATOR_FUNCTION().getText()
+        : ctx.UNITLESS_TEMPORAL_AGGREGATOR_FUNCTION().getText();
+    var aggregatorType = elementParser.parseAggregatorType(aggregatorFunction);
+
     var timePeriods = parseIntervalList(ctx.intervalList());
-    var unit = elementParser.parseEventDurationUnit(ctx.TIME_UNIT().getText());
+
+    var unit = aggregatorWithUnit ? elementParser.parseDurationUnit(ctx.TIME_UNIT().getText()) : null;
+    Supplier<SummaryStatistics> statisticsSupplier =
+        () -> summaryStatisticsByPeriods.computeIfAbsent(timePeriods, k -> TsdlComponentFactory.INSTANCE.summaryStatistics());
 
     return switch (aggregatorType) {
-      case TEMPORAL_AVERAGE, TEMPORAL_COUNT, TEMPORAL_MAXIMUM, TEMPORAL_MINIMUM, TEMPORAL_STANDARD_DEVIATION, TEMPORAL_SUM -> {
-        var statistics = summaryStatisticsByPeriods.computeIfAbsent(timePeriods, k -> TsdlComponentFactory.INSTANCE.summaryStatistics());
-        yield elementFactory.getAggregator(aggregatorType, timePeriods, unit, statistics);
-      }
+      case TEMPORAL_AVERAGE, TEMPORAL_MAXIMUM, TEMPORAL_MINIMUM, TEMPORAL_STANDARD_DEVIATION, TEMPORAL_SUM ->
+          elementFactory.getAggregator(aggregatorType, timePeriods, unit, statisticsSupplier.get());
+      case TEMPORAL_COUNT -> elementFactory.getAggregator(aggregatorType, timePeriods, null, statisticsSupplier.get());
       default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", aggregatorType);
     };
   }
@@ -419,8 +428,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var bounds = durationSpecificationWithoutPrefix.trim().split(",");
     Conditions.checkSizeExactly(Condition.STATE, bounds, 2, "There must be exactly two bounds for an event duration, separated by ','.");
 
-    var lowerBound = elementParser.parseEventDurationBound(bounds[0], TsdlElementParser.DurationBoundType.LOWER_BOUND);
-    var upperBound = elementParser.parseEventDurationBound(bounds[1], TsdlElementParser.DurationBoundType.UPPER_BOUND);
+    var lowerBound = elementParser.parseDurationBound(bounds[0], TsdlElementParser.DurationBoundType.LOWER_BOUND);
+    var upperBound = elementParser.parseDurationBound(bounds[1], TsdlElementParser.DurationBoundType.UPPER_BOUND);
 
     if (lowerBound.value() > upperBound.value()) {
       throw new TsdlParseException("The lower bound of an event duration must be less than or equal to its upper bound.");
@@ -430,7 +439,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       throw new TsdlParseException("If the lower and upper bound of an event are equal, both of them have to be inclusive, i.e., use '[' and ']'.");
     }
 
-    var unit = elementParser.parseEventDurationUnit(timeUnit);
+    var unit = elementParser.parseDurationUnit(timeUnit);
 
     return elementFactory.getDuration(lowerBound, upperBound, unit);
   }

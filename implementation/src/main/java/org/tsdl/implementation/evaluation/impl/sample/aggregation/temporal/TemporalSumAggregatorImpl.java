@@ -14,7 +14,7 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString
-public class TemporalSumAggregatorImpl extends AbstractTemporalAggregator implements TemporalSumAggregator {
+public class TemporalSumAggregatorImpl extends AbstractTemporalAggregatorWithUnit implements TemporalSumAggregator {
 
   public TemporalSumAggregatorImpl(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     super(periods, unit, summaryStatistics);

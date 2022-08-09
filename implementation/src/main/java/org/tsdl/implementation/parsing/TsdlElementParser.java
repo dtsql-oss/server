@@ -37,9 +37,9 @@ public interface TsdlElementParser {
 
   TemporalRelationType parseTemporalRelationType(String str);
 
-  TsdlDurationBound parseEventDurationBound(String str, DurationBoundType boundType);
+  TsdlDurationBound parseDurationBound(String str, DurationBoundType boundType);
 
-  ParsableTsdlTimeUnit parseEventDurationUnit(String str);
+  ParsableTsdlTimeUnit parseDurationUnit(String str);
 
   TimePeriod parseTimePeriod(String str);
 

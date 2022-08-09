@@ -5,7 +5,7 @@ import org.tsdl.implementation.parsing.enums.AggregatorType;
 /**
  * An aggregator calculating the minimum of period durations.
  */
-public interface TemporalMinimumAggregator extends TemporalAggregator {
+public interface TemporalMinimumAggregator extends TemporalAggregatorWithUnit {
   @Override
   default AggregatorType type() {
     return AggregatorType.TEMPORAL_MINIMUM;
