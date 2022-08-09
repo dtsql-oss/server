@@ -56,13 +56,6 @@ public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements D
 
   private boolean satisfiesDurationConstraint(TsdlPeriod period, TsdlDuration duration) {
     var unitAdjustedDuration = period.duration(duration.unit().modelEquivalent());
-    var satisfiesLowerBound = duration.lowerBound().inclusive()
-        ? unitAdjustedDuration >= duration.lowerBound().value()
-        : unitAdjustedDuration > duration.lowerBound().value();
-    var satisfiesUpperBound = duration.upperBound().inclusive()
-        ? unitAdjustedDuration <= duration.upperBound().value()
-        : unitAdjustedDuration < duration.upperBound().value();
-
-    return satisfiesLowerBound && satisfiesUpperBound;
+    return duration.isSatisfiedBy(unitAdjustedDuration);
   }
 }

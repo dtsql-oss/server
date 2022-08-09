@@ -20,4 +20,26 @@ public record TsdlDurationImpl(
     Conditions.checkNotNull(Condition.ARGUMENT, lowerBound, "The lower bound of an event must not be null. Use 0 instead.");
     Conditions.checkNotNull(Condition.ARGUMENT, upperBound, "The upper bound of an event must not be null. Use Long.MAX_VALUE instead.");
   }
+
+  @Override
+  public boolean isSatisfiedBy(double unitAdjustedValue) {
+    var satisfiesLowerBound = lowerBound.inclusive()
+        ? unitAdjustedValue >= lowerBound.value()
+        : unitAdjustedValue > lowerBound.value();
+    var satisfiesUpperBound = upperBound().inclusive()
+        ? unitAdjustedValue <= upperBound.value()
+        : unitAdjustedValue < upperBound.value();
+
+    return satisfiesLowerBound && satisfiesUpperBound;
+  }
+
+  @Override
+  public String toString() {
+    return "%s%s, %s%s".formatted(
+        lowerBound.inclusive() ? "[" : "(",
+        lowerBound.value(),
+        upperBound.value(),
+        upperBound.inclusive() ? "]" : ")"
+    );
+  }
 }

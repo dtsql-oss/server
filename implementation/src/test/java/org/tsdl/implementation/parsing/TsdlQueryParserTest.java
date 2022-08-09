@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
@@ -1053,7 +1054,7 @@ class TsdlQueryParserTest {
           AND(gt(s2)) AS mid
 
         CHOOSE:
-          low precedes high
+          low precedes high WITHIN [23,26] minutes
 
         YIELD:
           all periods""";
@@ -1258,8 +1259,12 @@ class TsdlQueryParserTest {
       assertThat(query.choice())
           .asInstanceOf(InstanceOfAssertFactories.optional(PrecedesOperator.class))
           .get()
-          .extracting(PrecedesOperator::cardinality, PrecedesOperator::operand1, PrecedesOperator::operand2)
-          .containsExactly(2, low, high);
+          .extracting(PrecedesOperator::cardinality, PrecedesOperator::operand1, PrecedesOperator::operand2, PrecedesOperator::tolerance)
+          .containsExactly(2, low, high, Optional.of(
+              new TsdlDurationImpl(
+                  TsdlDurationBound.of(23, true),
+                  TsdlDurationBound.of(26, true),
+                  ParsableTsdlTimeUnit.MINUTES)));
     }
 
     @Test
