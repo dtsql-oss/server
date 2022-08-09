@@ -5,6 +5,6 @@
 #    / /     ___/ /  / /_/ /  / /___   #
 #   /_/     /____/  /_____/  /_____/   #
 ########################################
-#          TSDL Query Service          #
-#        Powered by Spring Boot        #
+#          TSDL Query Service          # v${application.version}
+#        Powered by Spring Boot        # v${spring-boot.version}
 ########################################
