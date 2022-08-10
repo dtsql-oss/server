@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
@@ -613,51 +614,31 @@ class TsdlQueryParserTest {
           .containsExactly("average", AggregatorType.AVERAGE, "standardDeviation", AggregatorType.STANDARD_DEVIATION);
     }
 
-    @Test
-    void filterDeclaration_relativeDeviationFilterWithInvalidPercentage_throws() {
+    @ParameterizedTest
+    @CsvSource({
+        "rel,102,between 0 and 100",
+        "abs,-0.25,absolute value"
+    })
+    void filterDeclaration_invalidDeviationFilterRange_throws(String type, Double deviation, String containedMessage) {
       var queryString = """
           APPLY FILTER:
-            AND(around(rel, 23, 102))
-          YIELD: data points""";
+            AND(around(%s, 23, %s))
+          YIELD: data points""".formatted(type, deviation);
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParseException.class)
-          .hasMessageContaining("between 0 and 100");
+          .hasMessageContaining(containedMessage);
     }
 
-    @Test
-    void filterDeclaration_absoluteDeviationFilterWithNegtaiveValue_throws() {
+    @ParameterizedTest
+    @CsvSource({
+        "absolute,25,-0.1",
+        "rel,test,-0.1",
+        "rel,23,invalid"
+    })
+    void filterDeclaration_invalidDeviationArguments_throws(String type, String reference, String deviation) {
       var queryString = """
           APPLY FILTER:
-            AND(around(abs, 23, -0.1))
-          YIELD: data points""";
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString))
-          .isInstanceOf(TsdlParseException.class)
-          .hasMessageContaining("absolute value");
-    }
-
-    @Test
-    void filterDeclaration_invalidType_throws() {
-      var queryString = """
-          APPLY FILTER:
-            AND(around(absolute, 23, -0.1))
-          YIELD: data points""";
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
-    }
-
-    @Test
-    void filterDeclaration_invalidReferenceArgument_throws() {
-      var queryString = """
-          APPLY FILTER:
-            AND(around(rel, test, -0.1))
-          YIELD: data points""";
-      assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
-    }
-
-    @Test
-    void filterDeclaration_invalidDeviationArgument_throws() {
-      var queryString = """
-          APPLY FILTER:
-            AND(around(rel, 23, invalid))
+            AND(around(%s, %s, %s))
           YIELD: data points""";
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
     }

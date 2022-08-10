@@ -60,12 +60,9 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
       try (var reader = new BufferedReader(new FileReader(testFile))) {
         String line;
         while ((line = reader.readLine()) != null) {
-          if (skippedHeaders < testSource.skipHeaders()) {
-            skippedHeaders++;
-            continue;
-          }
-
-          if ("".equals(line.trim())) {
+          var notEnoughSkipped = skippedHeaders < testSource.skipHeaders();
+          if (notEnoughSkipped || "".equals(line.trim())) {
+            skippedHeaders += notEnoughSkipped ? 1 : 0;
             continue;
           }
 

@@ -22,35 +22,35 @@ class CsvSerializingTsdlClientTest {
   private static final CsvSerializingTsdlClient csvClient = new CsvSerializingTsdlClient();
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsDataPoints_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsDataPoints_writesFileCorrectly")
   void query_serviceReturnsDataPoints_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
                                                           QueryResultDto serverResponse) throws IOException {
     executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriod_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriod_writesFileCorrectly")
   void query_serviceReturnsPeriod_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile, QueryResultDto serverResponse)
       throws IOException {
     executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriodSet_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsPeriodSet_writesFileCorrectly")
   void query_serviceReturnsPeriodSet_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
                                                          QueryResultDto serverResponse) throws IOException {
     executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalar_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalar_writesFileCorrectly")
   void query_serviceReturnsScalar_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile, QueryResultDto serverResponse)
       throws IOException {
     executeTest(spec, targetFile, serverResponse);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalarList_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvSerializingTsdClientTestDataFactory#query_serviceReturnsScalarList_writesFileCorrectly")
   void query_serviceReturnsScalarList_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String targetFile,
                                                           QueryResultDto serverResponse) throws IOException {
     executeTest(spec, targetFile, serverResponse);

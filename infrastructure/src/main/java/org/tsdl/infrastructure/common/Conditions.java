@@ -112,7 +112,7 @@ public final class Conditions {
   }
 
   public static void checkIsGreaterThan(Condition conditionType, int i1, int i2) {
-    checkIsGreaterThan(conditionType, i1, Long.valueOf(i2));
+    checkIsGreaterThan(conditionType, i1, (long) i2);
   }
 
   public static void checkIsGreaterThan(Condition conditionType, long i1, long i2, String messageTemplate, Object... messageArguments) {

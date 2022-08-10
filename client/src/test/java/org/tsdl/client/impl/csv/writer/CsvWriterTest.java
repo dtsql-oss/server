@@ -15,35 +15,35 @@ import org.tsdl.infrastructure.dto.QueryResultDto;
 @Slf4j
 class CsvWriterTest {
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvWriterTestDataFactory#query_writeDataPoints_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvWriterTestDataFactory#query_writeDataPoints_writesFileCorrectly")
   void query_writeDataPoints_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String filePath, QueryResultDto serverResponse,
                                                  String expectedContents) throws IOException {
     executeTest(spec, filePath, serverResponse, expectedContents);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvWriterTestDataFactory#query_writePeriod_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvWriterTestDataFactory#query_writePeriod_writesFileCorrectly")
   void query_writePeriod_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String filePath, QueryResultDto serverResponse,
                                              String expectedContents) throws IOException {
     executeTest(spec, filePath, serverResponse, expectedContents);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvWriterTestDataFactory#query_writePeriodSet_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvWriterTestDataFactory#query_writePeriodSet_writesFileCorrectly")
   void query_writePeriodSet_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String filePath, QueryResultDto serverResponse,
                                                 String expectedContents) throws IOException {
     executeTest(spec, filePath, serverResponse, expectedContents);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvWriterTestDataFactory#query_writeScalar_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvWriterTestDataFactory#query_writeScalar_writesFileCorrectly")
   void query_writeScalar_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String filePath, QueryResultDto serverResponse,
                                              String expectedContents) throws IOException {
     executeTest(spec, filePath, serverResponse, expectedContents);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvWriterTestDataFactory#query_writeScalarList_writesFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvWriterTestDataFactory#query_writeScalarList_writesFileCorrectly")
   void query_writeScalarList_writesFileCorrectly(CsvSerializingQueryClientSpecification spec, String filePath, QueryResultDto serverResponse,
                                                  String expectedContents) throws IOException {
     executeTest(spec, filePath, serverResponse, expectedContents);

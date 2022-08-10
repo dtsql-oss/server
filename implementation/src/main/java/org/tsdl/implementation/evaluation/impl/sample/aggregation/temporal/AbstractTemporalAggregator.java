@@ -17,7 +17,7 @@ abstract class AbstractTemporalAggregator implements TemporalAggregator {
   private double sampleValue = Double.NaN;
   private final String descriptor;
 
-  public AbstractTemporalAggregator(List<TimePeriod> periods, SummaryStatistics summaryStatistics) {
+  protected AbstractTemporalAggregator(List<TimePeriod> periods, SummaryStatistics summaryStatistics) {
     this.periods = Conditions.checkNotNull(Condition.ARGUMENT, periods, "Periods must not be null.");
     this.summaryStatistics = Conditions.checkNotNull(Condition.ARGUMENT, summaryStatistics, "Summary statistics calculator must not be null.");
     this.descriptor = "%s over %s periods".formatted(type(), periods.size());

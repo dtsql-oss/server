@@ -3,7 +3,7 @@ package org.tsdl.implementation.evaluation.impl.sample.aggregation.value;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
@@ -18,8 +18,8 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 @Slf4j
 abstract class AbstractValueAggregator implements ValueAggregator {
-  private final Function<DataPoint, Boolean> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
-  private final Function<DataPoint, Boolean> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
+  private final Predicate<DataPoint> lowerBoundChecker = dp -> lowerBound().isEmpty() || !dp.timestamp().isBefore(lowerBound().get());
+  private final Predicate<DataPoint> upperBoundChecker = dp -> upperBound().isEmpty() || !dp.timestamp().isAfter(upperBound().get());
 
   private double sampleValue = Double.NaN;
 
@@ -32,7 +32,7 @@ abstract class AbstractValueAggregator implements ValueAggregator {
   /**
    * Initializes a {@link AbstractValueAggregator} instance.
    */
-  public AbstractValueAggregator(Instant lowerBound, Instant upperBound) {
+  protected AbstractValueAggregator(Instant lowerBound, Instant upperBound) {
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
     this.descriptor = "%s from %s until %s".formatted(
@@ -81,7 +81,7 @@ abstract class AbstractValueAggregator implements ValueAggregator {
 
   private List<DataPoint> getAggregatorInput(List<DataPoint> dataPoints) {
     return dataPoints.stream()
-        .filter(dp -> lowerBoundChecker.apply(dp) && upperBoundChecker.apply(dp))
+        .filter(dp -> lowerBoundChecker.test(dp) && upperBoundChecker.test(dp))
         .toList();
   }
 }

@@ -1,4 +1,4 @@
-package org.tsdl.client.stub;
+package org.tsdl.client.impl.csv.stub;
 
 import java.time.Instant;
 import java.util.List;

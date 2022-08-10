@@ -1,4 +1,4 @@
-package org.tsdl.client.stub;
+package org.tsdl.client.impl.csv.stub;
 
 import java.nio.file.Path;
 import java.util.UUID;

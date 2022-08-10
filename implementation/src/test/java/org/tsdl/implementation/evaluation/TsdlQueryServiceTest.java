@@ -694,8 +694,8 @@ class TsdlQueryServiceTest {
       assertThat(result)
           .asInstanceOf(InstanceOfAssertFactories.type(TsdlPeriodSet.class))
           .satisfies(periodSet -> {
-            assertThat(periodSet.totalPeriods()).isEqualTo(0);
-            assertThat(periodSet.periods()).hasSize(0);
+            assertThat(periodSet.totalPeriods()).isZero();
+            assertThat(periodSet.periods()).isEmpty();
             assertThat(periodSet.isEmpty()).isTrue();
           });
     }

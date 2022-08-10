@@ -37,7 +37,7 @@ class BaseTsdlClientTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsDataPoints_deserializesCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsDataPoints_deserializesCorrectly")
   void query_serviceReturnsDataPoints_deserializesCorrectly(String serviceResponse, QueryResultDto expectedResult) throws Exception {
     enqueueMockResponse(serviceResponse);
 
@@ -48,7 +48,7 @@ class BaseTsdlClientTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsPeriodSet_deserializesCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsPeriodSet_deserializesCorrectly")
   void query_serviceReturnsPeriodsSet_deserializesCorrectly(String serviceResponse, QueryResultDto expectedResult) throws Exception {
     enqueueMockResponse(serviceResponse);
 
@@ -59,7 +59,7 @@ class BaseTsdlClientTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsPeriod_deserializesCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsPeriod_deserializesCorrectly")
   void query_serviceReturnsPeriod_deserializesCorrectly(String serviceResponse, QueryResultDto expectedResult) throws Exception {
     enqueueMockResponse(serviceResponse);
 
@@ -70,7 +70,7 @@ class BaseTsdlClientTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsScalar_deserializesCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsScalar_deserializesCorrectly")
   void query_serviceReturnsScalar_deserializesCorrectly(String serviceResponse, QueryResultDto expectedResult) throws Exception {
     enqueueMockResponse(serviceResponse);
 
@@ -81,7 +81,7 @@ class BaseTsdlClientTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsScalarList_deserializesCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseTsdlClientTestDataFactory#query_serviceReturnsScalarList_deserializesCorrectly")
   void query_serviceReturnsScalarList_deserializesCorrectly(String serviceResponse, QueryResultDto expectedResult) throws Exception {
     enqueueMockResponse(serviceResponse);
 
@@ -118,7 +118,8 @@ class BaseTsdlClientTest {
         .addHeader("Content-Type", "application/json")
     );
 
-    assertThatThrownBy(() -> CLIENT.query(baseUrl, new QueryDto())).isInstanceOf(TsdlClientException.class);
+    final var dto = new QueryDto(); // variable to appease SonarLint's "Refactor code of lambda so that only one exception can be thrown"
+    assertThatThrownBy(() -> CLIENT.query(baseUrl, dto)).isInstanceOf(TsdlClientException.class);
   }
 
   @Test

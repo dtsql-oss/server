@@ -15,31 +15,31 @@ import org.tsdl.infrastructure.model.QueryResult;
 @Slf4j
 class CsvReaderTest {
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readDataPoints_readsFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvReaderTestDataFactory#query_readDataPoints_readsFileCorrectly")
   void query_readDataPoints_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readPeriod_readsFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvReaderTestDataFactory#query_readPeriod_readsFileCorrectly")
   void query_readPeriod_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readPeriodSet_readsFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvReaderTestDataFactory#query_readPeriodSet_readsFileCorrectly")
   void query_readPeriodSet_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readScalar_readsFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvReaderTestDataFactory#query_readScalar_readsFileCorrectly")
   void query_readScalar_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.CsvReaderTestDataFactory#query_readScalarList_readsFileCorrectly")
+  @MethodSource("org.tsdl.client.impl.csv.stub.CsvReaderTestDataFactory#query_readScalarList_readsFileCorrectly")
   void query_readScalarList_readsFileCorrectly(Path tempPath, QueryResult expectedResult, String fileContent) throws IOException {
     executeTest(fileContent, tempPath, expectedResult);
   }

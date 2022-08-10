@@ -14,7 +14,7 @@ abstract class AbstractSummaryAggregator extends AbstractValueAggregator impleme
   /**
    * Initializes a {@link AbstractValueAggregator} instance.
    */
-  public AbstractSummaryAggregator(Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
+  protected AbstractSummaryAggregator(Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
     super(lowerBound, upperBound);
     Conditions.checkNotNull(Condition.ARGUMENT, summaryStatistics, "Summary statistics calculator must not be null.");
     this.summaryStatistics = summaryStatistics;

@@ -16,7 +16,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 abstract class AbstractTemporalAggregatorWithUnit extends AbstractTemporalAggregator implements TemporalAggregatorWithUnit {
   protected final ParsableTsdlTimeUnit unit;
 
-  public AbstractTemporalAggregatorWithUnit(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
+  protected AbstractTemporalAggregatorWithUnit(List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
     super(periods, summaryStatistics);
     this.unit = Conditions.checkNotNull(Condition.ARGUMENT, unit, "Unit must not be null.");
   }

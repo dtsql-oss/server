@@ -69,6 +69,9 @@ import org.tsdl.infrastructure.common.Conditions;
  * Reference implementation of {@link TsdlQueryElementFactory}.
  */
 public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
+  public static final String AGGREGATOR_TYPE_MUST_NOT_BE_NULL = "Aggregator type must not be null.";
+  public static final String OVERLOAD_DOES_NOT_SUPPORT_AGGREGATOR_TYPE = "This overload does not support aggregator type '%s'";
+
   @Override
   public TsdlIdentifier getIdentifier(String name) {
     Conditions.checkNotNull(Condition.ARGUMENT, name, "Identifier name must not be null.");
@@ -153,18 +156,18 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
 
   @Override
   public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, Calculus calculus) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, type, AGGREGATOR_TYPE_MUST_NOT_BE_NULL);
 
     if (type == AggregatorType.INTEGRAL) {
       return new IntegralAggregatorImpl(lowerBound, upperBound, calculus);
     }
 
-    throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+    throw Conditions.exception(Condition.ARGUMENT, OVERLOAD_DOES_NOT_SUPPORT_AGGREGATOR_TYPE, type);
   }
 
   @Override
   public TsdlAggregator getAggregator(AggregatorType type, List<TimePeriod> periods, ParsableTsdlTimeUnit unit, SummaryStatistics summaryStatistics) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, type, AGGREGATOR_TYPE_MUST_NOT_BE_NULL);
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Time periods must not be null.");
     if (type != AggregatorType.TEMPORAL_COUNT) {
       Conditions.checkNotNull(Condition.ARGUMENT, unit, "Time unit must not be null if type is not '%s'.", AggregatorType.TEMPORAL_COUNT);
@@ -179,13 +182,13 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
       case TEMPORAL_MINIMUM -> new TemporalMinimumAggregatorImpl(periods, unit, summaryStatistics);
       case TEMPORAL_STANDARD_DEVIATION -> new TemporalStandardDeviationAggregatorImpl(periods, unit, summaryStatistics);
       case TEMPORAL_SUM -> new TemporalSumAggregatorImpl(periods, unit, summaryStatistics);
-      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+      default -> throw Conditions.exception(Condition.ARGUMENT, OVERLOAD_DOES_NOT_SUPPORT_AGGREGATOR_TYPE, type);
     };
   }
 
   @Override
   public TsdlAggregator getAggregator(AggregatorType type, Instant lowerBound, Instant upperBound, SummaryStatistics summaryStatistics) {
-    Conditions.checkNotNull(Condition.ARGUMENT, type, "Aggregator type must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, type, AGGREGATOR_TYPE_MUST_NOT_BE_NULL);
 
     return switch (type) {
       case AVERAGE -> new AverageAggregatorImpl(lowerBound, upperBound, summaryStatistics);
@@ -194,7 +197,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
       case SUM -> new SumAggregatorImpl(lowerBound, upperBound, summaryStatistics);
       case COUNT -> new CountAggregatorImpl(lowerBound, upperBound, summaryStatistics);
       case STANDARD_DEVIATION -> new StandardDeviationAggregatorImpl(lowerBound, upperBound, summaryStatistics);
-      default -> throw Conditions.exception(Condition.ARGUMENT, "This overload does not support aggregator type '%s'", type);
+      default -> throw Conditions.exception(Condition.ARGUMENT, OVERLOAD_DOES_NOT_SUPPORT_AGGREGATOR_TYPE, type);
     };
   }
 

@@ -11,7 +11,7 @@ public class StringArrayValueConverter extends AbstractValueConverter<String[]> 
   private static final Map<Class<?>, Function<Object, String[]>> CONVERTERS = Map.of(
       String[].class, String[].class::cast,
       ArrayList.class, v -> ((ArrayList<?>) v).stream()
-          .filter(o -> o instanceof String)
+          .filter(String.class::isInstance)
           .map(String.class::cast)
           .toArray(String[]::new)
   );
