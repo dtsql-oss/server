@@ -12,8 +12,9 @@ import org.tsdl.infrastructure.model.QueryResult;
  */
 public class ScalarListWriter extends BaseWriter<MultipleScalarResult, CsvSerializingQueryClientSpecification> {
   @Override
-  protected void writeInternal(MultipleScalarResult result, CsvSerializingQueryClientSpecification specification) throws IOException {
-    try (var csvWriter = createWriter(specification.targetFile())) {
+  protected void writeInternal(MultipleScalarResult result, CsvSerializingQueryClientSpecification specification, String targetFile)
+      throws IOException {
+    try (var csvWriter = createWriter(targetFile)) {
       writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("value");

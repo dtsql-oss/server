@@ -11,11 +11,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
-import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
+import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
@@ -41,20 +44,59 @@ class TsdlElementParserTest {
   }
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validFilterTypeInputs")
-  void parseFilterType_validRepresentations_ok(String representation, ThresholdFilterType member) {
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validThresholdFilterTypeInputs")
+  void parseThresholdFilterType_validRepresentations_ok(String representation, ThresholdFilterType member) {
     assertThat(PARSER.parseThresholdFilterType(representation)).isEqualTo(member);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"lt ", " gt", "g t", "lT ", "", "      ", "0", "1"})
-  void parseFilterType_invalidRepresentations_throws(String representation) {
+  void parseThresholdFilterType_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseThresholdFilterType(representation)).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
-  void parseFilterType_null_throws() {
+  void parseThresholdFilterType_null_throws() {
     assertThatThrownBy(() -> PARSER.parseThresholdFilterType(null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validDeviationFilterTypeInputs")
+  void parseDeviationFilterType_validRepresentations_ok(String representation, String type, DeviationFilterType member) {
+    assertThat(PARSER.parseDeviationFilterType(representation, type)).isEqualTo(member);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "around,relative", "around,absolute", "around,' rel'", "Around,rel", "Around,abs",
+      "' around',abs", "' around',rel", "'',''", "around,''", "'',abs", "'',rel"
+  })
+  void parseDeviationFilterType_invalidRepresentations_throws(String representation, String type) {
+    assertThatThrownBy(() -> PARSER.parseDeviationFilterType(representation, type)).isInstanceOf(NoSuchElementException.class);
+  }
+
+  @Test
+  void parseDeviationFilterType_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseDeviationFilterType(null, null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDeviationFilterType(null, "rel")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDeviationFilterType("around", null)).isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validTemporalFilterTypeInputs")
+  void parseTemporalFilterType_validRepresentations_ok(String representation, TemporalFilterType member) {
+    assertThat(PARSER.parseTemporalFilterType(representation)).isEqualTo(member);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"after ", " before", "After", "Before", "", "  ", "0", "1"})
+  void parseTemporalFilterType_invalidRepresentations_throws(String representation) {
+    assertThatThrownBy(() -> PARSER.parseTemporalFilterType(representation)).isInstanceOf(NoSuchElementException.class);
+  }
+
+  @Test
+  void parseTemporalFilterType_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseTemporalFilterType(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest
@@ -81,7 +123,7 @@ class TsdlElementParserTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "cnt", "      ", "0", "1"})
+  @ValueSource(strings = {"avg ", "average", "maX", "min ", "", "SUM", "cnt", "      ", "0", "1", "int", " integral"})
   void parseAggregatorType_invalidRepresentations_throws(String representation) {
     assertThatThrownBy(() -> PARSER.parseAggregatorType(representation)).isInstanceOf(NoSuchElementException.class);
   }
@@ -110,46 +152,77 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationBoundInputs")
-  void parseEventDurationBound_validRepresentations_ok(String representation, boolean lowerBound, EventDurationBound expected) {
-    assertThat(PARSER.parseEventDurationBound(representation, lowerBound)).isEqualTo(expected);
+  void parseEventDurationBound_validRepresentations_ok(String representation, TsdlElementParser.DurationBoundType boundType,
+                                                       TsdlDurationBound expected) {
+    assertThat(PARSER.parseDurationBound(representation, boundType)).isEqualTo(expected);
   }
 
   @ParameterizedTest
   @CsvSource({
-      "[-5,true",
-      "5.3],false",
-      "-25.3],false",
-      "-253],false",
-      "[235.324,true",
-      "[522,false",
-      "2323],true",
-      "23][,false",
-      "],true",
+      "[-5,LOWER_BOUND",
+      "5.3],UPPER_BOUND",
+      "-25.3],UPPER_BOUND",
+      "-253],UPPER_BOUND",
+      "[235.324,LOWER_BOUND",
+      "[522,UPPER_BOUND",
+      "2323],LOWER_BOUND",
+      "23][,UPPER_BOUND",
+      "],LOWER_BOUND",
   })
-  void parseEventDurationBound_invalidRepresentations_throws(String representation, boolean lowerBound) {
-    assertThatThrownBy(() -> PARSER.parseEventDurationBound(representation, lowerBound)).isInstanceOf(TsdlParseException.class);
+  void parseEventDurationBound_invalidRepresentations_throws(String representation, TsdlElementParser.DurationBoundType boundType) {
+    assertThatThrownBy(() -> PARSER.parseDurationBound(representation, boundType)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
   void parseEventDurationBound_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseEventDurationBound(null, false)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationBound(null, TsdlElementParser.DurationBoundType.UPPER_BOUND)).isInstanceOf(
+        IllegalArgumentException.class);
+  }
+
+
+  @ParameterizedTest
+  @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validTimePeriodInputs")
+  void parseTimePeriod_validRepresentations_ok(String representation, TimePeriod expected) {
+    assertThat(PARSER.parseTimePeriod(representation)).isEqualTo(expected);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z", // missing quotes
+      "\" 2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z\"", // superfluous space
+      "\"2022-07-13T23:04:06.124Z/2022-07-13T23:04:06.123Z\"", // start after end
+      "\"2022-07-13T23:04:06.122Z 2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.122Z-2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.122Z--2022-07-13T23:04:06.123Z\"", // wrong range separator
+      "\"2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z/ \"", // trailing content
+      "\" /2022-07-13T23:04:06.123Z/2022-07-13T23:05:06Z\"", // preceding content
+      "\"fake/2022-07-13T23:04:06.123Z\"", // fake content
+      "\"2022-07-13 23:04:06.123Z/2022-07-13T23:05:06Z\"", // invalid timestamp
+  })
+  void parseTimePeriod_invalidRepresentations_throws(String representation) {
+    assertThatThrownBy(() -> PARSER.parseTimePeriod(representation)).isInstanceOf(TsdlParseException.class);
+  }
+
+  @Test
+  void parseTimePeriod_null_throws() {
+    assertThatThrownBy(() -> PARSER.parseTimePeriod(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validEventDurationUnitInputs")
-  void parseEventDurationUnit_validRepresentations_ok(String representation, EventDurationUnit member) {
-    assertThat(PARSER.parseEventDurationUnit(representation)).isEqualTo(member);
+  void parseEventDurationUnit_validRepresentations_ok(String representation, ParsableTsdlTimeUnit member) {
+    assertThat(PARSER.parseDurationUnit(representation)).isEqualTo(member);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"years", "DAYS", "Minutes", "", "   ", "minutes ", " seconds", "milliseconds", "milli"})
   void parseEventDurationUnit_invalidRepresentations_throws(String representation) {
-    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(representation)).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationUnit(representation)).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
   void parseEventDurationUnit_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseEventDurationUnit(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDurationUnit(null)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest
@@ -195,20 +268,20 @@ class TsdlElementParserTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.parsing.stub.ElementParserDataFactory#validParseDateLiteralInputs")
-  void parseDateLiteral_validLiteral_parsesCorrectly(String str, Instant expected) {
-    assertThat(PARSER.parseDateLiteral(str)).isEqualTo(expected);
+  void parseDateLiteral_validLiteral_parsesCorrectly(String str, Instant expected, boolean literal) {
+    assertThat(PARSER.parseDate(str, literal)).isEqualTo(expected);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\""
+      "", " ", "test", "2022-07-13T23:04:06.123Z", "'2022-07-13T23:04:06.123Z'", "\"2015-13-05T12:35:45Z\"", "\"2015-11-05 12:35:45Z\""
   })
   void parseDateLiteral_invalidLiteral_throws(String str) {
-    assertThatThrownBy(() -> PARSER.parseDateLiteral(str)).isInstanceOf(TsdlParseException.class);
+    assertThatThrownBy(() -> PARSER.parseDate(str, true)).isInstanceOf(TsdlParseException.class);
   }
 
   @Test
   void parseDateLiteral_null_throws() {
-    assertThatThrownBy(() -> PARSER.parseDateLiteral(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> PARSER.parseDate(null, true)).isInstanceOf(IllegalArgumentException.class);
   }
 }

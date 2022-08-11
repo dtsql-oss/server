@@ -10,7 +10,7 @@ import org.tsdl.infrastructure.model.TsdlLogEvent;
 /**
  * Default implementation of {@link SingularScalarResult}.
  */
-public record SingularScalarResultImpl(Double value, List<TsdlLogEvent> logs) implements SingularScalarResult {
+public record SingularScalarResultImpl(double value, List<TsdlLogEvent> logs) implements SingularScalarResult {
   public SingularScalarResultImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Value must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, logs, "Logs must not be null.");

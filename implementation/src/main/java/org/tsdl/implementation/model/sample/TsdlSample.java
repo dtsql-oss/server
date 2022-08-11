@@ -23,7 +23,7 @@ public interface TsdlSample extends TsdlFormattable<TsdlSample> {
    * @return computed sample value
    */
   default double compute(List<DataPoint> dataPoints, List<TsdlLogEvent> logs) {
-    var sample = aggregator().compute(dataPoints);
+    var sample = aggregator().compute(identifier().name(), dataPoints);
 
     if (formatter().isPresent()) {
       echo(logs);

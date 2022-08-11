@@ -6,16 +6,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.tsdl.implementation.evaluation.TsdlEvaluationException;
 import org.tsdl.implementation.evaluation.TsdlSamplesCalculator;
-import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
+import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
+import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.deviation.AroundFilter;
 import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlSampleFilterArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
-import org.tsdl.infrastructure.common.Condition;
-import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlLogEvent;
 
@@ -33,59 +34,66 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
   }
 
   @Override
-  public void setConnectiveArgumentValues(TsdlQuery query, Map<TsdlIdentifier, Double> sampleValues) {
-    if (query.filter().isPresent()) {
-      setThresholdFilterSampleArguments(
-          createThresholdFilterStream(query.filter().get().filters()),
+  public void setConnectiveArgumentValues(SinglePointFilterConnective filter, List<TsdlEvent> events, Map<TsdlIdentifier, Double> sampleValues) {
+    if (filter != null) {
+      setSampleFilterArgumentValues(
+          createSampleFilterArgumentStream(filter.filters()),
           sampleValues
       );
+      validateSinglePointFilters(filter.filters());
     }
 
-    var singlePointEvents = query.events().stream()
+    var singlePointEventFilters = events.stream()
         .filter(event -> event.definition() instanceof SinglePointEventDefinition)
         .map(event -> (SinglePointEventDefinition) event.definition())
         .flatMap(eventDefinition -> eventDefinition.connective().filters().stream())
         .toList();
 
-    setThresholdFilterSampleArguments(
-        createThresholdFilterStream(singlePointEvents),
+    setSampleFilterArgumentValues(
+        createSampleFilterArgumentStream(singlePointEventFilters),
         sampleValues
     );
+    validateSinglePointFilters(singlePointEventFilters);
   }
 
-  private Stream<ThresholdFilter> createThresholdFilterStream(List<SinglePointFilter> filters) {
-    // constructs like lt(sampleIdentifier)
-    var nonNegated = filters.stream()
-        .filter(ThresholdFilter.class::isInstance)
-        .map(ThresholdFilter.class::cast)
-        .filter(filter -> filter.threshold() instanceof TsdlSampleFilterArgument);
-
-    // constructs like NOT(gt(sampleIdentifier))
-    var negated = filters.stream()
-        .filter(NegatedSinglePointFilter.class::isInstance)
-        .map(NegatedSinglePointFilter.class::cast)
-        .filter(filter -> filter.filter() instanceof ThresholdFilter)
-        .map(filter -> (ThresholdFilter) filter.filter())
-        .filter(filter -> filter.threshold() instanceof TsdlSampleFilterArgument);
-
-    return Stream.concat(nonNegated, negated);
-  }
-
-  @SuppressWarnings("ConstantConditions") // method too complex for this inspection due to the "filterArgument" pattern variable, but logic is fine
-  private void setThresholdFilterSampleArguments(Stream<ThresholdFilter> filters, Map<TsdlIdentifier, Double> sampleValues) {
-    filters.forEach(thresholdFilter -> {
-      if (!(thresholdFilter.threshold() instanceof TsdlSampleFilterArgument filterArgument)) {
-        throw Conditions.exception(Condition.ARGUMENT, "Filter argument must reference a sample (non-literal).");
+  private void validateSinglePointFilters(List<SinglePointFilter> filters) {
+    for (var filter : filters) {
+      if (!(filter instanceof AroundFilter aroundFilter)) {
+        continue;
       }
 
-      var argumentIdentifier = filterArgument.sample().identifier();
+      if (aroundFilter.maximumDeviation().value() < 0) {
+        throw new TsdlEvaluationException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
+      }
+    }
+  }
+
+  private Stream<TsdlSampleFilterArgument> createSampleFilterArgumentStream(List<SinglePointFilter> filters) {
+    return filters.stream()
+        .flatMap(filter -> extractFilterArguments(filter).stream())
+        .filter(TsdlSampleFilterArgument.class::isInstance)
+        .map(TsdlSampleFilterArgument.class::cast);
+  }
+
+  private List<TsdlFilterArgument> extractFilterArguments(SinglePointFilter filter) {
+    return switch (filter) {
+      case AroundFilter aroundFilter -> List.of(aroundFilter.referenceValue(), aroundFilter.maximumDeviation());
+      case ThresholdFilter thresholdFilter -> List.of(thresholdFilter.threshold());
+      case NegatedSinglePointFilter negatedSinglePointFilter -> extractFilterArguments(negatedSinglePointFilter.filter());
+      default -> List.of();
+    };
+  }
+
+  private void setSampleFilterArgumentValues(Stream<TsdlSampleFilterArgument> arguments, Map<TsdlIdentifier, Double> sampleValues) {
+    arguments.forEach(argument -> {
+      var argumentIdentifier = argument.sample().identifier();
       if (!sampleValues.containsKey(argumentIdentifier)) {
         throw new TsdlEvaluationException(
             "Sample '%s' referenced by filter has not been computed. Is it declared in the 'SAMPLES' directive?".formatted(argumentIdentifier.name())
         );
       }
 
-      filterArgument.setValue(sampleValues.get(argumentIdentifier));
+      argument.setValue(sampleValues.get(argumentIdentifier));
     });
   }
 }

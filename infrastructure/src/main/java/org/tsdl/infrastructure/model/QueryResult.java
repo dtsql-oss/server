@@ -33,7 +33,7 @@ public interface QueryResult {
     return new TsdlDataPointsImpl(items, List.of(logs));
   }
 
-  static TsdlPeriod of(Integer index, Instant start, Instant end, TsdlLogEvent... logs) {
+  static TsdlPeriod of(int index, Instant start, Instant end, TsdlLogEvent... logs) {
     return new TsdlPeriodImpl(index, start, end, List.of(logs));
   }
 
@@ -41,7 +41,7 @@ public interface QueryResult {
     return new TsdlPeriodSetImpl(totalPeriods, periods, List.of(logs));
   }
 
-  static SingularScalarResult of(Double value, TsdlLogEvent... logs) {
+  static SingularScalarResult of(double value, TsdlLogEvent... logs) {
     return new SingularScalarResultImpl(value, List.of(logs));
   }
 

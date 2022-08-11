@@ -1,14 +1,19 @@
 package org.tsdl.implementation.parsing.stub;
 
 import java.time.Instant;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
-import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
+import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 
@@ -24,10 +29,24 @@ public final class ElementParserDataFactory {
     );
   }
 
-  public static Stream<Arguments> validFilterTypeInputs() {
+  public static Stream<Arguments> validThresholdFilterTypeInputs() {
     return Stream.of(
         Arguments.of("gt", ThresholdFilterType.GT),
         Arguments.of("lt", ThresholdFilterType.LT)
+    );
+  }
+
+  public static Stream<Arguments> validDeviationFilterTypeInputs() {
+    return Stream.of(
+        Arguments.of("around", "rel", DeviationFilterType.AROUND_RELATIVE),
+        Arguments.of("around", "abs", DeviationFilterType.AROUND_ABSOLUTE)
+    );
+  }
+
+  public static Stream<Arguments> validTemporalFilterTypeInputs() {
+    return Stream.of(
+        Arguments.of("before", TemporalFilterType.BEFORE),
+        Arguments.of("after", TemporalFilterType.AFTER)
     );
   }
 
@@ -51,7 +70,9 @@ public final class ElementParserDataFactory {
         Arguments.of("max", AggregatorType.MAXIMUM),
         Arguments.of("min", AggregatorType.MINIMUM),
         Arguments.of("sum", AggregatorType.SUM),
-        Arguments.of("count", AggregatorType.COUNT)
+        Arguments.of("count", AggregatorType.COUNT),
+        Arguments.of("integral", AggregatorType.INTEGRAL),
+        Arguments.of("stddev", AggregatorType.STANDARD_DEVIATION)
     );
   }
 
@@ -64,28 +85,38 @@ public final class ElementParserDataFactory {
 
   public static Stream<Arguments> validEventDurationBoundInputs() {
     return Stream.of(
-        Arguments.of("[5", true, EventDurationBound.of(5, true)),
-        Arguments.of("[ 5", true, EventDurationBound.of(5, true)),
-        Arguments.of("[   0", true, EventDurationBound.of(0, true)),
-        Arguments.of("   2345)   ", false, EventDurationBound.of(2345, false)),
-        Arguments.of("   7   )", false, EventDurationBound.of(7, false)),
-        Arguments.of("   5]   ", false, EventDurationBound.of(5, true)),
-        Arguments.of("   (   035   ", true, EventDurationBound.of(35, false)),
-        Arguments.of("   [\n   35   ", true, EventDurationBound.of(35, true)),
-        Arguments.of("35   \r]\n", false, EventDurationBound.of(35, true)),
-        Arguments.of(" ] ", false, EventDurationBound.of(Long.MAX_VALUE, true)),
-        Arguments.of(")", false, EventDurationBound.of(Long.MAX_VALUE, false))
+        Arguments.of("[5", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("[ 5", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("[   0", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(0, true)),
+        Arguments.of("   2345)   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(2345, false)),
+        Arguments.of("   7   )", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(7, false)),
+        Arguments.of("   5]   ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(5, true)),
+        Arguments.of("   (   035   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(35, false)),
+        Arguments.of("   [\n   35   ", TsdlElementParser.DurationBoundType.LOWER_BOUND, TsdlDurationBound.of(35, true)),
+        Arguments.of("35   \r]\n", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(35, true)),
+        Arguments.of(" ] ", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(Long.MAX_VALUE, true)),
+        Arguments.of(")", TsdlElementParser.DurationBoundType.UPPER_BOUND, TsdlDurationBound.of(Long.MAX_VALUE, false))
+    );
+  }
+
+  public static Stream<Arguments> validTimePeriodInputs() {
+    BiFunction<String, String, Arguments> arguments =
+        (s1, s2) -> Arguments.of("\"%s/%s\"".formatted(s1, s2), new TimePeriodImpl(Instant.parse(s1), Instant.parse(s2)));
+    return Stream.of(
+        arguments.apply("2022-07-13T23:04:06.123Z", "2022-07-13T23:05:06Z"),
+        arguments.apply("2008-07-13T23:04:06Z", "2009-01-01T12:00:00+01:00"),
+        arguments.apply("2009-06-30T18:30:00-02:30", "2010-01-01T12:00:00+00:00")
     );
   }
 
   public static Stream<Arguments> validEventDurationUnitInputs() {
     return Stream.of(
-        Arguments.of("weeks", EventDurationUnit.WEEKS),
-        Arguments.of("days", EventDurationUnit.DAYS),
-        Arguments.of("hours", EventDurationUnit.HOURS),
-        Arguments.of("minutes", EventDurationUnit.MINUTES),
-        Arguments.of("seconds", EventDurationUnit.SECONDS),
-        Arguments.of("millis", EventDurationUnit.MILLISECONDS)
+        Arguments.of("weeks", ParsableTsdlTimeUnit.WEEKS),
+        Arguments.of("days", ParsableTsdlTimeUnit.DAYS),
+        Arguments.of("hours", ParsableTsdlTimeUnit.HOURS),
+        Arguments.of("minutes", ParsableTsdlTimeUnit.MINUTES),
+        Arguments.of("seconds", ParsableTsdlTimeUnit.SECONDS),
+        Arguments.of("millis", ParsableTsdlTimeUnit.MILLISECONDS)
     );
   }
 
@@ -123,15 +154,23 @@ public final class ElementParserDataFactory {
   }
 
   public static Stream<Arguments> validParseDateLiteralInputs() {
-    final Function<String, Arguments> testCase = (str) -> Arguments.of("\"%s\"".formatted(str), Instant.parse(str));
+    final Function<String, Arguments> testCaseLiteral = (str) -> Arguments.of("\"%s\"".formatted(str), Instant.parse(str), true);
+    final Function<String, Arguments> testCaseNonLiteral = (str) -> Arguments.of("%s".formatted(str), Instant.parse(str), false);
     return Stream.of(
-        testCase.apply("2022-07-13T23:04:06.123Z"),
-        testCase.apply("2022-07-13T23:04:06.123456Z"),
-        testCase.apply("2022-07-13T23:04:06.123456789Z"),
-        testCase.apply("2022-07-13T23:04:06.12345689Z"),
-        testCase.apply("2022-07-13T23:04:06Z"),
-        testCase.apply("2009-01-01T12:00:00+01:00"),
-        testCase.apply("2009-06-30T18:30:00-02:30")
+        testCaseLiteral.apply("2022-07-13T23:04:06.123Z"),
+        testCaseLiteral.apply("2022-07-13T23:04:06.123456Z"),
+        testCaseLiteral.apply("2022-07-13T23:04:06.123456789Z"),
+        testCaseLiteral.apply("2022-07-13T23:04:06.12345689Z"),
+        testCaseLiteral.apply("2022-07-13T23:04:06Z"),
+        testCaseLiteral.apply("2009-01-01T12:00:00+01:00"),
+        testCaseLiteral.apply("2009-06-30T18:30:00-02:30"),
+        testCaseNonLiteral.apply("2022-07-13T23:04:06.123Z"),
+        testCaseNonLiteral.apply("2022-07-13T23:04:06.123456Z"),
+        testCaseNonLiteral.apply("2022-07-13T23:04:06.123456789Z"),
+        testCaseNonLiteral.apply("2022-07-13T23:04:06.12345689Z"),
+        testCaseNonLiteral.apply("2022-07-13T23:04:06Z"),
+        testCaseNonLiteral.apply("2009-01-01T12:00:00+01:00"),
+        testCaseNonLiteral.apply("2009-06-30T18:30:00-02:30")
     );
   }
 }

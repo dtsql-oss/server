@@ -19,15 +19,22 @@
     <!-- the purpose of stub classes and methods is evident - no documentation needed -->
     <suppress files="org[\\/]tsdl[\\/]storage[\\/]csv[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]storage[\\/]influxdb[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]formatting[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]client[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]client[\\/]stub" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]formatting[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]csv[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]builder[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
 
     <!-- exception classes tend to have some unused members, which is fine -->
-    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]exception" checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]TsdlEvaluationException" checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]exception"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]evaluation[\\/]TsdlEvaluationException"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]service[\\/]exception" checks="MissingJavadocType|MissingJavadocMethod"/>
 
     <!-- mappers, DTOs und configuration don't need documentation  -->

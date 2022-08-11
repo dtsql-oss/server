@@ -14,7 +14,7 @@ import org.tsdl.infrastructure.model.QueryResultType;
 @Slf4j
 class BaseReaderTest {
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseReaderTestDataFactory#peekType")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseReaderTestDataFactory#peekType")
   void peekType(String fileContent, Path filePath, QueryResultType expectedType) throws IOException {
     try {
       Files.writeString(filePath, fileContent, StandardCharsets.UTF_8);

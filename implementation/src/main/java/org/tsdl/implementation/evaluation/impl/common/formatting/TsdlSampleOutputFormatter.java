@@ -2,11 +2,16 @@ package org.tsdl.implementation.evaluation.impl.common.formatting;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.sample.TsdlSample;
-import org.tsdl.implementation.model.sample.aggregation.TsdlLocalAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregator;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TemporalAggregatorWithUnit;
+import org.tsdl.implementation.model.sample.aggregation.value.ValueAggregator;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -14,6 +19,7 @@ import org.tsdl.infrastructure.common.Conditions;
 /**
  * Concrete output formatter for {@link TsdlSample} instances.
  */
+@Slf4j
 public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample> {
   private static final TsdlElementParser ELEMENT_PARSER = TsdlComponentFactory.INSTANCE.elementParser();
   private final int decimalPlaces;
@@ -32,33 +38,73 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
     Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, decimalArgument, 0L, "Number of decimal places must be greater than or equal to 0.");
 
     this.args = args;
-    decimalPlaces = decimalArgument.intValue();
+    decimalPlaces = (int) decimalArgument;
   }
 
   @Override
   public String format(TsdlSample obj) {
     Conditions.checkNotNull(Condition.ARGUMENT, obj, "Sample to format must not be null.");
 
+    var sampleName = obj.identifier().name();
+    var aggregatorFunction = obj.aggregator().type().representation();
+    var formattedValue = getDecimalFormat().format(obj.aggregator().value());
+
+    var descriptor = switch (obj.aggregator()) {
+      case ValueAggregator v -> getSampleDescriptor(v, aggregatorFunction);
+      case TemporalAggregator t -> getSampleDescriptor(t, aggregatorFunction);
+      default -> throw Conditions.exception(Condition.STATE, "Cannot format sample '%s', unrecognized aggregator type.", sampleName);
+    };
+
+    var suffix = switch (obj.aggregator()) {
+      case ValueAggregator ignored -> "";
+      case TemporalAggregatorWithUnit tu -> tu.unit().representation();
+      case TemporalAggregator ignored -> /* noinspection DuplicateBranchesInSwitch */ ""; // no unit -> no suffix
+      default -> throw Conditions.exception(Condition.STATE, "Cannot format sample '%s', unrecognized aggregator type.", sampleName);
+    };
+
+    var formattedString = "sample '%s' %s := %s%s".formatted(
+        sampleName,
+        descriptor,
+        formattedValue,
+        suffix != null && !"".equals(suffix) ? " " + suffix : ""
+    );
+
+    log.debug(formattedString);
+    return formattedString;
+  }
+
+  private String getSampleDescriptor(ValueAggregator valueAggregator, String aggregatorFunction) {
+    var lowerBound = valueAggregator.lowerBound().orElse(null);
+    var upperBound = valueAggregator.upperBound().orElse(null);
+    var localSampleArguments = String.join(
+        ", ",
+        "\"" + (lowerBound != null ? lowerBound.toString() : "") + "\"",
+        "\"" + (upperBound != null ? upperBound.toString() : "") + "\""
+    );
+
+    return "%s(%s)".formatted(
+        aggregatorFunction,
+        lowerBound == null && upperBound == null ? "" : localSampleArguments
+    );
+  }
+
+  private String getSampleDescriptor(TemporalAggregator temporalAggregator, String aggregatorFunction) {
+    var unit = temporalAggregator instanceof TemporalAggregatorWithUnit t ? t.unit().representation() + ", " : "";
+    var temporalSampleArguments = temporalAggregator.periods().stream()
+        .map(p -> "\"%s/%s\"".formatted(p.start(), p.end()))
+        .collect(Collectors.joining(", "));
+
+    return "%s(%s%s)".formatted(aggregatorFunction, unit, temporalSampleArguments);
+  }
+
+  private NumberFormat getDecimalFormat() {
     var format = "0" + (decimalPlaces > 0 ? String.format(".%s", "0".repeat(decimalPlaces)) : "");
     var decimalFormat = new DecimalFormat(format);
     var symbols = new DecimalFormatSymbols(Locale.US);
     symbols.setDecimalSeparator('.');
     decimalFormat.setDecimalFormatSymbols(symbols);
     decimalFormat.setGroupingUsed(false);
-
-    var sampleName = obj.identifier().name();
-    var aggregatorFunction = obj.aggregator().type().representation();
-    var value = obj.aggregator().value();
-
-    var isLocal = obj.aggregator() instanceof TsdlLocalAggregator;
-    var localAddendum = "";
-    if (isLocal) {
-      var localAggregator = (TsdlLocalAggregator) obj.aggregator();
-      localAddendum = "(from %s until %s) ".formatted(localAggregator.lowerBound(), localAggregator.upperBound());
-    }
-
-    return "%ssample '%s' of '%s' aggregator %s:= %s".formatted(isLocal ? "local " : "", sampleName, aggregatorFunction, localAddendum,
-        decimalFormat.format(value));
+    return decimalFormat;
   }
 
   @Override

@@ -169,16 +169,48 @@ class CsvStorageServiceTest {
   }
 
   @ParameterizedTest
+  @MethodSource("org.tsdl.storage.csv.stub.CsvStorageTestDataFactory#fiveCsvRows")
+  void loadAndTransform_skipFirstRowAndcustomEndOfFileMarker_startsAtSecondAndStopsAtEof(List<List<Object>> persistedData) throws IOException {
+    var serviceConfig = new CsvStorageConfiguration();
+    var lookupConfig = new CsvStorageConfiguration(
+        Map.of(
+            CsvStorageProperty.FILE_PATH, "/some/path",
+            CsvStorageProperty.FIELD_SEPARATOR, ';',
+            CsvStorageProperty.SKIP_HEADERS, 1,
+            CsvStorageProperty.CUSTOM_EOF_MARKERS, new String[] {"#TSDL Query Evaluation Logs", "CustomEOF"}
+        )
+    );
+    var transformationConfig = new CsvStorageConfiguration(
+        Map.of(
+            CsvStorageProperty.VALUE_COLUMN, 1,
+            CsvStorageProperty.TIME_COLUMN, 2,
+            CsvStorageProperty.TIME_FORMAT, "MM/dd/yyyy HH:mm:ss"
+        )
+    );
+
+    testLoadAndTransformSuccess(
+        persistedData,
+        serviceConfig,
+        lookupConfig,
+        transformationConfig,
+        List.of(
+            DataPoint.of(Instant.now(), 2.0),
+            DataPoint.of(Instant.now(), 3.5)
+        ),
+        true);
+  }
+
+  @ParameterizedTest
   @MethodSource("org.tsdl.storage.csv.stub.CsvStorageTestDataFactory#threeCsvRows")
   void loadAndTransform_validInputs_returnsDataPoints(List<List<Object>> persistedData) throws IOException {
     var serviceConfig = new CsvStorageConfiguration();
     var lookupConfig = new CsvStorageConfiguration(Map.of(
         CsvStorageProperty.FILE_PATH, "/some/path",
+        CsvStorageProperty.SKIP_HEADERS, 0,
         CsvStorageProperty.FIELD_SEPARATOR, ','
     ));
     var transformationConfig = new CsvStorageConfiguration(Map.of(
         CsvStorageProperty.VALUE_COLUMN, 1,
-        CsvStorageProperty.SKIP_HEADERS, 0,
         CsvStorageProperty.TIME_COLUMN, 2,
         CsvStorageProperty.TIME_FORMAT, "MM/dd/yyyy HH:mm:ss"
     ));
@@ -225,11 +257,11 @@ class CsvStorageServiceTest {
     var serviceConfig = new CsvStorageConfiguration();
     var lookupConfig = new CsvStorageConfiguration(Map.of(
         CsvStorageProperty.FILE_PATH, "/mnt/path/to/file",
+        CsvStorageProperty.SKIP_HEADERS, 0,
         CsvStorageProperty.FIELD_SEPARATOR, ','
     ));
     var transformationConfig = new CsvStorageConfiguration(Map.of(
         CsvStorageProperty.VALUE_COLUMN, 1,
-        CsvStorageProperty.SKIP_HEADERS, 0,
         CsvStorageProperty.TIME_COLUMN, 2,
         CsvStorageProperty.TIME_FORMAT, "MM/dd/yyyy HH:mm"
     ));
@@ -312,8 +344,8 @@ class CsvStorageServiceTest {
     var service = getCsvStorageServiceSpy(persistedData);
     service.initialize(serviceConfig);
 
-    var tables = service.load(lookupConfig);
-    return service.transform(tables, transformationConfig);
+    var csvRows = service.load(lookupConfig);
+    return service.transform(csvRows, transformationConfig);
   }
 
   private void assertResults(List<DataPoint> actual, List<DataPoint> expected, boolean ignoreTimestamp) {
@@ -347,7 +379,7 @@ class CsvStorageServiceTest {
       var newRow = mock(CsvRow.class);
 
       when(newRow.getFields())
-          .thenAnswer(i -> persistedData.stream().map(Object::toString).toList());
+          .thenAnswer(i -> row.stream().map(Object::toString).toList());
 
       when(newRow.getField(anyInt()))
           .thenAnswer(i -> {

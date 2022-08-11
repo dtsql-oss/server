@@ -17,8 +17,6 @@ public record AfterFilterImpl(Instant argument) implements AfterFilter {
   @Override
   public boolean evaluate(DataPoint dataPoint) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, dataPoint.timestamp(), "Data point timestamp must not be null.");
-
     return dataPoint.timestamp().isAfter(argument);
   }
 }

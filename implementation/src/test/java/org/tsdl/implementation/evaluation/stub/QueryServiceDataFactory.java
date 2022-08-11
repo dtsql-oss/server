@@ -29,6 +29,21 @@ public final class QueryServiceDataFactory {
     );
   }
 
+  public static Stream<Arguments> dataPoints_1() {
+    return Stream.of(
+        Arguments.of(
+            List.of(
+                dp("2022-05-24 20:33:45.000", 25.75),
+                dp("2022-05-25 20:33:45.234", 27.25),
+                dp("2022-05-26 20:36:44.234", 75.52),
+                dp("2022-05-27 20:36:44.234", 100.25),
+                dp("2022-05-28 20:36:44.234", 50.24),
+                dp("2022-05-29 20:36:44.234", 27.44)
+            )
+        )
+    );
+  }
+
   public static Stream<Arguments> globalAggregates() {
     final var input = List.of(
         dp("2022-05-24 20:33:45.000", 25.75),
@@ -43,7 +58,8 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "min()", 25.75),
         Arguments.of(input, "max()", 75.52),
         Arguments.of(input, "count()", 5.0),
-        Arguments.of(input, "sum()", 239.32)
+        Arguments.of(input, "sum()", 239.32),
+        Arguments.of(input, "stddev()", 18.98234927505)
     );
   }
 
@@ -57,7 +73,7 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, "avg() AS s1,  min() AS s2", "s1,s2", new Double[] {47.864, 25.75}),
+        Arguments.of(input, "avg() AS s1,  min() AS s2, stddev() AS s3", "s1,s2,s3", new Double[] {47.864, 25.75, 18.98234927505}),
         Arguments.of(input, "max() AS s1", "s1", new Double[] {75.52}),
         Arguments.of(input, "count() AS s1, sum() AS sample3", "s1, sample3", new Double[] {5.0, 239.32})
     );
@@ -77,7 +93,13 @@ public final class QueryServiceDataFactory {
         Arguments.of(input, "max(\"2022-05-23T20:37:47.234Z\" , \"2022-05-24T20:33:45.234Z\")", 27.25),
         Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"2022-05-24T20:40:44.000Z\")", 53.25),
         Arguments.of(input, "count(\"2022-05-24T20:30:45.000Z\"\r,\n\"2022-05-24T20:37:47.233Z\")", 3.0),
-        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\")", 102.77)
+        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\")", 102.77),
+        Arguments.of(input, "sum(\"\"\n ,  \"2022-05-24T20:36:46.234Z\")", 128.52),
+        Arguments.of(input, "min(\"2022-05-24T20:35:46.234Z\",   \"\")", 53.25),
+        Arguments.of(input, "sum(\"2022-05-24T20:35:46.234Z\",   \"\")", 186.32),
+        Arguments.of(input, "avg(\"\",   \"\")", 47.864),
+        Arguments.of(input, "stddev(\"\", \"2022-05-24T20:37:00.000Z\")", 23.116362170549),
+        Arguments.of(input, "stddev(\"2022-05-24T20:33:45.100Z\", \"2022-05-24T20:38:00.000Z\")", 19.725746852499)
     );
   }
 
@@ -91,15 +113,23 @@ public final class QueryServiceDataFactory {
     );
 
     return Stream.of(
-        Arguments.of(input, """
+        Arguments.of(
+            input, """
                 avg("2022-05-23T20:33:45.000Z", "2022-05-24T20:33:44.000Z") AS s1,
                 max("2022-05-23T20:37:47.234Z" , "2022-05-24T20:33:45.234Z") AS numeroDos,
                 min("2022-05-24T20:35:46.234Z",   "2022-05-24T20:40:44.000Z") AS sampleNumber3,
-                count("2022-05-24T20:30:45.000Z"
+                count(""
                 ,
-                "2022-05-24T20:37:47.233Z") AS fourthOneIsTheCharm""",
-            "s1, numeroDos,   sampleNumber3,fourthOneIsTheCharm", new Double[] {0.0, 27.25, 53.25, 3.0}),
-        Arguments.of(input, "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1", "s1", new Double[] {102.77})
+                "2022-05-24T20:36:46.233Z") AS fourthOneIsTheCharm""",
+            "s1, numeroDos,   sampleNumber3,fourthOneIsTheCharm", new Double[] {0.0, 27.25, 53.25, 2.0}
+        ),
+        Arguments.of(
+            input,
+            "sum(\"2022-05-24T20:33:45.234Z\"\n ,  \"2022-05-24T20:36:46.234Z\") AS s1, "
+                + "stddev(\"2022-05-24T20:33:45.100Z\", \"2022-05-24T20:38:00.000Z\") AS s2",
+            "s1, s2",
+            new Double[] {102.77, 19.725746852499}
+        )
     );
   }
 

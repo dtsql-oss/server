@@ -1,7 +1,7 @@
 package org.tsdl.implementation.evaluation.impl.filter.threshold;
 
+import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.filter.threshold.GreaterThanFilter;
-import org.tsdl.implementation.model.filter.threshold.argument.TsdlFilterArgument;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;

@@ -60,12 +60,14 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
       try (var reader = new BufferedReader(new FileReader(testFile))) {
         String line;
         while ((line = reader.readLine()) != null) {
-          if (skippedHeaders < testSource.skipHeaders()) {
-            skippedHeaders++;
+          var notEnoughSkipped = skippedHeaders < testSource.skipHeaders();
+          if (notEnoughSkipped || "".equals(line.trim())) {
+            skippedHeaders += notEnoughSkipped ? 1 : 0;
             continue;
           }
 
           var split = line.split(";");
+          Conditions.checkSizeExactly(Condition.STATE, split, 2, "Line is not of form 'time;value': '%s'", line);
           var date = split[0].trim();
           var value = split[1].trim();
 

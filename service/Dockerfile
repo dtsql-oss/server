@@ -24,4 +24,4 @@ FROM openjdk:18 as release
 
 COPY --from=build /src/service/target/service-*.jar /service-app.jar
 
-ENTRYPOINT ["java", "-jar", "/service-app.jar"]
+ENTRYPOINT ["java", "--enable-preview", "-jar", "/service-app.jar"]

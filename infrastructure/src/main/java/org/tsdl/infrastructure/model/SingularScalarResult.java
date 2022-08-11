@@ -8,7 +8,7 @@ import org.tsdl.infrastructure.model.impl.SingularScalarResultImpl;
  */
 @JsonDeserialize(as = SingularScalarResultImpl.class)
 public interface SingularScalarResult extends QueryResult {
-  Double value();
+  double value();
 
   @Override
   default QueryResultType type() {

@@ -10,19 +10,23 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.model.common.Identifiable;
-import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.TsdlElementParser;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlUtil;
 
 /**
  * Default implementation of {@link TsdlElementParser}.
@@ -40,6 +44,13 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   public ThresholdFilterType parseThresholdFilterType(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
     return parseEnumMember(ThresholdFilterType.class, str);
+  }
+
+  @Override
+  public DeviationFilterType parseDeviationFilterType(String str, String type) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+    Conditions.checkNotNull(Condition.ARGUMENT, type, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+    return parseEnumMember(DeviationFilterType.class, "%s_%s".formatted(str, type));
   }
 
   @Override
@@ -76,7 +87,7 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public EventDurationBound parseEventDurationBound(String str, boolean lowerBound) {
+  public TsdlDurationBound parseDurationBound(String str, DurationBoundType boundType) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     final var inclusiveBounds = Set.of('[', ']');
@@ -85,21 +96,21 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     final var upperParentheses = Set.of(']', ')');
 
     var trimmedStr = str.trim();
-
-    var parenthesis = lowerBound ? trimmedStr.charAt(0) : trimmedStr.charAt(trimmedStr.length() - 1);
+    var isLowerBound = boundType == DurationBoundType.LOWER_BOUND;
+    var parenthesis = isLowerBound ? trimmedStr.charAt(0) : trimmedStr.charAt(trimmedStr.length() - 1);
     if (!inclusiveBounds.contains(parenthesis) && !exclusiveBounds.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid duration parenthesis. Valid options: '(', '[', ']', ')'".formatted(parenthesis));
-    } else if (lowerBound && !lowerParentheses.contains(parenthesis)) {
+    } else if (isLowerBound && !lowerParentheses.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid parenthesis for duration lower bounds. Valid options: '(', '['".formatted(parenthesis));
-    } else if (!lowerBound && !upperParentheses.contains(parenthesis)) {
+    } else if (!isLowerBound && !upperParentheses.contains(parenthesis)) {
       throw new TsdlParseException("'%s' is not a valid parenthesis for duration upper bounds. Valid options: ')', ']'".formatted(parenthesis));
     }
 
     var inclusive = inclusiveBounds.contains(parenthesis); // otherwise firstChar must be in exclusive list due to assertion above
-    var valueString = lowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
+    var valueString = isLowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
 
     long value;
-    if ("".equals(valueString) && lowerBound) {
+    if ("".equals(valueString) && isLowerBound) {
       value = 0;
     } else if ("".equals(valueString)) {
       value = Long.MAX_VALUE;
@@ -111,17 +122,40 @@ public class TsdlElementParserImpl implements TsdlElementParser {
       throw new TsdlParseException("The value of an event duration bound must be greater than or equal to 0, but was %s".formatted(value));
     }
 
-    return EventDurationBound.of(value, inclusive);
+    return TsdlDurationBound.of(value, inclusive);
   }
 
   @Override
-  public EventDurationUnit parseEventDurationUnit(String str) {
+  public ParsableTsdlTimeUnit parseDurationUnit(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
-    return parseEnumMember(EventDurationUnit.class, str);
+    return parseEnumMember(ParsableTsdlTimeUnit.class, str);
   }
 
   @Override
-  public Double parseNumber(String str) {
+  public TimePeriod parseTimePeriod(String str) {
+    Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
+
+    var stringValue = parseStringLiteral(str);
+    var dateStrings = stringValue.split("/");
+
+    if (dateStrings.length != 2) {
+      throw new TsdlParseException(
+          "Time period must consist of exactly two ISO8601 timestamps separated by a '/' (i.e., \"T1/T2\"), but '%s' does not".formatted(stringValue)
+      );
+    }
+
+    var startDate = parseDate(dateStrings[0], false);
+    var endDate = parseDate(dateStrings[1], false);
+
+    if (startDate.isAfter(endDate)) {
+      throw new TsdlParseException("Start of time period must not be after end.");
+    }
+
+    return new TimePeriodImpl(startDate, endDate);
+  }
+
+  @Override
+  public double parseNumber(String str) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
     var decimalFormat = new DecimalFormat();
@@ -148,11 +182,10 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Long parseInteger(String str) {
+  public long parseInteger(String str) {
     var dbl = parseNumber(str);
-    var isInteger = dbl == Math.floor(dbl); // double is not infinite by implementation of "parseDouble", so no !Double.isInfinite() check required
-    if (isInteger) {
-      return dbl.longValue();
+    if (TsdlUtil.isMathematicalInteger(dbl)) {
+      return (long) dbl;
     }
 
     throw new TsdlParseException("Expected double '%s' to be an integer.".formatted(dbl));
@@ -172,10 +205,10 @@ public class TsdlElementParserImpl implements TsdlElementParser {
   }
 
   @Override
-  public Instant parseDateLiteral(String str) {
+  public Instant parseDate(String str, boolean literal) {
     Conditions.checkNotNull(Condition.ARGUMENT, str, STRING_TO_PARSE_MUST_NOT_BE_NULL);
 
-    var stringValue = parseStringLiteral(str);
+    var stringValue = literal ? parseStringLiteral(str) : str;
     try {
       return Instant.parse(stringValue);
     } catch (DateTimeParseException e) {

@@ -14,11 +14,12 @@ import org.tsdl.service.mapper.converters.CharacterArrayValueConverter;
 import org.tsdl.service.mapper.converters.CharacterValueConverter;
 import org.tsdl.service.mapper.converters.InstantValueConverter;
 import org.tsdl.service.mapper.converters.PropertyValueConverter;
+import org.tsdl.service.mapper.converters.StringArrayValueConverter;
 
 @Mapper
 public abstract class StorageServiceConfigurationMapper {
   private static final List<PropertyValueConverter<?>> AVAILABLE_CONVERTERS = List.of(
-      new CharacterValueConverter(), new CharacterArrayValueConverter(), new InstantValueConverter()
+      new CharacterValueConverter(), new CharacterArrayValueConverter(), new InstantValueConverter(), new StringArrayValueConverter()
   );
 
   public StorageServiceConfiguration mapToConfiguration(Map<String, Object> properties,
@@ -54,8 +55,11 @@ public abstract class StorageServiceConfigurationMapper {
         .filter(c -> c.canConvert(value, targetType))
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(
-            "There is no element converter available supporting a conversion from type '%s' to type '%s'.".formatted(value.getClass().getName(),
-                targetType.getName())));
+            "Invalid value for storage configuration property '%s'. Implicit conversion from type '%s' to type '%s' is invalid.".formatted(
+                property.identifier(),
+                value.getClass().getName(),
+                targetType.getName()))
+        );
 
     return converter.convert(value);
   }

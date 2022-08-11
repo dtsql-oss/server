@@ -1,11 +1,13 @@
 package org.tsdl.implementation.parsing;
 
 import java.time.Instant;
-import org.tsdl.implementation.model.event.EventDurationBound;
-import org.tsdl.implementation.model.event.EventDurationUnit;
+import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
+import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.result.YieldFormat;
+import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.enums.AggregatorType;
 import org.tsdl.implementation.parsing.enums.ConnectiveIdentifier;
+import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalFilterType;
 import org.tsdl.implementation.parsing.enums.TemporalRelationType;
 import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
@@ -14,9 +16,18 @@ import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
  * Provides methods for parsing elements/components of {@link org.tsdl.implementation.model.TsdlQuery}.
  */
 public interface TsdlElementParser {
+  /**
+   * Represents different kinds of duration bounds.
+   */
+  enum DurationBoundType {
+    LOWER_BOUND, UPPER_BOUND
+  }
+
   ConnectiveIdentifier parseConnectiveIdentifier(String str);
 
   ThresholdFilterType parseThresholdFilterType(String str);
+
+  DeviationFilterType parseDeviationFilterType(String str, String type);
 
   TemporalFilterType parseTemporalFilterType(String str);
 
@@ -26,15 +37,17 @@ public interface TsdlElementParser {
 
   TemporalRelationType parseTemporalRelationType(String str);
 
-  EventDurationBound parseEventDurationBound(String str, boolean lowerBound);
+  TsdlDurationBound parseDurationBound(String str, DurationBoundType boundType);
 
-  EventDurationUnit parseEventDurationUnit(String str);
+  ParsableTsdlTimeUnit parseDurationUnit(String str);
 
-  Double parseNumber(String str);
+  TimePeriod parseTimePeriod(String str);
 
-  Long parseInteger(String str);
+  double parseNumber(String str);
+
+  long parseInteger(String str);
 
   String parseStringLiteral(String str);
 
-  Instant parseDateLiteral(String str);
+  Instant parseDate(String str, boolean literal);
 }

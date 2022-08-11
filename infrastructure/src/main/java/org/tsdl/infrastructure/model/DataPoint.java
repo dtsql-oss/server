@@ -11,13 +11,13 @@ import org.tsdl.infrastructure.model.impl.TsdlDataPoint;
 public interface DataPoint {
   Instant timestamp();
 
-  Double value();
+  double value();
 
-  Long asInteger();
+  long asInteger();
 
   String asText();
 
-  static DataPoint of(Instant timestamp, Double value) {
+  static DataPoint of(Instant timestamp, double value) {
     return new TsdlDataPoint(timestamp, value);
   }
 }

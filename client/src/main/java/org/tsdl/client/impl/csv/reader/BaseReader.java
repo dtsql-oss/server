@@ -14,7 +14,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.tsdl.client.api.QueryResultReader;
 import org.tsdl.client.api.QueryResultWriter;
-import org.tsdl.client.util.TsdlClientException;
+import org.tsdl.client.util.TsdlClientIoException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.common.ThrowingConsumer;
@@ -35,7 +35,7 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
 
   protected abstract T readInternal(String filePath) throws Exception;
 
-  protected Double parseNumber(String str) throws ParseException {
+  protected double parseNumber(String str) throws ParseException {
     return TsdlUtil.parseNumber(str);
   }
 
@@ -104,7 +104,7 @@ public abstract class BaseReader<T extends QueryResult> implements QueryResultRe
     try {
       return proc.get();
     } catch (Exception e) {
-      throw new TsdlClientException("An error occurred during a read operation.", e);
+      throw new TsdlClientIoException("An error occurred during a read operation.", e);
     }
   }
 }

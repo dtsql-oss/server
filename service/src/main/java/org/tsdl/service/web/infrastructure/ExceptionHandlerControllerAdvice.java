@@ -134,7 +134,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
    * @return a {@link ValidationErrorsHolder} with the current timestamp, a message indicating a validation error and the errors provided
    *     by {@code errorCollector}
    */
-  private ValidationErrorsHolder buildValidationFailureResponse(Supplier<Collection<? extends ValidationError>> errorCollector, String path) {
+  private ValidationErrorsHolder buildValidationFailureResponse(Supplier<Collection<ValidationError>> errorCollector, String path) {
     var errors = new ValidationErrorsHolder(Instant.now().atZone(ZoneOffset.UTC), path);
     errors.setErrors(errorCollector.get());
 
@@ -179,7 +179,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
       this.validationErrors = new ArrayList<>();
     }
 
-    public void setErrors(Collection<? extends ValidationError> errors) {
+    public void setErrors(Collection<ValidationError> errors) {
       validationErrors.clear();
       validationErrors.addAll(errors);
       message = "There were validation errors: " + getValidationErrorsRepresentation();

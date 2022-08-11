@@ -19,6 +19,9 @@
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
         <okhttp.version>4.10.0</okhttp.version>
+
+        <!-- needed for JaCoCo, see https://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html -->
+        <argLine>--enable-preview</argLine>
     </properties>
 
     <dependencies>
@@ -52,6 +55,7 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -102,9 +106,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
-                <configuration>
-                    <argLine>--enable-preview</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

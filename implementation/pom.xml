@@ -18,6 +18,9 @@
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
+
+        <!-- needed for JaCoCo, see https://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html -->
+        <argLine>--enable-preview</argLine>
     </properties>
 
     <dependencies>
@@ -78,9 +81,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
-                <configuration>
-                    <argLine>--enable-preview</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

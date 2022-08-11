@@ -12,13 +12,18 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
  */
 public class PeriodSetWriter extends BaseWriter<TsdlPeriodSet, CsvSerializingQueryClientSpecification> {
   @Override
-  protected void writeInternal(TsdlPeriodSet result, CsvSerializingQueryClientSpecification specification) throws IOException {
-    try (var csvWriter = createWriter(specification.targetFile())) {
+  protected void writeInternal(TsdlPeriodSet result, CsvSerializingQueryClientSpecification specification, String targetFile) throws IOException {
+    try (var csvWriter = createWriter(targetFile)) {
       writeDiscriminatorComment(csvWriter, result.type());
 
       csvWriter.writeRow("index", "empty", "start", "end");
       for (var periods : result.periods()) {
-        csvWriter.writeRow(periods.index().toString(), Boolean.toString(periods.isEmpty()), periods.start().toString(), periods.end().toString());
+        csvWriter.writeRow(
+            String.valueOf(periods.index()),
+            Boolean.toString(periods.isEmpty()),
+            periods.start().toString(),
+            periods.end().toString()
+        );
       }
 
       writeLogs(csvWriter, result.logs());

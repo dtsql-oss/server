@@ -1,17 +1,12 @@
 lexer grammar TsdlLexer;
 
-WHITESPACE
-  :  ' '
-  |  '\r'
-  |  '\n'
-  |  '\r\n'
-  |  '\t'
-  ;
+WHITESPACE  :  WHITESPACE_CHARACTER+  ;
+fragment WHITESPACE_CHARACTER  :  ' '  |  '\r'  |  '\n'  |  '\r\n'  |  '\t'  ;
 
 SAMPLES_CLAUSE  :  'WITH SAMPLES'  ;
 EVENTS_CLAUSE  :  'USING EVENTS'  ;
 FILTER_CLAUSE  :  'APPLY FILTER'  ;
-CHOOSE_CLAUSE  :  'CHOOSE'  ;
+CHOICE_CLAUSE  :  'CHOOSE'  ;
 
 YIELD  :  'YIELD'  ;
 YIELD_ALL_PERIODS  :  'all periods'  ;
@@ -37,11 +32,22 @@ TEMPORAL_FILTER_TYPE
   |  'after'
   ;
 
-COMMA  :  ','  ;
+DEVIATION_FILTER_TYPE
+  :  'around'
+  ;
+
+AROUND_FILTER_TYPE
+  :  'rel'
+  |  'abs'
+  ;
+
 PARENTHESIS_OPEN  :  '('  ;
 PARENTHESIS_CLOSE  :  ')'  ;
-
 COLON  :  ':'  ;
+fragment COMMA  :  ','  ;
+LIST_SEPARATOR
+  :  WHITESPACE? COMMA WHITESPACE?
+  ;
 
 NUMBER
   :  INT
@@ -69,17 +75,35 @@ TEMPORAL_RELATION
   |  'follows'
   ;
 
-AGGREGATOR_GLOBAL_INPUT  :  '_input'  ;
-AGGREGATOR_FUNCTION
+VALUE_AGGREGATOR_FUNCTION
   :  'avg'
   |  'max'
   |  'min'
   |  'sum'
   |  'count'
+  |  'integral'
+  |  'stddev'
   ;
 
-DURATION_FOR  :  'FOR'  ;
-DURATION_RANGE  :  DURATION_RANGE_OPEN WHITESPACE* INT? WHITESPACE* COMMA WHITESPACE* INT? DURATION_RANGE_CLOSE  ; // INT >= 0 (app validation)
+TEMPORAL_AGGREGATOR_FUNCTION
+  :  'avg_t'
+  |  'max_t'
+  |  'min_t'
+  |  'sum_t'
+  |  'stddev_t'
+  ;
+
+UNITLESS_TEMPORAL_AGGREGATOR_FUNCTION  :  'count_t'  ;
+
+// INT >= 0 (app validation)
+TIME_TOLERANCE  :  TIME_TOLERANCE_WITHIN WHITESPACE DURATION_RANGE_OPEN WHITESPACE? INT? LIST_SEPARATOR INT? DURATION_RANGE_CLOSE  ;
+fragment TIME_TOLERANCE_WITHIN  :  'WITHIN'  ;
+fragment TIME_TOLERANCE_OPEN  :  PARENTHESIS_OPEN  |  '['  ;
+fragment TIME_TOLERANCE_CLOSE  :  PARENTHESIS_CLOSE  | ']'  ;
+
+// INT >= 0 (app validation)
+EVENT_DURATION  :  DURATION_FOR WHITESPACE DURATION_RANGE_OPEN WHITESPACE? INT? LIST_SEPARATOR INT? DURATION_RANGE_CLOSE  ;
+fragment DURATION_FOR  :  'FOR'  ;
 fragment DURATION_RANGE_OPEN  :  PARENTHESIS_OPEN  |  '['  ;
 fragment DURATION_RANGE_CLOSE  :  PARENTHESIS_CLOSE  | ']'  ;
 

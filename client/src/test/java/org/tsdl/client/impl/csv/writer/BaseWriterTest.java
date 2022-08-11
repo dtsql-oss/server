@@ -14,7 +14,7 @@ import org.tsdl.infrastructure.model.QueryResultType;
 @Slf4j
 class BaseWriterTest {
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.stub.BaseWriterTestDataFactory#writeDiscriminatorComment")
+  @MethodSource("org.tsdl.client.impl.csv.stub.BaseWriterTestDataFactory#writeDiscriminatorComment")
   void writeDiscriminatorComment(String expectedContent, Path filePath, QueryResultType type) throws IOException {
     // closing before asserting causes flush which is necessary to assert successfully (otherwise, file would be empty)
     try (var writer = BaseWriter.createWriter(filePath.toString())) {

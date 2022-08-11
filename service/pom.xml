@@ -22,6 +22,9 @@
         <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
         <kotlin.version>1.7.10</kotlin.version>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
+
+        <!-- needed for JaCoCo, see https://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html -->
+        <argLine>--enable-preview</argLine>
     </properties>
 
     <dependencyManagement>
@@ -132,9 +135,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
-                <configuration>
-                    <argLine>--enable-preview</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -201,6 +201,7 @@
                 <includes>
                     <include>application.yml</include>
                     <include>META-INF/additional-spring-configuration-metadata.json</include>
+                    <include>banner.txt</include>
                 </includes>
             </resource>
         </resources>

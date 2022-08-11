@@ -17,8 +17,6 @@ public record BeforeFilterImpl(Instant argument) implements BeforeFilter {
   @Override
   public boolean evaluate(DataPoint dataPoint) {
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, dataPoint.timestamp(), "Data point timestamp must not be null.");
-
     return dataPoint.timestamp().isBefore(argument);
   }
 }

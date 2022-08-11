@@ -22,9 +22,9 @@ public class PeriodReader extends BaseReader<TsdlPeriod> {
           row -> {
             Conditions.checkIsTrue(Condition.STATE, period.get() == null, "'PERIOD' CSV file must not contain more than one period.");
             period.set(QueryResult.of(
-                Integer.valueOf(row.getField(0)),
-                Instant.parse(row.getField(2)),
-                Instant.parse(row.getField(3))
+                    Integer.parseInt(row.getField(0)),
+                    Instant.parse(row.getField(2)),
+                    Instant.parse(row.getField(3))
                 )
             );
           }

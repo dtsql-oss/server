@@ -9,14 +9,14 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link DataPoint}.
  */
-public record TsdlDataPoint(Instant timestamp, Double value) implements DataPoint {
+public record TsdlDataPoint(Instant timestamp, double value) implements DataPoint {
   public TsdlDataPoint {
     Conditions.checkNotNull(Condition.ARGUMENT, timestamp, "Timestamp must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Value must not be null.");
   }
 
-  public Long asInteger() {
-    return Long.valueOf(value.toString());
+  public long asInteger() {
+    return (long) value;
   }
 
   public String asText() {

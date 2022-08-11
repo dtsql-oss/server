@@ -54,6 +54,14 @@ public final class Conditions {
     checkEquals(conditionType, obj1, obj2, "Operands must be equal.");
   }
 
+  public static void checkNull(Condition conditionType, Object value, String messageTemplate, Object... messageArguments) {
+    checkIsTrue(conditionType, value == null, messageTemplate, messageArguments);
+  }
+
+  public static void checkNull(Condition conditionType, Object value) {
+    checkNull(conditionType, value, "Operand must be null.");
+  }
+
   @NonNull
   public static <T> T checkNotNull(Condition conditionType, T value, String messageTemplate, Object... messageArguments) {
     checkIsTrue(conditionType, value != null, messageTemplate, messageArguments);
@@ -83,35 +91,35 @@ public final class Conditions {
     checkIsTrue(conditionType, index >= 0 && collection.size() > index, "Index must be within collection range.");
   }
 
-  public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
-    checkIsGreaterThanOrEqual(conditionType, Long.valueOf(i1), Long.valueOf(i2), messageTemplate, messageArguments);
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, int i1, int i2, String messageTemplate, Object... messageArguments) {
+    checkIsGreaterThanOrEqual(conditionType, i1, (long) i2, messageTemplate, messageArguments);
   }
 
-  public static void checkIsGreaterThanOrEqual(Condition conditionType, Integer i1, Integer i2) {
-    checkIsGreaterThanOrEqual(conditionType, Long.valueOf(i1), Long.valueOf(i2));
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, int i1, int i2) {
+    checkIsGreaterThanOrEqual(conditionType, i1, (long) i2);
   }
 
-  public static void checkIsGreaterThanOrEqual(Condition conditionType, Long i1, Long i2, String messageTemplate, Object... messageArguments) {
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, long i1, long i2, String messageTemplate, Object... messageArguments) {
     checkIsTrue(conditionType, i1 >= i2, messageTemplate, messageArguments);
   }
 
-  public static void checkIsGreaterThanOrEqual(Condition conditionType, Long i1, Long i2) {
+  public static void checkIsGreaterThanOrEqual(Condition conditionType, long i1, long i2) {
     checkIsTrue(conditionType, i1 >= i2, "First integer must be greater than second.");
   }
 
-  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2, String messageTemplate, Object... messageArguments) {
-    checkIsGreaterThan(conditionType, Long.valueOf(i1), Long.valueOf(i2), messageTemplate, messageArguments);
+  public static void checkIsGreaterThan(Condition conditionType, int i1, int i2, String messageTemplate, Object... messageArguments) {
+    checkIsGreaterThan(conditionType, i1, (long) i2, messageTemplate, messageArguments);
   }
 
-  public static void checkIsGreaterThan(Condition conditionType, Integer i1, Integer i2) {
-    checkIsGreaterThan(conditionType, Long.valueOf(i1), Long.valueOf(i2));
+  public static void checkIsGreaterThan(Condition conditionType, int i1, int i2) {
+    checkIsGreaterThan(conditionType, i1, (long) i2);
   }
 
-  public static void checkIsGreaterThan(Condition conditionType, Long i1, Long i2, String messageTemplate, Object... messageArguments) {
+  public static void checkIsGreaterThan(Condition conditionType, long i1, long i2, String messageTemplate, Object... messageArguments) {
     checkIsTrue(conditionType, i1 > i2, messageTemplate, messageArguments);
   }
 
-  public static void checkIsGreaterThan(Condition conditionType, Long i1, Long i2) {
+  public static void checkIsGreaterThan(Condition conditionType, long i1, long i2) {
     checkIsTrue(conditionType, i1 > i2, "First integer must be greater than second.");
   }
 
