@@ -48,27 +48,59 @@ public final class ValueSampleSpecificationImpl implements ValueSampleSpecificat
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.AVERAGE);
   }
 
+  public static ValueSampleSpecification average(String identifier, String lowerBound, String upperBound) {
+    return average(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
+  }
+
   public static ValueSampleSpecification maximum(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.MAXIMUM);
+  }
+
+  public static ValueSampleSpecification maximum(String identifier, String lowerBound, String upperBound) {
+    return maximum(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
   }
 
   public static ValueSampleSpecification minimum(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.MINIMUM);
   }
 
+  public static ValueSampleSpecification minimum(String identifier, String lowerBound, String upperBound) {
+    return minimum(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
+  }
+
   public static ValueSampleSpecification sum(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.SUM);
+  }
+
+  public static ValueSampleSpecification sum(String identifier, String lowerBound, String upperBound) {
+    return sum(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
   }
 
   public static ValueSampleSpecification count(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.COUNT);
   }
 
+  public static ValueSampleSpecification count(String identifier, String lowerBound, String upperBound) {
+    return count(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
+  }
+
   public static ValueSampleSpecification integral(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.INTEGRAL);
   }
 
+  public static ValueSampleSpecification integral(String identifier, String lowerBound, String upperBound) {
+    return integral(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
+  }
+
   public static ValueSampleSpecification standardDeviation(String identifier, Instant lowerBound, Instant upperBound) {
     return new ValueSampleSpecificationImpl(identifier, lowerBound, upperBound, ValueSampleType.STANDARD_DEVIATION);
+  }
+
+  public static ValueSampleSpecification standardDeviation(String identifier, String lowerBound, String upperBound) {
+    return standardDeviation(identifier, instantOrNull(lowerBound), instantOrNull(upperBound));
+  }
+
+  private static Instant instantOrNull(String str) {
+    return str == null ? null : BuilderUtil.requireInstant(str);
   }
 }

@@ -1,4 +1,4 @@
-package org.tsdl.client.impl;
+package org.tsdl.client.impl.builder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,14 +82,14 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
   @Override
   public TsdlQueryBuilder event(EventSpecification eventSpec) {
     var eventDefinition = filterConnectiveString(eventSpec.definition());
-    var durationConstraint = eventSpec.duration().isPresent() ? intervalString(eventSpec.duration().get()) : "";
+    var durationConstraint = eventSpec.duration().isPresent() ? intervalString(eventSpec.duration().get(), "FOR") : "";
     events.add("%s%s AS %s".formatted(eventDefinition, durationConstraint, eventSpec.identifier()));
     return this;
   }
 
   @Override
   public TsdlQueryBuilder choice(ChoiceSpecification choiceSpec) {
-    var durationConstraint = choiceSpec.tolerance().isPresent() ? intervalString(choiceSpec.tolerance().get()) : "";
+    var durationConstraint = choiceSpec.tolerance().isPresent() ? intervalString(choiceSpec.tolerance().get(), "WITHIN") : "";
     var operator = switch (choiceSpec.type()) {
       case PRECEDES -> "precedes";
       case FOLLOWS -> "follows";
@@ -141,7 +141,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
         .append(SECTION_SEPARATOR);
   }
 
-  private static String intervalString(Range range) {
+  private static String intervalString(Range range, String prefix) {
     if (range == null) {
       return "";
     }
@@ -155,7 +155,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     var upper = range.upperBound().isPresent() ? "%s".formatted(range.upperBound().get()) : "";
 
     return range.lowerBound().isPresent() || range.upperBound().isPresent()
-        ? " FOR %s%s,%s%s %s".formatted(parens[0], lower, upper, parens[1], unitString(range.unit()))
+        ? " %s %s%s,%s%s %s".formatted(prefix, parens[0], lower, upper, parens[1], unitString(range.unit()))
         : "";
   }
 

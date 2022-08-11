@@ -2,7 +2,7 @@ package org.tsdl.client.api.builder;
 
 import java.util.Arrays;
 import java.util.List;
-import org.tsdl.client.impl.TsdlQueryBuilderImpl;
+import org.tsdl.client.impl.builder.TsdlQueryBuilderImpl;
 
 /**
  * Facilities constructing a syntactically valid TSDL query.

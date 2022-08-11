@@ -27,7 +27,7 @@
               checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]csv[\\/]stub"
               checks="MissingJavadocType|MissingJavadocMethod"/>
-    <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]csv[\\/]stub"
+    <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]builder[\\/]stub"
               checks="MissingJavadocType|MissingJavadocMethod"/>
 
     <!-- exception classes tend to have some unused members, which is fine -->
