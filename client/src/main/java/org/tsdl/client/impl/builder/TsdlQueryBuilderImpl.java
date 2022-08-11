@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.tsdl.client.api.builder.ChoiceSpecification;
+import org.tsdl.client.api.builder.EchoSpecification;
 import org.tsdl.client.api.builder.EventSpecification;
 import org.tsdl.client.api.builder.FilterConnectiveSpecification;
 import org.tsdl.client.api.builder.FilterSpecification;
@@ -48,8 +49,9 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
       case INTEGRAL -> "integral";
       case STANDARD_DEVIATION -> "stddev";
     };
+    var echo = sampleSpec.echo().isPresent() ? echoString(sampleSpec.echo().get()) : "";
 
-    samples.add("%s(%s) AS %s".formatted(aggregatorFunction, sampleArgument, sampleSpec.identifier()));
+    samples.add("%s(%s) AS %s%s".formatted(aggregatorFunction, sampleArgument, sampleSpec.identifier(), echo));
     return this;
   }
 
@@ -68,8 +70,9 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
       case COUNT -> "count_t";
       case STANDARD_DEVIATION -> "stddev_t";
     };
+    var echo = sampleSpec.echo().isPresent() ? echoString(sampleSpec.echo().get()) : "";
 
-    samples.add("%s(%s) AS %s".formatted(aggregatorFunction, sampleArgument, sampleSpec.identifier()));
+    samples.add("%s(%s) AS %s%s".formatted(aggregatorFunction, sampleArgument, sampleSpec.identifier(), echo));
     return this;
   }
 
@@ -139,6 +142,14 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
         .append(":\n").append(INDENT)
         .append(String.join(",%n%s".formatted(INDENT), sectionContents))
         .append(SECTION_SEPARATOR);
+  }
+
+  private static String echoString(EchoSpecification echo) {
+    if (echo == null) {
+      return null;
+    }
+
+    return " -> echo(%s)".formatted(String.join(", ", echo.arguments()));
   }
 
   private static String intervalString(Range range, String prefix) {

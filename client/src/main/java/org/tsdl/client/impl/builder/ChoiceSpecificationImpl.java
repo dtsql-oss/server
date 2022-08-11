@@ -44,7 +44,15 @@ public final class ChoiceSpecificationImpl implements ChoiceSpecification {
     return new ChoiceSpecificationImpl(operand1, operand2, tolerance, ChoiceOperator.PRECEDES);
   }
 
+  public static ChoiceSpecification precedes(String operand1, String operand2) {
+    return new ChoiceSpecificationImpl(operand1, operand2, null, ChoiceOperator.PRECEDES);
+  }
+
   public static ChoiceSpecification follows(String operand1, String operand2, Range tolerance) {
     return new ChoiceSpecificationImpl(operand1, operand2, tolerance, ChoiceOperator.FOLLOWS);
+  }
+
+  public static ChoiceSpecification follows(String operand1, String operand2) {
+    return new ChoiceSpecificationImpl(operand1, operand2, null, ChoiceOperator.FOLLOWS);
   }
 }

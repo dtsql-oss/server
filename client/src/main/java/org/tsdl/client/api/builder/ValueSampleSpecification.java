@@ -20,5 +20,7 @@ public interface ValueSampleSpecification {
 
   Optional<Instant> upperBound();
 
+  Optional<EchoSpecification> echo();
+
   ValueSampleType type();
 }

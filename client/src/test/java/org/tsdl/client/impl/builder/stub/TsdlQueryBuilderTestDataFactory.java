@@ -3,11 +3,11 @@ package org.tsdl.client.impl.builder.stub;
 import static org.tsdl.client.api.builder.FilterSpecification.not;
 import static org.tsdl.client.api.builder.Range.IntervalType.CLOSED;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN;
-import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_END;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_START;
 import static org.tsdl.client.api.builder.TsdlQueryBuilder.as;
 import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.follows;
 import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.precedes;
+import static org.tsdl.client.impl.builder.EchoSpecificationImpl.echo;
 import static org.tsdl.client.impl.builder.EventSpecificationImpl.event;
 import static org.tsdl.client.impl.builder.FilterConnectiveSpecificationImpl.and;
 import static org.tsdl.client.impl.builder.FilterConnectiveSpecificationImpl.or;
@@ -60,14 +60,17 @@ public final class TsdlQueryBuilderTestDataFactory {
             "avg_t(minutes, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\") AS s1"
         ),
         Arguments.of(
-            sumTemporal("s2", TsdlTimeUnit.HOURS, period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
+            sumTemporal("s2", TsdlTimeUnit.HOURS, echo("3"), period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
                 period("2022-04-06T12:45:03.123+03:00", "2022-04-07T12:45:03.123-08:30")),
-            "sum_t(hours, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") AS s2"
+            "sum_t(hours, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") "
+                + "AS s2 -> echo(3)"
         ),
         Arguments.of(
-            maximumTemporal("s3", TsdlTimeUnit.WEEKS, period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
+            maximumTemporal("s3", TsdlTimeUnit.WEEKS, echo("1", "hey"),
+                period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
                 period("2022-04-06T12:45:03.123+03:00", "2022-04-07T12:45:03.123-08:30")),
-            "max_t(weeks, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") AS s3"
+            "max_t(weeks, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") "
+                + "AS s3 -> echo(1, hey)"
         ),
         Arguments.of(
             minimumTemporal("s4", TsdlTimeUnit.SECONDS, period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
@@ -75,9 +78,11 @@ public final class TsdlQueryBuilderTestDataFactory {
             "min_t(seconds, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") AS s4"
         ),
         Arguments.of(
-            standardDeviationTemporal("s5", TsdlTimeUnit.MILLISECONDS, period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
+            standardDeviationTemporal("s5", TsdlTimeUnit.MILLISECONDS, echo(),
+                period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
                 period("2022-04-06T12:45:03.123+03:00", "2022-04-07T12:45:03.123-08:30")),
-            "stddev_t(millis, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") AS s5"
+            "stddev_t(millis, \"2022-04-03T12:45:03.123Z/2022-04-05T12:45:03.123Z\", \"2022-04-06T09:45:03.123Z/2022-04-07T21:15:03.123Z\") "
+                + "AS s5 -> echo()"
         ),
         Arguments.of(
             countTemporal("s6", period("2022-04-03T12:45:03.123Z", "2022-04-05T12:45:03.123Z"),
@@ -98,8 +103,8 @@ public final class TsdlQueryBuilderTestDataFactory {
             "avg() AS s1"
         ),
         Arguments.of(
-            sum("s1", "2022-04-03T12:45:03.123Z", null),
-            "sum(\"2022-04-03T12:45:03.123Z\", \"\") AS s1"
+            sum("s1", "2022-04-03T12:45:03.123Z", null, echo("3", "4")),
+            "sum(\"2022-04-03T12:45:03.123Z\", \"\") AS s1 -> echo(3, 4)"
         ),
         Arguments.of(
             minimum("s1", null, Instant.parse("2022-04-03T12:45:03.123Z")),
@@ -110,12 +115,12 @@ public final class TsdlQueryBuilderTestDataFactory {
             "max(\"2022-04-03T11:45:03.123Z\", \"2022-04-03T12:45:03.123Z\") AS s1"
         ),
         Arguments.of(
-            standardDeviation("s1", "2022-04-03T11:45:03.123Z", "2022-04-03T12:45:03.123Z"),
-            "stddev(\"2022-04-03T11:45:03.123Z\", \"2022-04-03T12:45:03.123Z\") AS s1"
+            standardDeviation("s1", "2022-04-03T11:45:03.123Z", "2022-04-03T12:45:03.123Z", echo()),
+            "stddev(\"2022-04-03T11:45:03.123Z\", \"2022-04-03T12:45:03.123Z\") AS s1 -> echo()"
         ),
         Arguments.of(
-            count("s1", null, Instant.parse("2022-04-03T12:45:03.123Z")),
-            "count(\"\", \"2022-04-03T12:45:03.123Z\") AS s1"
+            count("s1", null, Instant.parse("2022-04-03T12:45:03.123Z"), echo("3")),
+            "count(\"\", \"2022-04-03T12:45:03.123Z\") AS s1 -> echo(3)"
         ),
         Arguments.of(
             integral("s1", (Instant) null, null),
@@ -182,8 +187,8 @@ public final class TsdlQueryBuilderTestDataFactory {
             "low precedes high WITHIN (23,26] minutes"
         ),
         Arguments.of(
-            follows("low", "high", within(23L, TsdlTimeUnit.DAYS, OPEN_END)),
-            "low follows high WITHIN [,23) days"
+            follows("low", "high"),
+            "low follows high"
         ),
         Arguments.of(
             follows("low", "high", within(26L, CLOSED, TsdlTimeUnit.MILLISECONDS)),

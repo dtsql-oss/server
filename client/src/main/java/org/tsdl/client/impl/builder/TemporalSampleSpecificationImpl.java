@@ -2,6 +2,8 @@ package org.tsdl.client.impl.builder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import org.tsdl.client.api.builder.EchoSpecification;
 import org.tsdl.client.api.builder.QueryPeriod;
 import org.tsdl.client.api.builder.TemporalSampleSpecification;
 import org.tsdl.client.util.TsdlQueryBuildException;
@@ -14,9 +16,11 @@ public final class TemporalSampleSpecificationImpl implements TemporalSampleSpec
   private final String identifier;
   private final TsdlTimeUnit unit;
   private final List<QueryPeriod> periods;
+  private final EchoSpecification echo;
   private final TemporalSampleType type;
 
-  private TemporalSampleSpecificationImpl(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods, TemporalSampleType type) {
+  private TemporalSampleSpecificationImpl(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods, EchoSpecification echo,
+                                          TemporalSampleType type) {
     if (identifier == null || identifier.trim().isEmpty()) {
       throw new TsdlQueryBuildException("Sample identifier must neither be null nor blank.");
     }
@@ -27,6 +31,7 @@ public final class TemporalSampleSpecificationImpl implements TemporalSampleSpec
     this.identifier = identifier;
     this.unit = unit;
     this.periods = periods;
+    this.echo = echo;
     this.type = type;
   }
 
@@ -46,55 +51,115 @@ public final class TemporalSampleSpecificationImpl implements TemporalSampleSpec
   }
 
   @Override
+  public Optional<EchoSpecification> echo() {
+    return Optional.ofNullable(echo);
+  }
+
+  @Override
   public TemporalSampleType type() {
     return type;
   }
 
+  public static TemporalSampleSpecification averageTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, echo, TemporalSampleType.AVERAGE);
+  }
+
   public static TemporalSampleSpecification averageTemporal(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, periods, TemporalSampleType.AVERAGE);
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, null, TemporalSampleType.AVERAGE);
   }
 
   public static TemporalSampleSpecification averageTemporal(String identifier, TsdlTimeUnit unit, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, Arrays.stream(periods).toList(), TemporalSampleType.AVERAGE);
+    return averageTemporal(identifier, unit, Arrays.stream(periods).toList());
+  }
+
+  public static TemporalSampleSpecification averageTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, QueryPeriod... periods) {
+    return averageTemporal(identifier, unit, echo, Arrays.stream(periods).toList());
+  }
+
+
+  public static TemporalSampleSpecification maximumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, echo, TemporalSampleType.MAXIMUM);
   }
 
   public static TemporalSampleSpecification maximumTemporal(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, periods, TemporalSampleType.MAXIMUM);
+    return maximumTemporal(identifier, unit, null, periods);
+  }
+
+  public static TemporalSampleSpecification maximumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, QueryPeriod... periods) {
+    return maximumTemporal(identifier, unit, echo, Arrays.stream(periods).toList());
   }
 
   public static TemporalSampleSpecification maximumTemporal(String identifier, TsdlTimeUnit unit, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, Arrays.stream(periods).toList(), TemporalSampleType.MAXIMUM);
+    return maximumTemporal(identifier, unit, Arrays.stream(periods).toList());
+  }
+
+
+  public static TemporalSampleSpecification minimumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, echo, TemporalSampleType.MINIMUM);
   }
 
   public static TemporalSampleSpecification minimumTemporal(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, periods, TemporalSampleType.MINIMUM);
+    return minimumTemporal(identifier, unit, null, periods);
+  }
+
+  public static TemporalSampleSpecification minimumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, QueryPeriod... periods) {
+    return minimumTemporal(identifier, unit, echo, Arrays.stream(periods).toList());
   }
 
   public static TemporalSampleSpecification minimumTemporal(String identifier, TsdlTimeUnit unit, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, Arrays.stream(periods).toList(), TemporalSampleType.MINIMUM);
+    return minimumTemporal(identifier, unit, null, Arrays.stream(periods).toList());
+  }
+
+
+  public static TemporalSampleSpecification sumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, echo, TemporalSampleType.SUM);
   }
 
   public static TemporalSampleSpecification sumTemporal(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, periods, TemporalSampleType.SUM);
+    return sumTemporal(identifier, unit, null, periods);
+  }
+
+  public static TemporalSampleSpecification sumTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo, QueryPeriod... periods) {
+    return sumTemporal(identifier, unit, echo, Arrays.stream(periods).toList());
   }
 
   public static TemporalSampleSpecification sumTemporal(String identifier, TsdlTimeUnit unit, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, Arrays.stream(periods).toList(), TemporalSampleType.SUM);
+    return sumTemporal(identifier, unit, Arrays.stream(periods).toList());
+  }
+
+
+  public static TemporalSampleSpecification standardDeviationTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo,
+                                                                      List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, unit, periods, echo, TemporalSampleType.STANDARD_DEVIATION);
   }
 
   public static TemporalSampleSpecification standardDeviationTemporal(String identifier, TsdlTimeUnit unit, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, periods, TemporalSampleType.STANDARD_DEVIATION);
+    return standardDeviationTemporal(identifier, unit, null, periods);
+  }
+
+  public static TemporalSampleSpecification standardDeviationTemporal(String identifier, TsdlTimeUnit unit, EchoSpecification echo,
+                                                                      QueryPeriod... periods) {
+    return standardDeviationTemporal(identifier, unit, echo, Arrays.stream(periods).toList());
   }
 
   public static TemporalSampleSpecification standardDeviationTemporal(String identifier, TsdlTimeUnit unit, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, unit, Arrays.stream(periods).toList(), TemporalSampleType.STANDARD_DEVIATION);
+    return standardDeviationTemporal(identifier, unit, null, periods);
+  }
+
+
+  public static TemporalSampleSpecification countTemporal(String identifier, EchoSpecification echo, List<QueryPeriod> periods) {
+    return new TemporalSampleSpecificationImpl(identifier, null, periods, echo, TemporalSampleType.COUNT);
   }
 
   public static TemporalSampleSpecification countTemporal(String identifier, List<QueryPeriod> periods) {
-    return new TemporalSampleSpecificationImpl(identifier, null, periods, TemporalSampleType.COUNT);
+    return countTemporal(identifier, null, periods);
+  }
+
+  public static TemporalSampleSpecification countTemporal(String identifier, EchoSpecification echo, QueryPeriod... periods) {
+    return countTemporal(identifier, echo, Arrays.stream(periods).toList());
   }
 
   public static TemporalSampleSpecification countTemporal(String identifier, QueryPeriod... periods) {
-    return new TemporalSampleSpecificationImpl(identifier, null, Arrays.stream(periods).toList(), TemporalSampleType.COUNT);
+    return countTemporal(identifier, null, Arrays.stream(periods).toList());
   }
 }

@@ -1,6 +1,7 @@
 package org.tsdl.client.api.builder;
 
 import java.util.List;
+import java.util.Optional;
 import org.tsdl.infrastructure.common.TsdlTimeUnit;
 
 /**
@@ -19,6 +20,8 @@ public interface TemporalSampleSpecification {
   TsdlTimeUnit unit();
 
   List<QueryPeriod> periods();
+
+  Optional<EchoSpecification> echo();
 
   TemporalSampleType type();
 }
