@@ -614,19 +614,15 @@ class TsdlQueryParserTest {
           .containsExactly("average", AggregatorType.AVERAGE, "standardDeviation", AggregatorType.STANDARD_DEVIATION);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "rel,102,between 0 and 100",
-        "abs,-0.25,absolute value"
-    })
-    void filterDeclaration_invalidDeviationFilterRange_throws(String type, Double deviation, String containedMessage) {
+    @Test
+    void filterDeclaration_invalidDeviationFilterRange_throws() {
       var queryString = """
           APPLY FILTER:
-            AND(around(%s, 23, %s))
-          YIELD: data points""".formatted(type, deviation);
+            AND(around(abs, 23, -0.25))
+          YIELD: data points""";
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
           .isInstanceOf(TsdlParseException.class)
-          .hasMessageContaining(containedMessage);
+          .hasMessageContaining("absolute value");
     }
 
     @ParameterizedTest

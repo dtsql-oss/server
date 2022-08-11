@@ -14,9 +14,7 @@ import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
-import org.tsdl.implementation.model.filter.deviation.AbsoluteAroundFilter;
 import org.tsdl.implementation.model.filter.deviation.AroundFilter;
-import org.tsdl.implementation.model.filter.deviation.RelativeAroundFilter;
 import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -64,13 +62,8 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
         continue;
       }
 
-      var maximumDeviation = aroundFilter.maximumDeviation().value();
-      if ((aroundFilter instanceof RelativeAroundFilter) && !(maximumDeviation >= 0.0 && maximumDeviation <= 100.0)) {
-        throw new TsdlEvaluationException(
-            "For relative 'around' filters, the maximum deviation must be between 0 and 100 because it is a percentage.");
-      } else if ((aroundFilter instanceof AbsoluteAroundFilter) && maximumDeviation < 0) {
-        throw new TsdlEvaluationException(
-            "For absolute 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
+      if (aroundFilter.maximumDeviation().value() < 0) {
+        throw new TsdlEvaluationException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
       }
     }
   }

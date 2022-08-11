@@ -5,7 +5,7 @@ import java.util.List;
 import org.tsdl.client.api.builder.EchoSpecification;
 
 /**
- * Default implementation of {@link EchoSpecification}
+ * Default implementation of {@link EchoSpecification}.
  */
 public final class EchoSpecificationImpl implements EchoSpecification {
   private final List<String> arguments;

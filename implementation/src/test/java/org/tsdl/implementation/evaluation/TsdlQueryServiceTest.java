@@ -1,7 +1,6 @@
 package org.tsdl.implementation.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
 import java.time.Instant;
@@ -361,23 +360,6 @@ class TsdlQueryServiceTest {
                     QueryResult.of(1, Instant.parse("2022-08-10T11:37:27.627Z"), Instant.parse("2022-08-10T16:22:27.627Z"))
                 );
           });
-    }
-
-    @ParameterizedTest
-    @TsdlTestSources(
-        @TsdlTestSource(value = DATA_ROOT + "series11.csv", skipHeaders = 5)
-    )
-    @TsdlTestVisualization(renderPointShape = false)
-    void queryEvent_aroundRelativeWithSampleWithInvalidPercentageRange_throws(List<DataPoint> dps) {
-      var query = """
-          WITH SAMPLES: avg() AS myAVg, max() AS myMax
-          USING EVENTS: AND(around(rel, myAVg, myMax)) FOR [1,] hours AS tunnel
-          YIELD: all periods
-          """;
-
-      assertThatThrownBy(() -> queryService.query(dps, query))
-          .isInstanceOf(TsdlEvaluationException.class)
-          .hasMessageContaining("between 0 and 100");
     }
   }
 

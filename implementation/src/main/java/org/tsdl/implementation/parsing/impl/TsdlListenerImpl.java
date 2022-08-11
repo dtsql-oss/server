@@ -32,7 +32,6 @@ import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.implementation.model.sample.aggregation.TsdlAggregator;
 import org.tsdl.implementation.model.sample.aggregation.temporal.TimePeriod;
 import org.tsdl.implementation.parsing.TsdlElementParser;
-import org.tsdl.implementation.parsing.enums.DeviationFilterType;
 import org.tsdl.implementation.parsing.exception.DuplicateIdentifierException;
 import org.tsdl.implementation.parsing.exception.InvalidReferenceException;
 import org.tsdl.implementation.parsing.exception.TsdlParseException;
@@ -362,11 +361,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var deviation = parseFilterArgument(ctx.deviationFilterArguments().filterArgument().get(1));
 
     if (deviation instanceof TsdlLiteralFilterArgument deviationArg) {
-      var maximumDeviation = deviationArg.value();
-      if (filterType == DeviationFilterType.AROUND_RELATIVE && !(maximumDeviation >= 0.0 && maximumDeviation <= 100.0)) {
-        throw new TsdlParseException("For relative 'around' filters, the maximum deviation must be between 0 and 100 because it is a percentage.");
-      } else if (filterType == DeviationFilterType.AROUND_ABSOLUTE && maximumDeviation < 0) {
-        throw new TsdlParseException("For absolute 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
+      if (deviationArg.value() < 0) {
+        throw new TsdlParseException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
       }
     }
 
