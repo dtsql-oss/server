@@ -61,7 +61,7 @@ public class TsdlTestProvider implements ArgumentsProvider, AnnotationConsumer<T
         String line;
         while ((line = reader.readLine()) != null) {
           var notEnoughSkipped = skippedHeaders < testSource.skipHeaders();
-          if (notEnoughSkipped || "".equals(line.trim())) {
+          if (notEnoughSkipped || line.trim().isEmpty()) {
             skippedHeaders += notEnoughSkipped ? 1 : 0;
             continue;
           }

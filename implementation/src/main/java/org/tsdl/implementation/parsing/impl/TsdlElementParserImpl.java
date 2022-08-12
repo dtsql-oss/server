@@ -110,9 +110,9 @@ public class TsdlElementParserImpl implements TsdlElementParser {
     var valueString = isLowerBound ? trimmedStr.substring(1) : trimmedStr.substring(0, trimmedStr.length() - 1);
 
     long value;
-    if ("".equals(valueString) && isLowerBound) {
+    if (valueString.isEmpty() && isLowerBound) {
       value = 0;
-    } else if ("".equals(valueString)) {
+    } else if (valueString.isEmpty()) {
       value = Long.MAX_VALUE;
     } else {
       value = parseInteger(valueString.trim());

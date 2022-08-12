@@ -1,4 +1,4 @@
-[![CI (Ubuntu)](https://github.com/tsdl-oss/java/actions/workflows/main.yml/badge.svg)](https://github.com/tsdl-oss/java/actions/workflows/main.yml)
+[![CI (Ubuntu)](https://github.com/tsdl-oss/java/actions/workflows/main.yml/badge.svg)](https://github.com/tsdl-oss/java/actions/workflows/main.yml)  [![Qodana (Ubuntu)](https://github.com/tsdl-oss/server/actions/workflows/qodana.yml/badge.svg)](https://github.com/tsdl-oss/server/actions/workflows/qodana.yml)
 
 ### Initial Setup
 

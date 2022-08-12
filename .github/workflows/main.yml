@@ -18,12 +18,12 @@ env:
   TSDL_SKIP_TEST_VISUALIZATION: true
 
 
-# run CI builds for main and develop branches, as well as pull requests targeting the main or development branch
+# run CI builds on main branch as well as on pull requests
 on:
   push:
     branches:
-      - '**'
-  # allow triggering CI runs manually via GitHub UI
+      - main
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         run: |
           make all-build
 
-  check:
+  checkstyle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -62,7 +62,7 @@ jobs:
 
   test:
     if: ${{ always() }}
-    needs: [ check ]
+    needs: [ checkstyle ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

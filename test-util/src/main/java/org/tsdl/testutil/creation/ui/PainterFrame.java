@@ -55,9 +55,9 @@ public class PainterFrame extends JPanel implements MouseMotionListener {
 
         mid.setText("0");
         mid.setBounds(10, getHeight() / 2 - 10, 100, 20);
-        top.setText(getHeight() / 2 + "");
+        top.setText(String.valueOf(getHeight() / 2));
         top.setBounds(10, 0, 100, 20);
-        bottom.setText(-getHeight() / 2 + "");
+        bottom.setText(String.valueOf(-getHeight() / 2));
         bottom.setBounds(10, getHeight() - 20, 100, 20);
 
         add(mid);

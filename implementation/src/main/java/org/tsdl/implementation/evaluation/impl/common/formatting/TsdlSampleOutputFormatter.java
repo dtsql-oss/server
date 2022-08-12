@@ -66,7 +66,7 @@ public class TsdlSampleOutputFormatter implements TsdlOutputFormatter<TsdlSample
         sampleName,
         descriptor,
         formattedValue,
-        suffix != null && !"".equals(suffix) ? " " + suffix : ""
+        suffix != null && !suffix.isEmpty() ? " " + suffix : ""
     );
 
     log.debug(formattedString);

@@ -162,7 +162,7 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
       // both buttons should close the window
       ActionListener frameCloser = e -> {
         locationOnClose = getLocation();
-        TestVisualizationWindow.this.dispose();
+        this.dispose();
       };
       btnGet.addActionListener(frameCloser);
       btnNo.addActionListener(frameCloser);
@@ -212,5 +212,3 @@ public class JfreeChartTimeSeriesTestVisualizer implements TimeSeriesTestVisuali
     }
   }
 }
-
-
