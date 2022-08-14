@@ -67,3 +67,11 @@ jobs:
 
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2022.2.1
+
+#      - name: Deploy to GitHub Pages
+#        if: github.ref == 'refs/heads/main' # deploy only if on main branch
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ${{ runner.temp }}/qodana/results/report
+#          destination_dir: ./

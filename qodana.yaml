@@ -1,4 +1,4 @@
 version: "1.0"
 profile:
   name: qodana.recommended
-failThreshold: 0 # make CI step when more problems than this threshold are detected
+failThreshold: 10000 # 1 # make CI step when more problems than this threshold are detected
