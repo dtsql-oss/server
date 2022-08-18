@@ -21,7 +21,7 @@ class BaseWriterTest {
       BaseWriter.writeDiscriminatorComment(writer, type);
     } finally {
       var writtenContent = Files.readString(filePath, StandardCharsets.UTF_8);
-      assertThat(writtenContent).isEqualTo(expectedContent.replaceAll("(\\r\\n|\\r|\\n)", System.lineSeparator()));
+      assertThat(writtenContent).isEqualToNormalizingNewlines(expectedContent);
 
       try {
         Files.delete(filePath);

@@ -22,7 +22,7 @@ import org.tsdl.infrastructure.common.TsdlTimeUnit;
  */
 public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
   private static final String INDENT = "  ";
-  private static final String SECTION_SEPARATOR = "\n";
+  private static final String SECTION_SEPARATOR = System.lineSeparator();
 
   private final List<String> samples;
   private String filter;
