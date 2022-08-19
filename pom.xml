@@ -20,7 +20,7 @@
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
         <assertj.version>3.23.1</assertj.version>
         <junit.version>5.8.2</junit.version>
-        <mockito.version>4.6.1</mockito.version>
+        <mockito.version>4.7.0</mockito.version>
         <antlr.version>4.10.1</antlr.version>
         <mojo.version>3.3.0</mojo.version>
         <jfreechart.version>1.5.3</jfreechart.version>
@@ -63,7 +63,7 @@
                 -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.2.7</version>
+                <version>1.3.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>

@@ -27,6 +27,7 @@ on:
 
 jobs:
   qodana:
+    if: ${{ false }} # TODO enable as soon as setup complete
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -68,10 +69,10 @@ jobs:
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2022.2.1
 
-#      - name: Deploy to GitHub Pages
-#        if: github.ref == 'refs/heads/main' # deploy only if on main branch
-#        uses: peaceiris/actions-gh-pages@v3
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          publish_dir: ${{ runner.temp }}/qodana/results/report
-#          destination_dir: ./
+      - name: Deploy to GitHub Pages
+        if: ${{ false }} # TODO does not quite work yet # github.ref == 'refs/heads/main' # deploy only if on main branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ runner.temp }}/qodana/results/report
+          destination_dir: ./
