@@ -20,7 +20,7 @@ public record RelativeAroundFilterImpl(TsdlFilterArgument referenceValue, TsdlFi
     Conditions.checkNotNull(Condition.ARGUMENT, dataPoint, "Data point must not be null.");
 
     var absoluteDifference = Math.abs(dataPoint.value() - referenceValue.value());
-    var percentageDifference = (absoluteDifference / referenceValue.value()) * 100;
+    var percentageDifference = (absoluteDifference / Math.abs(referenceValue.value())) * 100;
     return percentageDifference <= maximumDeviation().value();
   }
 }
