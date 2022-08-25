@@ -45,11 +45,14 @@ durationSpecification
   ;
 
 choiceDeclaration
-  :  CHOICE_CLAUSE COLON WHITESPACE choiceStatement
+  :  CHOICE_CLAUSE COLON WHITESPACE temporalRelation
   ;
 
-choiceStatement
-  :  IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE IDENTIFIER WHITESPACE? timeToleranceSpecification?
+temporalRelation
+  :  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventEvent
+  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventRecursive
+  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveEvent
+  |  PARENTHESIS_OPEN temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveRecursive
   ;
 
 timeToleranceSpecification
