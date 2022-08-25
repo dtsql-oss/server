@@ -2,6 +2,7 @@ package org.tsdl.implementation.math.impl;
 
 // TODO add unit tests
 
+import java.util.ArrayList;
 import java.util.List;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.infrastructure.common.Condition;
@@ -30,8 +31,19 @@ public class CalculusImpl implements Calculus {
   }
 
   @Override
-  public List<Double> derivative(List<DataPoint> dataPoints) {
-    throw new UnsupportedOperationException("Not implemented yet.");
+  public List<DataPoint> derivative(List<DataPoint> dataPoints, TsdlTimeUnit differenceUnit) {
+    var derivative = new ArrayList<DataPoint>(dataPoints.size() - 1);
+
+    for (int i = 0; i < dataPoints.size() - 1; i++) {
+      var current = dataPoints.get(i);
+      var next = dataPoints.get(i + 1);
+      var deltaX = TsdlUtil.getTimespan(current.timestamp(), next.timestamp(), differenceUnit);
+      var x = current.timestamp();
+      var y = (next.value() - current.value()) / deltaX;
+      derivative.add(DataPoint.of(x, y));
+    }
+
+    return derivative;
   }
 
   private double doubleTrapezoidalArea(DataPoint dp1, DataPoint dp2) {

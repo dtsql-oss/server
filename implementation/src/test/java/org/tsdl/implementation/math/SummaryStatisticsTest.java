@@ -13,7 +13,6 @@ import org.tsdl.implementation.math.impl.SummaryStatisticsImpl;
 
 class SummaryStatisticsTest {
 
-
   @ParameterizedTest
   @MethodSource("inputData")
   void summaryStatistics_testCalculations(List<Double> data, SummaryCalculationResults results, Double tolerance, Double toleranceVariance) {
