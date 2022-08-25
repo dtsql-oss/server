@@ -34,7 +34,8 @@ public final class CalculusDataFactory {
                 DataPoint.of(Instant.parse("2022-08-25T11:00:00.000Z"), 0.1333333333),
                 DataPoint.of(Instant.parse("2022-08-25T11:15:00.000Z"), 0.8000000000),
                 DataPoint.of(Instant.parse("2022-08-25T11:30:00.000Z"), -0.2666666667)
-            )
+            ),
+            0.0000000001
         )
     );
   }

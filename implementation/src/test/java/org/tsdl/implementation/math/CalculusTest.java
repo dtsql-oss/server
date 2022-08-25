@@ -15,9 +15,9 @@ class CalculusTest {
 
   @ParameterizedTest
   @MethodSource("org.tsdl.implementation.math.stub.CalculusDataFactory#derivativeInputs")
-  void derivative(List<DataPoint> input, TsdlTimeUnit unit, List<DataPoint> expectedDerivative) {
+  void derivative(List<DataPoint> input, TsdlTimeUnit unit, List<DataPoint> expectedDerivative, double precision) {
     // tes data has 9 exact decimal places, therefore precision 1E-10
-    final Comparator<Double> doubleComparator = (d1, d2) -> Math.abs(d1 - d2) <= 0.0000000001 ? 0 : 1;
+    final Comparator<Double> doubleComparator = (d1, d2) -> Math.abs(d1 - d2) <= precision ? 0 : 1;
     var derivative = CALCULUS.derivative(input, unit);
     assertThat(derivative)
         .usingRecursiveComparison()

@@ -1,5 +1,7 @@
 package org.tsdl.implementation.math.model;
 
+import org.tsdl.implementation.math.impl.model.LinearModelImpl;
+
 /**
  * <p>
  * Represents a linear function of the form:
@@ -16,4 +18,8 @@ public interface LinearModel {
   double slope();
 
   double ordinateIntercept();
+
+  static LinearModel of(double slope, double ordinateIntercept) {
+    return new LinearModelImpl(slope, ordinateIntercept);
+  }
 }
