@@ -26,31 +26,31 @@ public class ContinuousRegressionImpl implements ContinuousRegression {
       y.add(dataPoint.value());
     }
 
-    var xSummary = TsdlComponentFactory.INSTANCE.summaryStatistics();
-    var ySummary = TsdlComponentFactory.INSTANCE.summaryStatistics();
-    xSummary.ingest(() -> x);
-    ySummary.ingest(() -> y);
+    var summaryX = TsdlComponentFactory.INSTANCE.summaryStatistics();
+    var summaryY = TsdlComponentFactory.INSTANCE.summaryStatistics();
+    summaryX.ingest(() -> x);
+    summaryY.ingest(() -> y);
 
-    var xTimesYSummary = TsdlComponentFactory.INSTANCE.summaryStatistics();
-    var xTimesY = new ArrayList<Double>();
-    for (int i = 0; i < x.size(); i++) {
-      xTimesY.add(x.get(i) * y.get(i));
+    var summaryXtimesY = TsdlComponentFactory.INSTANCE.summaryStatistics();
+    var multiplyXy = new ArrayList<Double>();
+    for (var i = 0; i < x.size(); i++) {
+      multiplyXy.add(x.get(i) * y.get(i));
     }
-    xTimesYSummary.ingest(() -> xTimesY);
+    summaryXtimesY.ingest(() -> multiplyXy);
 
-    var xSquaredSummary = TsdlComponentFactory.INSTANCE.summaryStatistics();
-    xSquaredSummary.ingest(() -> x.stream().map(v -> v * v).toList());
+    var summaryXsquared = TsdlComponentFactory.INSTANCE.summaryStatistics();
+    summaryXsquared.ingest(() -> x.stream().map(v -> v * v).toList());
 
     var count = dataPoints.size();
-    var sumX = xSummary.sum();
-    var sumY = ySummary.sum();
-    var avgX = xSummary.average();
-    var avgY = ySummary.average();
-    var sumXTimesY = xTimesY.stream().mapToDouble(v -> v).sum();
-    var sumXSquared = x.stream().mapToDouble(v -> v * v).sum();
+    var sumX = summaryX.sum();
+    var sumY = summaryY.sum();
+    var avgX = summaryX.average();
+    var avgY = summaryY.average();
+    var sumXtimesY = multiplyXy.stream().mapToDouble(v -> v).sum();
+    var sumXsquared = x.stream().mapToDouble(v -> v * v).sum();
 
     var inverseCount = 1.0 / count;
-    var beta1 = (sumXTimesY - (inverseCount * sumX * sumY)) / (sumXSquared - (inverseCount * sumX * sumX));
+    var beta1 = (sumXtimesY - (inverseCount * sumX * sumY)) / (sumXsquared - (inverseCount * sumX * sumX));
     var beta0 = avgY - avgX * beta1;
 
     return LinearModel.of(beta1, beta0);

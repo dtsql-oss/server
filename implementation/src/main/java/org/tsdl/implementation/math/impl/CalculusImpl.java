@@ -34,7 +34,7 @@ public class CalculusImpl implements Calculus {
   public List<DataPoint> derivative(List<DataPoint> dataPoints, TsdlTimeUnit differenceUnit) {
     var derivative = new ArrayList<DataPoint>(dataPoints.size() - 1);
 
-    for (int i = 0; i < dataPoints.size() - 1; i++) {
+    for (var i = 0; i < dataPoints.size() - 1; i++) {
       var current = dataPoints.get(i);
       var next = dataPoints.get(i + 1);
       var deltaX = TsdlUtil.getTimespan(current.timestamp(), next.timestamp(), differenceUnit);

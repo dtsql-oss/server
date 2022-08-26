@@ -135,18 +135,16 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterChoiceDeclaration(TsdlParser.ChoiceDeclarationContext ctx) {
-    var choiceStatement = ctx.choiceStatement();
-
+  public void enterEventEvent(TsdlParser.EventEventContext ctx) {
     var chosenEvents = new ArrayList<TsdlEvent>();
-    for (var identifierDeclaration : choiceStatement.IDENTIFIER()) {
+    for (var identifierDeclaration : ctx.IDENTIFIER()) {
       var identifier = requireIdentifier(identifierDeclaration, IdentifierType.EVENT);
       var referencedEvent = declaredEvents.get(identifier);
       chosenEvents.add(referencedEvent);
     }
 
-    var relationType = elementParser.parseTemporalRelationType(choiceStatement.TEMPORAL_RELATION().getText());
-    var duration = parseDuration(choiceStatement.timeToleranceSpecification());
+    var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
+    var duration = parseDuration(ctx.timeToleranceSpecification());
     var operator = elementFactory.getChoice(relationType, chosenEvents, duration);
 
     queryBuilder.choiceValue(operator);
