@@ -23,6 +23,8 @@
               checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]formatting[\\/]stub"
               checks="MissingJavadocType|MissingJavadocMethod"/>
+    <suppress files="org[\\/]tsdl[\\/]implementation[\\/]math[\\/]stub"
+              checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]implementation[\\/]parsing[\\/]stub"
               checks="MissingJavadocType|MissingJavadocMethod"/>
     <suppress files="org[\\/]tsdl[\\/]client[\\/]impl[\\/]csv[\\/]stub"

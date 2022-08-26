@@ -57,8 +57,7 @@ class CsvWriterTest {
       writer.write(serverResponse.getResult(), spec, filePath);
 
       var writtenFile = Files.readString(file);
-      var normalizedExpected = expectedContent.replaceAll("(\\r\\n|\\r|\\n)", System.lineSeparator());
-      assertThat(writtenFile).isEqualTo(normalizedExpected);
+      assertThat(writtenFile).isEqualToNormalizingNewlines(expectedContent);
     } finally {
       try {
         Files.delete(file);

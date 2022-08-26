@@ -304,9 +304,7 @@ class CsvStorageServiceTest {
       service.store(data, persistConfig);
 
       var writtenFile = Files.readString(tempFilePath);
-      var normalizedExpected = expectedFileContents.replaceAll("(\\r\\n|\\r|\\n)", System.lineSeparator());
-      assertThat(writtenFile)
-          .isEqualTo(normalizedExpected);
+      assertThat(writtenFile).isEqualToNormalizingNewlines(expectedFileContents);
     } finally {
       if (delete) {
         try {

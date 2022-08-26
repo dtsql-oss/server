@@ -1,6 +1,7 @@
 package org.tsdl.implementation.math;
 
 import java.util.List;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
@@ -9,5 +10,5 @@ import org.tsdl.infrastructure.model.DataPoint;
 public interface Calculus {
   double definiteIntegral(List<DataPoint> dataPoints);
 
-  List<Double> derivative(List<DataPoint> dataPoints);
+  List<DataPoint> derivative(List<DataPoint> dataPoints, TsdlTimeUnit differenceUnit);
 }
