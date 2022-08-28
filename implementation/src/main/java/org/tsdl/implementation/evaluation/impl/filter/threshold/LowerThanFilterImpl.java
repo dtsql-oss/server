@@ -1,6 +1,6 @@
 package org.tsdl.implementation.evaluation.impl.filter.threshold;
 
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.filter.threshold.LowerThanFilter;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -9,7 +9,7 @@ import org.tsdl.infrastructure.model.DataPoint;
 /**
  * Default implementation of {@link LowerThanFilter}.
  */
-public record LowerThanFilterImpl(TsdlFilterArgument threshold) implements LowerThanFilter {
+public record LowerThanFilterImpl(TsdlScalarArgument threshold) implements LowerThanFilter {
   public LowerThanFilterImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, threshold, "Threshold of 'lower than' filter must not be null.");
   }

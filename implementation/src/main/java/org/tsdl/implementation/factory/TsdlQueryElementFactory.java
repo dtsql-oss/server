@@ -14,7 +14,7 @@ import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -33,9 +33,9 @@ import org.tsdl.implementation.parsing.enums.ThresholdFilterType;
 public interface TsdlQueryElementFactory {
   TsdlIdentifier getIdentifier(String name);
 
-  SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument);
+  SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlScalarArgument argument);
 
-  SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlFilterArgument reference, TsdlFilterArgument maximumDeviation);
+  SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlScalarArgument reference, TsdlScalarArgument maximumDeviation);
 
   SinglePointFilter getTemporalFilter(TemporalFilterType type, Instant argument);
 
@@ -43,9 +43,9 @@ public interface TsdlQueryElementFactory {
 
   SinglePointFilterConnective getConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters);
 
-  TsdlFilterArgument getFilterArgument(double value);
+  TsdlScalarArgument getFilterArgument(double value);
 
-  TsdlFilterArgument getFilterArgument(TsdlSample sample);
+  TsdlScalarArgument getFilterArgument(TsdlSample sample);
 
   TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
 

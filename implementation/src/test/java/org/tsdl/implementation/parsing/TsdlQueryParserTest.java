@@ -40,7 +40,7 @@ import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleScalarArgument;
 import org.tsdl.implementation.model.filter.deviation.AbsoluteAroundFilter;
 import org.tsdl.implementation.model.filter.deviation.RelativeAroundFilter;
 import org.tsdl.implementation.model.filter.temporal.AfterFilter;
@@ -582,7 +582,7 @@ class TsdlQueryParserTest {
           .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(GreaterThanFilter.class))
-          .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+          .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
           .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
           .isEqualTo("average");
     }
@@ -606,10 +606,10 @@ class TsdlQueryParserTest {
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
           .extracting(
-              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
-              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
-              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
-              absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
+              absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
+              absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
+              absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
+              absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
           )
           .containsExactly("average", AggregatorType.AVERAGE, "standardDeviation", AggregatorType.STANDARD_DEVIATION);
     }
@@ -682,7 +682,7 @@ class TsdlQueryParserTest {
             assertThat(event.definition())
                 .asInstanceOf(InstanceOfAssertFactories.type(SinglePointEventDefinition.class))
                 .extracting(def -> def.connective().filters().get(0), InstanceOfAssertFactories.type(ThresholdFilter.class))
-                .extracting(ThresholdFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+                .extracting(ThresholdFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
                 .extracting(sample -> sample.sample().identifier().name())
                 .isEqualTo("s3");
           });
@@ -1080,7 +1080,7 @@ class TsdlQueryParserTest {
           .satisfies(filterArguments -> {
             assertThat(filterArguments.get(0))
                 .asInstanceOf(InstanceOfAssertFactories.type(GreaterThanFilter.class))
-                .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+                .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
                 .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
                 .isEqualTo("s2");
 
@@ -1103,10 +1103,10 @@ class TsdlQueryParserTest {
             assertThat(filterArguments.get(5))
                 .asInstanceOf(InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
                 .extracting(
-                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
-                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
-                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
-                    absoluteAroundFilter -> ((TsdlSampleFilterArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
+                    absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.referenceValue()).sample().identifier().name(),
+                    absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.referenceValue()).sample().aggregator().type(),
+                    absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.maximumDeviation()).sample().identifier().name(),
+                    absoluteAroundFilter -> ((TsdlSampleScalarArgument) absoluteAroundFilter.maximumDeviation()).sample().aggregator().type()
                 )
                 .containsExactly("s1", AggregatorType.AVERAGE, "s7", AggregatorType.STANDARD_DEVIATION);
           });
@@ -1237,7 +1237,7 @@ class TsdlQueryParserTest {
                       .extracting(def -> def.connective().filters(), InstanceOfAssertFactories.list(SinglePointFilter.class))
                       .hasSize(1)
                       .element(0, InstanceOfAssertFactories.type(GreaterThanFilter.class))
-                      .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleFilterArgument.class))
+                      .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
                       .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
                       .isEqualTo("s2");
 

@@ -1,8 +1,8 @@
 package org.tsdl.implementation.model.filter.argument;
 
 /**
- * An argument to a TSDL filter.
+ * An argument representing a scalar value.
  */
-public interface TsdlFilterArgument {
+public interface TsdlScalarArgument {
   double value();
 }

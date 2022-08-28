@@ -12,8 +12,8 @@ import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
 import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralScalarArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleScalarArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.filter.deviation.AbsoluteAroundFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.deviation.RelativeAroundFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
@@ -48,7 +48,7 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -79,7 +79,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument) {
+  public SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlScalarArgument argument) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of threshold filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of threshold filter must not be null.");
     return switch (type) {
@@ -89,7 +89,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlFilterArgument reference, TsdlFilterArgument maximumDeviation) {
+  public SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlScalarArgument reference, TsdlScalarArgument maximumDeviation) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of deviation filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, reference, "Reference value of deviation filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, maximumDeviation, "Maximum deviation of deviation filter must not be null.");
@@ -126,15 +126,15 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlFilterArgument getFilterArgument(double value) {
+  public TsdlScalarArgument getFilterArgument(double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
-    return new TsdlLiteralFilterArgumentImpl(value);
+    return new TsdlLiteralScalarArgumentImpl(value);
   }
 
   @Override
-  public TsdlFilterArgument getFilterArgument(TsdlSample sample) {
+  public TsdlScalarArgument getFilterArgument(TsdlSample sample) {
     Conditions.checkNotNull(Condition.ARGUMENT, sample, "Filter argument sample must not be null.");
-    return new TsdlSampleFilterArgumentImpl(sample);
+    return new TsdlSampleScalarArgumentImpl(sample);
   }
 
   @Override

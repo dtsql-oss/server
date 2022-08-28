@@ -2,27 +2,27 @@ package org.tsdl.implementation.evaluation.impl.filter.argument;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleScalarArgument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
 /**
- * Default implementation of {@link TsdlSampleFilterArgument}.
+ * Default implementation of {@link TsdlSampleScalarArgument}.
  */
 @EqualsAndHashCode
 @ToString
-public class TsdlSampleFilterArgumentImpl implements TsdlSampleFilterArgument {
+public class TsdlSampleScalarArgumentImpl implements TsdlSampleScalarArgument {
   private final TsdlSample sample;
   private double value;
 
-  public TsdlSampleFilterArgumentImpl(TsdlSample sample, double value) {
+  public TsdlSampleScalarArgumentImpl(TsdlSample sample, double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, sample, "Sample of sample filter argument must not be null.");
     this.sample = sample;
     this.value = value;
   }
 
-  public TsdlSampleFilterArgumentImpl(TsdlSample sample) {
+  public TsdlSampleScalarArgumentImpl(TsdlSample sample) {
     this(sample, Double.NaN);
   }
 
