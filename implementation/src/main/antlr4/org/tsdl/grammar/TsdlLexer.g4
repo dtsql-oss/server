@@ -41,6 +41,11 @@ AROUND_FILTER_TYPE
   |  'abs'
   ;
 
+EVENT_CONSTANT  :  'const'  ;
+EVENT_INCREASE  :  'increase'  ;
+EVENT_DECREASE  :  'decrease'  ;
+
+HYPHEN  :  '-'  ;
 PARENTHESIS_OPEN  :  '('  ;
 PARENTHESIS_CLOSE  :  ')'  ;
 COLON  :  ':'  ;

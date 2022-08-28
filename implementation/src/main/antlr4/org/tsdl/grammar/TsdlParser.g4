@@ -37,7 +37,62 @@ events
   ;
 
 eventDeclaration
-  :  filterConnective WHITESPACE? (durationSpecification WHITESPACE?)? identifierDeclaration
+  :  eventConnective WHITESPACE? (durationSpecification WHITESPACE?)? identifierDeclaration
+  ;
+
+eventConnective
+  :  CONNECTIVE_IDENTIFIER PARENTHESIS_OPEN WHITESPACE? eventFunctionList WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+eventFunctionList
+  :  eventFunctions LIST_SEPARATOR eventFunctionDeclaration     // either two or more parameters
+  |  eventFunctionDeclaration                                        // or exactly one
+  ;
+
+eventFunctions
+  :  eventFunctionDeclaration (LIST_SEPARATOR eventFunctionDeclaration)* // one parameter plus [0..n] additional parameters
+  ;
+
+eventFunctionDeclaration
+  :  singlePointFilterDeclaration
+  |  complexEventDeclaration
+  ;
+
+complexEventDeclaration
+  :  complexEvent
+  |  negatedComplexEvent
+  ;
+
+complexEvent
+  :  constantEvent
+  |  increaseEvent
+  |  decreaseEvent
+  ;
+
+negatedComplexEvent
+  :  CONNECTIVE_NOT PARENTHESIS_OPEN WHITESPACE? complexEvent WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number
+constantEvent
+  :  EVENT_CONSTANT PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
+// additionally: first scalar <= second scalar
+increaseEvent
+  :  EVENT_INCREASE PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
+// additionally: first scalar <= second scalar
+decreaseEvent
+  :  EVENT_DECREASE PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+monotonicUpperBound
+  :  scalarArgument
+  |  HYPHEN
   ;
 
 durationSpecification
@@ -189,10 +244,10 @@ temporalFilter
   ;
 
 thresholdFilter
-  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? filterArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? scalarArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
-filterArgument
+scalarArgument
   :  NUMBER
   |  IDENTIFIER
   ;
@@ -203,5 +258,5 @@ deviationFilter
 
 // NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
 deviationFilterArguments
-  :  AROUND_FILTER_TYPE LIST_SEPARATOR filterArgument LIST_SEPARATOR filterArgument
+  :  AROUND_FILTER_TYPE LIST_SEPARATOR scalarArgument LIST_SEPARATOR scalarArgument
   ;

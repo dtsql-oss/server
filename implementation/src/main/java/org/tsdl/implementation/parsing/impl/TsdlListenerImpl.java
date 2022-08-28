@@ -24,8 +24,8 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
-import org.tsdl.implementation.model.filter.argument.TsdlLiteralFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlLiteralScalarArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -345,7 +345,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private SinglePointFilter parseThresholdFilter(TsdlParser.ThresholdFilterContext ctx) {
     var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
-    var filterArgument = parseFilterArgument(ctx.filterArgument());
+    var filterArgument = parseScalarArgument(ctx.scalarArgument());
 
     return elementFactory.getThresholdFilter(filterType, filterArgument);
   }
@@ -355,10 +355,10 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         ctx.DEVIATION_FILTER_TYPE().getText(),
         ctx.deviationFilterArguments().AROUND_FILTER_TYPE().getText()
     );
-    var reference = parseFilterArgument(ctx.deviationFilterArguments().filterArgument().get(0));
-    var deviation = parseFilterArgument(ctx.deviationFilterArguments().filterArgument().get(1));
+    var reference = parseScalarArgument(ctx.deviationFilterArguments().scalarArgument(0));
+    var deviation = parseScalarArgument(ctx.deviationFilterArguments().scalarArgument(1));
 
-    if (deviation instanceof TsdlLiteralFilterArgument deviationArg) {
+    if (deviation instanceof TsdlLiteralScalarArgument deviationArg) {
       if (deviationArg.value() < 0) {
         throw new TsdlParseException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
       }
@@ -367,7 +367,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getDeviationFilter(filterType, reference, deviation);
   }
 
-  TsdlFilterArgument parseFilterArgument(TsdlParser.FilterArgumentContext ctx) {
+  TsdlScalarArgument parseScalarArgument(TsdlParser.ScalarArgumentContext ctx) {
     if (ctx.IDENTIFIER() != null) {
       var identifier = requireIdentifier(ctx.IDENTIFIER(), IdentifierType.SAMPLE);
       var referencedSample = declaredSamples.get(identifier);
