@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.tsdl.client.api.builder.ChoiceSpecification;
+import org.tsdl.client.api.builder.ComplexEventFunctionSpecification;
 import org.tsdl.client.api.builder.EchoSpecification;
+import org.tsdl.client.api.builder.EventConnectiveSpecification;
+import org.tsdl.client.api.builder.EventFunctionSpecification;
 import org.tsdl.client.api.builder.EventSpecification;
 import org.tsdl.client.api.builder.FilterConnectiveSpecification;
 import org.tsdl.client.api.builder.FilterSpecification;
@@ -84,7 +87,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
 
   @Override
   public TsdlQueryBuilder event(EventSpecification eventSpec) {
-    var eventDefinition = filterConnectiveString(eventSpec.definition());
+    var eventDefinition = eventConnectiveString(eventSpec.definition());
     var durationConstraint = eventSpec.duration().isPresent() ? intervalString(eventSpec.duration().get(), "FOR") : "";
     events.add("%s%s AS %s".formatted(eventDefinition, durationConstraint, eventSpec.identifier()));
     return this;
@@ -170,6 +173,16 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
         : "";
   }
 
+  private static String eventConnectiveString(EventConnectiveSpecification eventConnective) {
+    var events = eventConnective.events().stream().map(TsdlQueryBuilderImpl::eventString).collect(Collectors.joining(", "));
+    var connective = switch (eventConnective.type()) {
+      case AND -> "AND";
+      case OR -> "OR";
+    };
+
+    return "%s(%s)".formatted(connective, events);
+  }
+
   private static String filterConnectiveString(FilterConnectiveSpecification filterConnective) {
     var filters = filterConnective.filters().stream().map(TsdlQueryBuilderImpl::filterString).collect(Collectors.joining(", "));
     var connective = switch (filterConnective.type()) {
@@ -180,6 +193,16 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     return "%s(%s)".formatted(connective, filters);
   }
 
+  private static String eventString(EventFunctionSpecification event) {
+    var filterString = switch (event) {
+      case FilterSpecification filter -> filterString(filter);
+      case ComplexEventFunctionSpecification.ConstantEventSpecification constant -> constantEventString(constant);
+      case ComplexEventFunctionSpecification.MonotonicEventSpecification monotonic -> monotonicEventString(monotonic);
+      default -> throw new TsdlQueryBuildException("Unknown filter specification '%s' known".formatted(event.getClass().getSimpleName()));
+    };
+    return event.isNegated() && !(event instanceof FilterSpecification) ? "NOT(%s)".formatted(filterString) : filterString;
+  }
+
   private static String filterString(FilterSpecification filter) {
     var filterString = switch (filter) {
       case FilterSpecification.ThresholdFilterSpecification threshold -> thresholdFilterString(threshold);
@@ -188,6 +211,18 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
       default -> throw new TsdlQueryBuildException("Unknown filter specification '%s' known".formatted(filter.getClass().getSimpleName()));
     };
     return filter.isNegated() ? "NOT(%s)".formatted(filterString) : filterString;
+  }
+
+  private static String monotonicEventString(ComplexEventFunctionSpecification.MonotonicEventSpecification monotonic) {
+    var eventFunction = switch (monotonic.type()) {
+      case INCREASE -> "increase";
+      case DECREASE -> "decrease";
+    };
+    return "%s(%s, %s, %s)".formatted(eventFunction, monotonic.minimumChange(), monotonic.maximumChange(), monotonic.tolerance());
+  }
+
+  private static String constantEventString(ComplexEventFunctionSpecification.ConstantEventSpecification constant) {
+    return "const(%s, %s)".formatted(constant.maximumSlope(), constant.maximumRelativeDeviation());
   }
 
   private static String thresholdFilterString(FilterSpecification.ThresholdFilterSpecification filter) {
