@@ -3,6 +3,7 @@ package org.tsdl.client.impl.builder.stub;
 import static org.tsdl.client.api.builder.EventFunctionSpecification.not;
 import static org.tsdl.client.api.builder.Range.IntervalType.CLOSED;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN;
+import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_END;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_START;
 import static org.tsdl.client.api.builder.TsdlQueryBuilder.as;
 import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.follows;
@@ -11,6 +12,7 @@ import static org.tsdl.client.impl.builder.ConstantEventSpecificationImpl.consta
 import static org.tsdl.client.impl.builder.DecreaseEventSpecificationImpl.decrease;
 import static org.tsdl.client.impl.builder.DeviationFilterSpecificationImpl.aroundAbsolute;
 import static org.tsdl.client.impl.builder.EchoSpecificationImpl.echo;
+import static org.tsdl.client.impl.builder.EventChoiceOperandImpl.eventOperand;
 import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.and;
 import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.or;
 import static org.tsdl.client.impl.builder.EventSpecificationImpl.event;
@@ -224,16 +226,28 @@ public final class TsdlQueryBuilderTestDataFactory {
   public static Stream<Arguments> choiceInput() {
     return Stream.of(
         Arguments.of(
-            precedes("low", "high", within(23L, 26L, TsdlTimeUnit.MINUTES, OPEN_START)),
-            "low precedes high WITHIN (23,26] minutes"
+            precedes(eventOperand("low"), eventOperand("high"), within(23L, 26L, TsdlTimeUnit.MINUTES, OPEN_START)),
+            "(low precedes high WITHIN (23,26] minutes)"
         ),
         Arguments.of(
-            follows("low", "high"),
-            "low follows high"
+            follows(eventOperand("low"), eventOperand("high")),
+            "(low follows high)"
         ),
         Arguments.of(
-            follows("low", "high", within(26L, CLOSED, TsdlTimeUnit.MILLISECONDS)),
-            "low follows high WITHIN [26,] millis"
+            follows(eventOperand("low"), eventOperand("high"), within(26L, CLOSED, TsdlTimeUnit.MILLISECONDS)),
+            "(low follows high WITHIN [26,] millis)"
+        ),
+        Arguments.of(
+            precedes(eventOperand("low"), follows("e2", "e3")),
+            "(low precedes (e2 follows e3))"
+        ),
+        Arguments.of(
+            precedes(
+                precedes("e1", "e4", within(TsdlTimeUnit.SECONDS, OPEN)),
+                follows("e2", "e3", within(23L, OPEN_END, TsdlTimeUnit.WEEKS)),
+                within(1L, 25L, TsdlTimeUnit.MINUTES, OPEN_START)
+            ),
+            "((e1 precedes e4 WITHIN (,) seconds) precedes (e2 follows e3 WITHIN [23,) weeks) WITHIN (1,25] minutes)"
         )
     );
   }
