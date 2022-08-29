@@ -1,16 +1,20 @@
 package org.tsdl.client.impl.builder.stub;
 
-import static org.tsdl.client.api.builder.FilterSpecification.not;
+import static org.tsdl.client.api.builder.EventFunctionSpecification.not;
 import static org.tsdl.client.api.builder.Range.IntervalType.CLOSED;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_START;
 import static org.tsdl.client.api.builder.TsdlQueryBuilder.as;
 import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.follows;
 import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.precedes;
+import static org.tsdl.client.impl.builder.ConstantEventSpecificationImpl.constant;
+import static org.tsdl.client.impl.builder.DecreaseEventSpecificationImpl.decrease;
+import static org.tsdl.client.impl.builder.DeviationFilterSpecificationImpl.aroundAbsolute;
 import static org.tsdl.client.impl.builder.EchoSpecificationImpl.echo;
+import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.and;
+import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.or;
 import static org.tsdl.client.impl.builder.EventSpecificationImpl.event;
-import static org.tsdl.client.impl.builder.FilterConnectiveSpecificationImpl.and;
-import static org.tsdl.client.impl.builder.FilterConnectiveSpecificationImpl.or;
+import static org.tsdl.client.impl.builder.IncreaseEventSpecificationImpl.increase;
 import static org.tsdl.client.impl.builder.QueryPeriodImpl.period;
 import static org.tsdl.client.impl.builder.RangeImpl.for_;
 import static org.tsdl.client.impl.builder.RangeImpl.within;
@@ -152,7 +156,7 @@ public final class TsdlQueryBuilderTestDataFactory {
         Arguments.of(
             and(
                 DeviationFilterSpecificationImpl.aroundRelative(20.0, 34.0, true),
-                DeviationFilterSpecificationImpl.aroundAbsolute("s1", "s7")
+                aroundAbsolute("s1", "s7")
             ),
             "AND(NOT(around(rel, 20.0, 34.0)), around(abs, s1, s7))"
         )
@@ -172,6 +176,43 @@ public final class TsdlQueryBuilderTestDataFactory {
         Arguments.of(
             event(and(gt("s2")), as("mid")),
             "AND(gt(s2)) AS mid"
+        ),
+        Arguments.of(
+            event(or(constant(23.5, "0.5")), "const1"),
+            "OR(const(23.5, 0.5)) AS const1"
+        ),
+        Arguments.of(
+            event(
+                and(
+                    constant(23.5, "0.5", true),
+                    not(constant(0.5, "23.76")),
+                    gt(23.5)
+                ),
+                "const1"
+            ),
+            "AND(NOT(const(23.5, 0.5)), NOT(const(0.5, 23.76)), gt(23.5)) AS const1"
+        ),
+        Arguments.of(
+            event(and(
+                    increase("23", 0.23, 1.75),
+                    not(decrease("23", Double.POSITIVE_INFINITY, 1.75))
+                ),
+                "ev1"),
+            "AND(increase(23, 0.23, 1.75), NOT(decrease(23, -, 1.75))) AS ev1"
+        ),
+        Arguments.of(
+            event(
+                or(
+                    lt(23.5, true),
+                    not(increase(124, Double.POSITIVE_INFINITY, 24.4, true)),
+                    not(decrease("12.5", "s4", "s3", false)),
+                    aroundAbsolute("s1", 2.3),
+                    not(after("2023-08-08T12:30:03.001Z"))
+                ),
+                "superEvent"
+            ),
+            "OR(NOT(lt(23.5)), increase(124.0, -, 24.4), NOT(decrease(12.5, s4, s3)), "
+                + "around(abs, s1, 2.3), NOT(after(\"2023-08-08T12:30:03.001Z\"))) AS superEvent"
         )
     );
   }

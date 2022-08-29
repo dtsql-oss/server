@@ -294,7 +294,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
-    var connective = parseSinglePointFilterConnective(ctx.filterConnective());
+    var connective = parseSinglePointFilterConnective(null/*ctx.filterConnective()*/); // TODO!!!
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var duration = parseDuration(ctx.durationSpecification());
     return elementFactory.getSinglePointEvent(connective, identifier, duration);

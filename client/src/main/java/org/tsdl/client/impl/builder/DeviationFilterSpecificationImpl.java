@@ -52,27 +52,27 @@ public final class DeviationFilterSpecificationImpl implements DeviationFilterSp
     return aroundRelative(reference, maximumDeviation, false);
   }
 
-  public static DeviationFilterSpecification aroundRelative(Double reference, String maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundRelative(double reference, String maximumDeviation, boolean negated) {
     return aroundRelative(String.valueOf(reference), maximumDeviation, negated);
   }
 
-  public static DeviationFilterSpecification aroundRelative(Double reference, String maximumDeviation) {
+  public static DeviationFilterSpecification aroundRelative(double reference, String maximumDeviation) {
     return aroundRelative(String.valueOf(reference), maximumDeviation, false);
   }
 
-  public static DeviationFilterSpecification aroundRelative(String reference, Double maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundRelative(String reference, double maximumDeviation, boolean negated) {
     return aroundRelative(reference, String.valueOf(maximumDeviation), negated);
   }
 
-  public static DeviationFilterSpecification aroundRelative(String reference, Double maximumDeviation) {
+  public static DeviationFilterSpecification aroundRelative(String reference, double maximumDeviation) {
     return aroundRelative(reference, String.valueOf(maximumDeviation), false);
   }
 
-  public static DeviationFilterSpecification aroundRelative(Double reference, Double maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundRelative(double reference, double maximumDeviation, boolean negated) {
     return aroundRelative(String.valueOf(reference), String.valueOf(maximumDeviation), negated);
   }
 
-  public static DeviationFilterSpecification aroundRelative(Double reference, Double maximumDeviation) {
+  public static DeviationFilterSpecification aroundRelative(double reference, double maximumDeviation) {
     return aroundRelative(String.valueOf(reference), String.valueOf(maximumDeviation), false);
   }
 
@@ -84,27 +84,27 @@ public final class DeviationFilterSpecificationImpl implements DeviationFilterSp
     return aroundAbsolute(reference, maximumDeviation, false);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(Double reference, String maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundAbsolute(double reference, String maximumDeviation, boolean negated) {
     return aroundAbsolute(String.valueOf(reference), maximumDeviation, negated);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(Double reference, String maximumDeviation) {
+  public static DeviationFilterSpecification aroundAbsolute(double reference, String maximumDeviation) {
     return aroundAbsolute(String.valueOf(reference), maximumDeviation, false);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(String reference, Double maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundAbsolute(String reference, double maximumDeviation, boolean negated) {
     return aroundAbsolute(reference, String.valueOf(maximumDeviation), negated);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(String reference, Double maximumDeviation) {
+  public static DeviationFilterSpecification aroundAbsolute(String reference, double maximumDeviation) {
     return aroundAbsolute(reference, String.valueOf(maximumDeviation), false);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(Double reference, Double maximumDeviation, boolean negated) {
+  public static DeviationFilterSpecification aroundAbsolute(double reference, double maximumDeviation, boolean negated) {
     return aroundAbsolute(String.valueOf(reference), String.valueOf(maximumDeviation), negated);
   }
 
-  public static DeviationFilterSpecification aroundAbsolute(Double reference, Double maximumDeviation) {
+  public static DeviationFilterSpecification aroundAbsolute(double reference, double maximumDeviation) {
     return aroundAbsolute(String.valueOf(reference), String.valueOf(maximumDeviation), false);
   }
 }

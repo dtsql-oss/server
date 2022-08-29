@@ -196,13 +196,13 @@ temporalAggregatorDeclaration
 
 // filter argument (STRING_LITERAL): ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)
 intervalList
-:  intervals LIST_SEPARATOR STRING_LITERAL     // either two or more events
-|  STRING_LITERAL                              // or exactly one
-;
+  :  intervals LIST_SEPARATOR STRING_LITERAL     // either two or more events
+  |  STRING_LITERAL                              // or exactly one
+  ;
 
 intervals
-:  STRING_LITERAL (LIST_SEPARATOR STRING_LITERAL)*   // one interval plus [0..n] additional intervals
-;
+  :  STRING_LITERAL (LIST_SEPARATOR STRING_LITERAL)*   // one interval plus [0..n] additional intervals
+  ;
 
 identifierDeclaration
   :  AS WHITESPACE IDENTIFIER

@@ -5,14 +5,10 @@ import java.time.Instant;
 /**
  * Represents a filter atom in a TSDL query.
  */
-public interface FilterSpecification {
+public interface FilterSpecification extends EventFunctionSpecification {
   boolean isNegated();
 
   FilterSpecification negate();
-
-  static FilterSpecification not(FilterSpecification filter) {
-    return filter.negate();
-  }
 
   /**
    * A threshold filter.
