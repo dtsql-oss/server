@@ -95,14 +95,30 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
 
   @Override
   public TsdlQueryBuilder choice(ChoiceSpecification choiceSpec) {
+    choice = choiceString(choiceSpec);
+    return this;
+  }
+
+  private static String choiceString(ChoiceSpecification choiceSpec) {
     var durationConstraint = choiceSpec.tolerance().isPresent() ? intervalString(choiceSpec.tolerance().get(), "WITHIN") : "";
     var operator = switch (choiceSpec.type()) {
       case PRECEDES -> "precedes";
       case FOLLOWS -> "follows";
     };
 
-    choice = "%s %s %s%s".formatted(choiceSpec.operand1(), operator, choiceSpec.operand2(), durationConstraint);
-    return this;
+    var operand1 = switch (choiceSpec.operand1()) {
+      case ChoiceSpecificationImpl recursive -> choiceString(recursive);
+      case EventChoiceOperandImpl event -> event.eventIdentifier();
+      default -> throw new TsdlQueryBuildException("Unknown choice operand type '%s'.".formatted(choiceSpec.operand1().getClass().getSimpleName()));
+    };
+
+    var operand2 = switch (choiceSpec.operand2()) {
+      case ChoiceSpecificationImpl recursive -> choiceString(recursive);
+      case EventChoiceOperandImpl event -> event.eventIdentifier();
+      default -> throw new TsdlQueryBuildException("Unknown choice operand type '%s'.".formatted(choiceSpec.operand2().getClass().getSimpleName()));
+    };
+
+    return "(%s %s %s%s)".formatted(operand1, operator, operand2, durationConstraint);
   }
 
   @Override
@@ -168,9 +184,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     var lower = range.lowerBound().isPresent() ? "%s".formatted(range.lowerBound().get()) : "";
     var upper = range.upperBound().isPresent() ? "%s".formatted(range.upperBound().get()) : "";
 
-    return range.lowerBound().isPresent() || range.upperBound().isPresent()
-        ? " %s %s%s,%s%s %s".formatted(prefix, parens[0], lower, upper, parens[1], unitString(range.unit()))
-        : "";
+    return " %s %s%s,%s%s %s".formatted(prefix, parens[0], lower, upper, parens[1], unitString(range.unit()));
   }
 
   private static String eventConnectiveString(EventConnectiveSpecification eventConnective) {
@@ -198,7 +212,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
       case FilterSpecification filter -> filterString(filter);
       case ComplexEventFunctionSpecification.ConstantEventSpecification constant -> constantEventString(constant);
       case ComplexEventFunctionSpecification.MonotonicEventSpecification monotonic -> monotonicEventString(monotonic);
-      default -> throw new TsdlQueryBuildException("Unknown filter specification '%s' known".formatted(event.getClass().getSimpleName()));
+      default -> throw new TsdlQueryBuildException("Unknown filter specification '%s'.".formatted(event.getClass().getSimpleName()));
     };
     return event.isNegated() && !(event instanceof FilterSpecification) ? "NOT(%s)".formatted(filterString) : filterString;
   }
@@ -208,7 +222,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
       case FilterSpecification.ThresholdFilterSpecification threshold -> thresholdFilterString(threshold);
       case FilterSpecification.TemporalFilterSpecification temporal -> temporalFilterString(temporal);
       case FilterSpecification.DeviationFilterSpecification deviation -> deviationFilterString(deviation);
-      default -> throw new TsdlQueryBuildException("Unknown filter specification '%s' known".formatted(filter.getClass().getSimpleName()));
+      default -> throw new TsdlQueryBuildException("Unknown filter specification '%s'.".formatted(filter.getClass().getSimpleName()));
     };
     return filter.isNegated() ? "NOT(%s)".formatted(filterString) : filterString;
   }

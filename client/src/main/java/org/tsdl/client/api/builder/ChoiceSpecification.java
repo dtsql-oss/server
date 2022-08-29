@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * Represents the "CHOOSE" section of a TSDL query.
  */
-public interface ChoiceSpecification {
+public interface ChoiceSpecification extends ChoiceOperand {
   /**
    * Temporal relation.
    */
@@ -13,9 +13,9 @@ public interface ChoiceSpecification {
     PRECEDES, FOLLOWS
   }
 
-  String operand1();
+  ChoiceOperand operand1();
 
-  String operand2();
+  ChoiceOperand operand2();
 
   Optional<Range> tolerance();
 
