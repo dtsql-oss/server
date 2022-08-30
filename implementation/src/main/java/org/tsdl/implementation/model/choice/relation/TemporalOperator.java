@@ -7,7 +7,7 @@ import org.tsdl.infrastructure.model.TsdlPeriodSet;
 /**
  * A temporal operator, relating events.
  */
-public interface TemporalOperator {
+public interface TemporalOperator extends TemporalOperand {
   int cardinality();
 
   /**

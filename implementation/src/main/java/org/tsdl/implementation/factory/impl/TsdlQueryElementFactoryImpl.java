@@ -37,6 +37,7 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.SumAggre
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
+import org.tsdl.implementation.model.choice.relation.TemporalOperand;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlDuration;
@@ -267,15 +268,14 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     return new TsdlDurationImpl(lowerBound, upperBound, unit);
   }
 
-  @Override
-  public TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> operands, TsdlDuration tolerance) {
+  public TemporalOperator getChoice(TemporalRelationType type, TemporalOperand operand1, TemporalOperand operand2, TsdlDuration tolerance) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of temporal relation must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, operands, "Operands of temporal relation must not be null.");
-    Conditions.checkSizeExactly(Condition.ARGUMENT, operands, 2, "Only binary temporal operators are supported at the moment.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First temporal operand must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second temporal operand must not be null.");
 
     return switch (type) {
-      case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1), tolerance);
-      case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1), tolerance);
+      case FOLLOWS -> new FollowsOperatorImpl(operand1, operand2, tolerance);
+      case PRECEDES -> new PrecedesOperatorImpl(operand1, operand2, tolerance);
     };
   }
 
