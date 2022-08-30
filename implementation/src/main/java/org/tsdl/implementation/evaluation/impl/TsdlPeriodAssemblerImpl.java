@@ -1,7 +1,5 @@
 package org.tsdl.implementation.evaluation.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,7 +19,9 @@ import org.tsdl.infrastructure.model.DataPoint;
 public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
   @Override
   public List<AnnotatedTsdlPeriod> assemble(List<DataPoint> dataPoints, List<TsdlEvent> events) {
-    var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
+    return List.of();
+    // TODO FIIIIX
+    /*var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
     var eventsByStrategy = events
         .stream()
         .collect(Collectors.groupingBy(TsdlEvent::computationStrategy));
@@ -43,13 +43,16 @@ public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
       log.debug("Detected periods: {}.", getDetectedPeriodLogRepresentation(assembledPeriods));
     }
 
-    return assembledPeriods;
+    return assembledPeriods;*/
   }
 
   private TsdlEventStrategy getEventStrategy(TsdlEventStrategyType type) {
     return switch (type) {
       case SINGLE_POINT_EVENT -> new SinglePointEventStrategyImpl();
       case SINGLE_POINT_EVENT_WITH_DURATION -> new DurationEventStrategyImpl(new SinglePointEventStrategyImpl());
+      case CONSTANT_EVENT -> null;
+      case INCREASE_EVENT -> null;
+      case DECREASE_EVENT -> null;
     };
   }
 

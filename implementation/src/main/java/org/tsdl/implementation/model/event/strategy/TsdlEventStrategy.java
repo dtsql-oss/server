@@ -3,7 +3,6 @@ package org.tsdl.implementation.model.event.strategy;
 import java.util.List;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
@@ -17,5 +16,5 @@ public interface TsdlEventStrategy {
    * Postcondition: detected periods are ordered by start time;
    * for equal start times, the period whose declaring event has the lower index has precedence
    */
-  List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events);
+  List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events);
 }

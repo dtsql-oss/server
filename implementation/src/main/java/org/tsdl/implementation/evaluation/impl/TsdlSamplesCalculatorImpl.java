@@ -9,7 +9,6 @@ import org.tsdl.implementation.evaluation.TsdlSamplesCalculator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleScalarArgument;
@@ -44,9 +43,9 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
     }
 
     var singlePointEventFilters = events.stream()
-        .filter(event -> event.definition() instanceof SinglePointEventDefinition)
-        .map(event -> (SinglePointEventDefinition) event.definition())
-        .flatMap(eventDefinition -> eventDefinition.connective().filters().stream())
+        .flatMap(event -> event.connective().events().stream())
+        .filter(event -> event instanceof SinglePointFilter)
+        .map(event -> (SinglePointFilter) event)
         .toList();
 
     setSampleFilterArgumentValues(
