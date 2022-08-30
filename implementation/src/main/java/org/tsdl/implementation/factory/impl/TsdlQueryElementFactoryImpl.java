@@ -7,10 +7,9 @@ import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorI
 import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
-import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
-import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.AndFilterConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.OrFilterConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
-import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralScalarArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleScalarArgumentImpl;
@@ -45,7 +44,16 @@ import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.event.TsdlEventStrategyType;
+import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
+import org.tsdl.implementation.model.event.definition.ComplexEventFunction;
+import org.tsdl.implementation.model.event.definition.ConstantEventImpl;
+import org.tsdl.implementation.model.event.definition.DecreaseEventImpl;
+import org.tsdl.implementation.model.event.definition.EventConnective;
+import org.tsdl.implementation.model.event.definition.EventFunction;
+import org.tsdl.implementation.model.event.definition.IncreaseEventImpl;
+import org.tsdl.implementation.model.event.definition.NegatedEventFunction;
+import org.tsdl.implementation.model.event.definition.NegatedEventFunctionImpl;
+import org.tsdl.implementation.model.event.definition.OrEventConnectiveImpl;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
@@ -116,12 +124,51 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public SinglePointFilterConnective getConnective(ConnectiveIdentifier identifier, List<SinglePointFilter> filters) {
-    Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for connective must not be null.");
+  public ComplexEventFunction getConstantEvent(TsdlScalarArgument maximumSlope, TsdlScalarArgument maximumRelativeDeviation) {
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumSlope, "Maximum slope must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumRelativeDeviation, "Maximum relative deviation must not be null.");
+    return new ConstantEventImpl(maximumSlope, maximumRelativeDeviation);
+  }
+
+  @Override
+  public ComplexEventFunction getIncreaseEvent(TsdlScalarArgument minimumChange, TsdlScalarArgument maximumChange, TsdlScalarArgument tolerance) {
+    Conditions.checkNotNull(Condition.ARGUMENT, minimumChange, "Minimum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumChange, "Maximum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance must not be null.");
+    return new IncreaseEventImpl(minimumChange, maximumChange, tolerance);
+  }
+
+  @Override
+  public ComplexEventFunction getDecreaseEvent(TsdlScalarArgument minimumChange, TsdlScalarArgument maximumChange, TsdlScalarArgument tolerance) {
+    Conditions.checkNotNull(Condition.ARGUMENT, minimumChange, "Minimum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumChange, "Maximum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance must not be null.");
+    return new DecreaseEventImpl(minimumChange, maximumChange, tolerance);
+  }
+
+  @Override
+  public NegatedEventFunction getNegatedEventFunction(EventFunction event) {
+    Conditions.checkNotNull(Condition.ARGUMENT, event, "Event to negate must not be null.");
+    return new NegatedEventFunctionImpl(event);
+  }
+
+  @Override
+  public SinglePointFilterConnective getFilterConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Identifier for filter connective must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters for connective must not be null.");
-    return switch (identifier) {
-      case AND -> new AndConnectiveImpl(filters);
-      case OR -> new OrConnectiveImpl(filters);
+    return switch (type) {
+      case AND -> new AndFilterConnectiveImpl(filters);
+      case OR -> new OrFilterConnectiveImpl(filters);
+    };
+  }
+
+  @Override
+  public EventConnective getEventConnective(ConnectiveIdentifier type, List<EventFunction> events) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Identifier for event connective must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, events, "List of events for connective must not be null.");
+    return switch (type) {
+      case AND -> new AndEventConnectiveImpl(events);
+      case OR -> new OrEventConnectiveImpl(events);
     };
   }
 
@@ -202,12 +249,13 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, TsdlDuration duration) {
-    Conditions.checkNotNull(Condition.ARGUMENT, definition, "Filter connective for event must not be null.");
+  public TsdlEvent getEvent(EventConnective connective, TsdlIdentifier identifier, TsdlDuration duration) {
+    Conditions.checkNotNull(Condition.ARGUMENT, connective, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
     return new TsdlEventImpl(
-        new SinglePointEventDefinitionImpl(identifier, definition, duration),
-        duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT
+        connective,
+        identifier,
+        duration
     );
   }
 

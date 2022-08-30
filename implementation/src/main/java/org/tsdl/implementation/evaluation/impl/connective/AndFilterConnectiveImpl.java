@@ -2,18 +2,18 @@ package org.tsdl.implementation.evaluation.impl.connective;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.tsdl.implementation.model.connective.AndConnective;
+import org.tsdl.implementation.model.connective.AndFilterConnective;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
- * Default implementation of {@link AndConnective}.
+ * Default implementation of {@link AndFilterConnective}.
  */
 @Slf4j
-public record AndConnectiveImpl(List<SinglePointFilter> filters) implements AndConnective {
-  public AndConnectiveImpl {
+public record AndFilterConnectiveImpl(List<SinglePointFilter> filters) implements AndFilterConnective {
+  public AndFilterConnectiveImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters of 'and' connective must not be null.");
   }
 

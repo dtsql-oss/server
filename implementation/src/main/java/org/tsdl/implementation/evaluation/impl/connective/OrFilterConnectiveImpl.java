@@ -2,18 +2,18 @@ package org.tsdl.implementation.evaluation.impl.connective;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.tsdl.implementation.model.connective.OrConnective;
+import org.tsdl.implementation.model.connective.OrFilterConnective;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
- * Default implementation of {@link OrConnective}.
+ * Default implementation of {@link OrFilterConnective}.
  */
 @Slf4j
-public record OrConnectiveImpl(List<SinglePointFilter> filters) implements OrConnective {
-  public OrConnectiveImpl {
+public record OrFilterConnectiveImpl(List<SinglePointFilter> filters) implements OrFilterConnective {
+  public OrFilterConnectiveImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters of 'or' connective must not be null.");
   }
 

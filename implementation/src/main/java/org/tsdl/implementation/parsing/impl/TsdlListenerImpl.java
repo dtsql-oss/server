@@ -23,6 +23,9 @@ import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
+import org.tsdl.implementation.model.event.definition.ComplexEventFunction;
+import org.tsdl.implementation.model.event.definition.EventConnective;
+import org.tsdl.implementation.model.event.definition.EventFunction;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlLiteralScalarArgument;
 import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
@@ -38,6 +41,8 @@ import org.tsdl.implementation.parsing.exception.TsdlParseException;
 import org.tsdl.implementation.parsing.exception.UnknownIdentifierException;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+
+// TODO: Pattern for parsing lists of any sort could be generified so that it is defined only once
 
 /**
  * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
@@ -120,14 +125,14 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (eventList.events() != null) {
       var events = eventList.events().eventDeclaration().stream().map(this::parseEvent).toList();
       events.forEach(event -> {
-        declaredEvents.put(event.definition().identifier(), event);
+        declaredEvents.put(event.identifier(), event);
         parsedEvents.add(event);
       });
     }
 
     if (eventList.eventDeclaration() != null) {
       var event = parseEvent(eventList.eventDeclaration());
-      declaredEvents.put(event.definition().identifier(), event);
+      declaredEvents.put(event.identifier(), event);
       parsedEvents.add(event);
     }
 
@@ -197,7 +202,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     } else if (ctx.aggregatorFunctionDeclaration().temporalAggregatorDeclaration() != null) {
       aggregator = parseTemporalAggregator(ctx.aggregatorFunctionDeclaration().temporalAggregatorDeclaration());
     } else {
-      throw new TsdlParseException("Cannot parse TsdlAggregator, neither 'valueAggregatorDeclaration' nor 'temporalAggregatorDeclaration' rule.");
+      throw new TsdlParseException("Cannot parse TsdlAggregator, neither 'valueAggregatorDeclaration' nor 'temporalAggregatorDeclaration' present.");
     }
 
     return elementFactory.getSample(aggregator, identifier, includeEcho, echoArguments);
@@ -294,10 +299,28 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
-    var connective = parseSinglePointFilterConnective(null/*ctx.filterConnective()*/); // TODO!!!
+    var connective = parseEventConnective(ctx.eventConnective());
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var duration = parseDuration(ctx.durationSpecification());
-    return elementFactory.getSinglePointEvent(connective, identifier, duration);
+    return elementFactory.getEvent(connective, identifier, duration);
+  }
+
+  private EventConnective parseEventConnective(TsdlParser.EventConnectiveContext ctx) {
+    var connectiveIdentifier = elementParser.parseConnectiveIdentifier(ctx.CONNECTIVE_IDENTIFIER().getText());
+    var eventFunctionList = ctx.eventFunctionList();
+
+    var parsedEventFunctions = new ArrayList<EventFunction>();
+    if (eventFunctionList.eventFunctions() != null) {
+      var firstEventFunctions = eventFunctionList.eventFunctions().eventFunctionDeclaration().stream().map(this::parseEventFunction).toList();
+      parsedEventFunctions.addAll(firstEventFunctions);
+    }
+
+    if (eventFunctionList.eventFunctionDeclaration() != null) {
+      var lastEventFunction = eventFunctionList.eventFunctionDeclaration();
+      parsedEventFunctions.add(parseEventFunction(lastEventFunction));
+    }
+
+    return elementFactory.getEventConnective(connectiveIdentifier, parsedEventFunctions);
   }
 
   private SinglePointFilterConnective parseSinglePointFilterConnective(TsdlParser.FilterConnectiveContext ctx) {
@@ -306,8 +329,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
     var parsedFilters = new ArrayList<SinglePointFilter>();
     if (filterList.singlePointFilters() != null) {
-      var filtersContext = filterList.singlePointFilters();
-      var firstFilters = filtersContext.singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).toList();
+      var firstFilters = filterList.singlePointFilters().singlePointFilterDeclaration().stream().map(this::parseSinglePointFilter).toList();
       parsedFilters.addAll(firstFilters);
     }
 
@@ -316,7 +338,60 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       parsedFilters.add(parseSinglePointFilter(lastFilter));
     }
 
-    return elementFactory.getConnective(connectiveIdentifier, parsedFilters);
+    return elementFactory.getFilterConnective(connectiveIdentifier, parsedFilters);
+  }
+
+  private EventFunction parseEventFunction(TsdlParser.EventFunctionDeclarationContext ctx) {
+    if (ctx.singlePointFilterDeclaration() != null) {
+      return parseSinglePointFilter(ctx.singlePointFilterDeclaration());
+    } else if (ctx.complexEventDeclaration() != null) {
+      return parseComplexEventFunction(ctx.complexEventDeclaration());
+    } else {
+      throw new TsdlParseException("Cannot parse EventFunction, neither 'singlePointFilterDeclaration' nor 'complexEventDeclaration' present.");
+    }
+  }
+
+  private EventFunction parseComplexEventFunction(TsdlParser.ComplexEventDeclarationContext ctx) {
+    EventFunction event;
+    if (ctx.negatedComplexEvent() == null) {
+      event = parseComplexEventFunction(ctx.complexEvent());
+    } else {
+      var innerEvent = parseComplexEventFunction(ctx.negatedComplexEvent().complexEvent());
+      event = elementFactory.getNegatedEventFunction(innerEvent);
+    }
+    return event;
+  }
+
+  private ComplexEventFunction parseComplexEventFunction(TsdlParser.ComplexEventContext ctx) {
+    if (ctx.constantEvent() != null) {
+      return parseConstantEvent(ctx.constantEvent());
+    } else if (ctx.increaseEvent() != null) {
+      return parseIncreaseEvent(ctx.increaseEvent());
+    } else if (ctx.decreaseEvent() != null) {
+      return parseDecreaseEvent(ctx.decreaseEvent());
+    } else {
+      throw new TsdlParseException("Cannot parse ComplexEventFunction, neither 'constantEvent', 'increaseEvent' nor 'decreaseEvent' present.");
+    }
+  }
+
+  private ComplexEventFunction parseConstantEvent(TsdlParser.ConstantEventContext ctx) {
+    var maximumSlope = parseScalarArgument(ctx.scalarArgument(0));
+    var maximumRelativeDeviation = parseScalarArgument(ctx.scalarArgument(1));
+    return elementFactory.getConstantEvent(maximumSlope, maximumRelativeDeviation);
+  }
+
+  private ComplexEventFunction parseIncreaseEvent(TsdlParser.IncreaseEventContext ctx) {
+    var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
+    var maximumChange = parseScalarArgument(ctx.scalarArgument(1));
+    var tolerance = parseScalarArgument(ctx.scalarArgument(2));
+    return elementFactory.getIncreaseEvent(minimumChange, maximumChange, tolerance);
+  }
+
+  private ComplexEventFunction parseDecreaseEvent(TsdlParser.DecreaseEventContext ctx) {
+    var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
+    var maximumChange = parseScalarArgument(ctx.scalarArgument(1));
+    var tolerance = parseScalarArgument(ctx.scalarArgument(2));
+    return elementFactory.getDecreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
   private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterDeclarationContext ctx) {
@@ -327,7 +402,6 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
       var innerFilter = parseSinglePointFilter(ctx.negatedSinglePointFilter().singlePointFilter());
       filter = elementFactory.getNegatedFilter(innerFilter);
     }
-
     return filter;
   }
 
@@ -346,7 +420,6 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private SinglePointFilter parseThresholdFilter(TsdlParser.ThresholdFilterContext ctx) {
     var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
     var filterArgument = parseScalarArgument(ctx.scalarArgument());
-
     return elementFactory.getThresholdFilter(filterType, filterArgument);
   }
 
