@@ -10,15 +10,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.tsdl.grammar.TsdlParser;
 import org.tsdl.grammar.TsdlParserBaseListener;
+import org.tsdl.grammar.TsdlParserBaseVisitor;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
+import org.tsdl.implementation.model.choice.relation.TemporalOperand;
+import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
@@ -64,6 +68,53 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
    * </p>
    */
   private record AggregatorBounds(Instant lowerBound, Instant upperBound) {
+  }
+
+  class TemporalRelationVisitor extends TsdlParserBaseVisitor<TemporalOperator> {
+    @Override
+    public TemporalOperator visitEventEvent(TsdlParser.EventEventContext ctx) {
+      var op1 = parseAtomicOperand(ctx.op1);
+      var op2 = parseAtomicOperand(ctx.op2);
+      var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
+      var duration = parseDuration(ctx.timeToleranceSpecification());
+
+      return elementFactory.getChoice(relationType, op1, op2, duration);
+    }
+
+    @Override
+    public TemporalOperator visitEventRecursive(TsdlParser.EventRecursiveContext ctx) {
+      var op1 = parseAtomicOperand(ctx.op1);
+      var op2 = visit(ctx.op2);
+      var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
+      var duration = parseDuration(ctx.timeToleranceSpecification());
+
+      return elementFactory.getChoice(relationType, op1, op2, duration);
+    }
+
+    @Override
+    public TemporalOperator visitRecursiveEvent(TsdlParser.RecursiveEventContext ctx) {
+      var op1 = visit(ctx.op1);
+      var op2 = parseAtomicOperand(ctx.op2);
+      var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
+      var duration = parseDuration(ctx.timeToleranceSpecification());
+
+      return elementFactory.getChoice(relationType, op1, op2, duration);
+    }
+
+    @Override
+    public TemporalOperator visitRecursiveRecursive(TsdlParser.RecursiveRecursiveContext ctx) {
+      var op1 = visit(ctx.op1);
+      var op2 = visit(ctx.op2);
+      var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
+      var duration = parseDuration(ctx.timeToleranceSpecification());
+
+      return elementFactory.getChoice(relationType, op1, op2, duration);
+    }
+
+    private TemporalOperand parseAtomicOperand(Token token) {
+      var identifier = requireIdentifier(token, IdentifierType.EVENT);
+      return declaredEvents.get(identifier);
+    }
   }
 
   private final TsdlElementParser elementParser = TsdlComponentFactory.INSTANCE.elementParser();
@@ -140,19 +191,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterEventEvent(TsdlParser.EventEventContext ctx) {
-    var chosenEvents = new ArrayList<TsdlEvent>();
-    for (var identifierDeclaration : ctx.IDENTIFIER()) {
-      var identifier = requireIdentifier(identifierDeclaration, IdentifierType.EVENT);
-      var referencedEvent = declaredEvents.get(identifier);
-      chosenEvents.add(referencedEvent);
-    }
-
-    var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
-    var duration = parseDuration(ctx.timeToleranceSpecification());
-    var operator = elementFactory.getChoice(relationType, chosenEvents, duration);
-
-    queryBuilder.choiceValue(operator);
+  public void enterChoiceDeclaration(TsdlParser.ChoiceDeclarationContext ctx) {
+    var temporalOperator = new TemporalRelationVisitor().visit(ctx.temporalRelation());
+    queryBuilder.choiceValue(temporalOperator);
   }
 
   @Override
@@ -375,22 +416,22 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   private ComplexEventFunction parseConstantEvent(TsdlParser.ConstantEventContext ctx) {
-    var maximumSlope = parseScalarArgument(ctx.scalarArgument(0));
-    var maximumRelativeDeviation = parseScalarArgument(ctx.scalarArgument(1));
+    var maximumSlope = parseScalarArgument(ctx.slope);
+    var maximumRelativeDeviation = parseScalarArgument(ctx.deviation);
     return elementFactory.getConstantEvent(maximumSlope, maximumRelativeDeviation);
   }
 
   private ComplexEventFunction parseIncreaseEvent(TsdlParser.IncreaseEventContext ctx) {
-    var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
+    var minimumChange = parseScalarArgument(ctx.minChange);
     var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
-    var tolerance = parseScalarArgument(ctx.scalarArgument(1));
+    var tolerance = parseScalarArgument(ctx.tolerance);
     return elementFactory.getIncreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
   private ComplexEventFunction parseDecreaseEvent(TsdlParser.DecreaseEventContext ctx) {
-    var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
+    var minimumChange = parseScalarArgument(ctx.minChange);
     var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
-    var tolerance = parseScalarArgument(ctx.scalarArgument(1));
+    var tolerance = parseScalarArgument(ctx.tolerance);
     return elementFactory.getDecreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
@@ -428,8 +469,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
         ctx.DEVIATION_FILTER_TYPE().getText(),
         ctx.deviationFilterArguments().AROUND_FILTER_TYPE().getText()
     );
-    var reference = parseScalarArgument(ctx.deviationFilterArguments().scalarArgument(0));
-    var deviation = parseScalarArgument(ctx.deviationFilterArguments().scalarArgument(1));
+    var reference = parseScalarArgument(ctx.deviationFilterArguments().reference);
+    var deviation = parseScalarArgument(ctx.deviationFilterArguments().deviation);
 
     if (deviation instanceof TsdlLiteralScalarArgument deviationArg) {
       if (deviationArg.value() < 0) {
@@ -469,8 +510,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getTemporalFilter(filterType, filterArgument);
   }
 
-  private TsdlIdentifier requireIdentifier(TerminalNode node, IdentifierType type) {
-    var identifier = parseIdentifier(node);
+  private TsdlIdentifier requireIdentifier(Token token, IdentifierType type) {
+    var identifier = parseIdentifier(token);
     var identifierMap = switch (type) {
       case EVENT -> declaredEvents;
       case SAMPLE -> declaredSamples;
@@ -483,6 +524,10 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     } else {
       throw new InvalidReferenceException(identifier.name(), type.name().toLowerCase());
     }
+  }
+
+  private TsdlIdentifier requireIdentifier(TerminalNode node, IdentifierType type) {
+    return requireIdentifier(node.getSymbol(), type);
   }
 
   private TsdlDuration parseDuration(TsdlParser.TimeToleranceSpecificationContext ctx) {
@@ -521,8 +566,12 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getDuration(lowerBound, upperBound, unit);
   }
 
+  private TsdlIdentifier parseIdentifier(Token token) {
+    return elementFactory.getIdentifier(token.getText());
+  }
+
   private TsdlIdentifier parseIdentifier(TerminalNode node) {
-    return elementFactory.getIdentifier(node.getText());
+    return parseIdentifier(node.getSymbol());
   }
 
   public TsdlQuery getQuery() {

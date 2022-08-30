@@ -75,19 +75,19 @@ negatedComplexEvent
 
 // first scalar: non-negative real number, second scalar: non-negative real number
 constantEvent
-  :  EVENT_CONSTANT PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  EVENT_CONSTANT PARENTHESIS_OPEN WHITESPACE? slope=scalarArgument LIST_SEPARATOR deviation=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
 // first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
 // additionally: first scalar <= second scalar
 increaseEvent
-  :  EVENT_INCREASE PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  EVENT_INCREASE PARENTHESIS_OPEN WHITESPACE? minChange=scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR tolerance=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
 // first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
 // additionally: first scalar <= second scalar
 decreaseEvent
-  :  EVENT_DECREASE PARENTHESIS_OPEN WHITESPACE? scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  EVENT_DECREASE PARENTHESIS_OPEN WHITESPACE? minChange=scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR tolerance=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
 monotonicUpperBound
@@ -104,10 +104,10 @@ choiceDeclaration
   ;
 
 temporalRelation
-  :  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventEvent
-  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventRecursive
-  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveEvent
-  |  PARENTHESIS_OPEN temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveRecursive
+  :  PARENTHESIS_OPEN op1=IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE op2=IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventEvent
+  |  PARENTHESIS_OPEN op1=IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE op2=temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventRecursive
+  |  PARENTHESIS_OPEN op1=temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE op2=IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveEvent
+  |  PARENTHESIS_OPEN op1=temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE op2=temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveRecursive
   ;
 
 timeToleranceSpecification
@@ -258,5 +258,5 @@ deviationFilter
 
 // NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
 deviationFilterArguments
-  :  AROUND_FILTER_TYPE LIST_SEPARATOR scalarArgument LIST_SEPARATOR scalarArgument
+  :  AROUND_FILTER_TYPE LIST_SEPARATOR reference=scalarArgument LIST_SEPARATOR deviation=scalarArgument
   ;

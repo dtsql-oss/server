@@ -5,6 +5,7 @@ import java.util.List;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
 import org.tsdl.implementation.model.TsdlQuery;
+import org.tsdl.implementation.model.choice.relation.TemporalOperand;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlDuration;
@@ -73,7 +74,7 @@ public interface TsdlQueryElementFactory {
 
   TsdlDuration getDuration(TsdlDurationBound lowerBound, TsdlDurationBound upperBound, ParsableTsdlTimeUnit unit);
 
-  TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> events, TsdlDuration tolerance);
+  TemporalOperator getChoice(TemporalRelationType type, TemporalOperand operand1, TemporalOperand operand2, TsdlDuration tolerance);
 
   YieldStatement getResult(YieldFormat format, List<TsdlIdentifier> identifier);
 }

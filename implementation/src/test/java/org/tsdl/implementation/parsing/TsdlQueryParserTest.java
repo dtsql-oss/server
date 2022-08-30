@@ -770,7 +770,7 @@ class TsdlQueryParserTest {
               expected
           ))
           /*.extracting(TsdlEvent::computationStrategy, InstanceOfAssertFactories.type(TsdlEventStrategyType.class))
-          .isEqualTo(TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION)*/; // TODO how to assert duration?
+          .isEqualTo(TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION)*/; // TODO how to assert duration strategy?
     }
 
     @ParameterizedTest
@@ -822,8 +822,14 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().identifier().name()).isEqualTo("e1");
-            assertThat(op.operand2().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand1())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e1");
+            assertThat(op.operand2())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e2");
             assertThat(op.tolerance()).isEmpty();
           });
     }
@@ -844,8 +850,14 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().identifier().name()).isEqualTo("e1");
-            assertThat(op.operand2().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand1())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e1");
+            assertThat(op.operand2())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e2");
             assertThat(op.tolerance())
                 .get()
                 .isEqualTo(tolerance);
@@ -867,10 +879,44 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().identifier().name()).isEqualTo("e2");
-            assertThat(op.operand2().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand1())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e2");
+            assertThat(op.operand2())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e1");
             assertThat(op.tolerance()).isEmpty();
           });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "(e1 follows e2)",
+        "(e2 precedes e1 WITHIN [0,23] minutes)",
+        "(e1 follows (e2 precedes e1) WITHIN [6,7] hours)",
+        "(e4 follows (e3 precedes e6 WITHIN (2,3) minutes) WITHIN (34,87] millis)",
+        "((e1 follows e2 WITHIN (2,3] minutes) precedes (e3 precedes (e4 follows e5) WITHIN [1,2) hours) WITHIN [,] weeks)"
+    })
+    void chooseDeclaration_relationOperators(String choiceDeclaration) {
+      var queryString = """
+          USING EVENTS:
+            AND(lt(1)) AS e1,
+            OR(gt(1)) AS e2,
+            AND(lt(2)) AS e3,
+            OR(lt(2)) AS e4,
+            AND(lt(3)) AS e5,
+            OR(lt(3)) AS e6
+          CHOOSE:
+            %s
+          YIELD:
+            data points
+          """.formatted(choiceDeclaration);
+
+      var query = PARSER.parseQuery(queryString);
+      System.out.print("");
+      // TODO add assertions
     }
 
     @ParameterizedTest
@@ -889,8 +935,14 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().identifier().name()).isEqualTo("e2");
-            assertThat(op.operand2().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand1())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e2");
+            assertThat(op.operand2())
+                .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
+                .extracting(event -> event.identifier().name(), InstanceOfAssertFactories.STRING)
+                .isEqualTo("e1");
             assertThat(op.tolerance())
                 .get()
                 .isEqualTo(tolerance);
