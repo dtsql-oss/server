@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlDuration;
-import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
+import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.strategy.DurationEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
@@ -22,13 +22,13 @@ import org.tsdl.infrastructure.model.TsdlPeriod;
 @Slf4j
 public record DurationEventStrategyImpl(TsdlEventStrategy strategy) implements DurationEventStrategy {
   @Override
-  public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events) {
+  public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     log.debug("Detecting periods using composite strategy '{}' over {} data points and {} events.", DurationEventStrategyImpl.class.getName(),
         dataPoints.size(),
         events.size());
 
     var eventsByIdentifier = events.stream()
-        .collect(Collectors.toMap(TsdlEventDefinition::identifier, Function.identity()));
+        .collect(Collectors.toMap(TsdlEvent::identifier, Function.identity()));
     log.debug("Employing wrapped strategy '{}' to assemble initial periods.", strategy.getClass().getName());
     var detectedPeriods = strategy.detectPeriods(dataPoints, events);
     log.debug("Detected {} data points using wrapped strategy '{}'. Filtering the result now using duration-specific logic.", detectedPeriods.size(),

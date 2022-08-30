@@ -29,7 +29,7 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2, TsdlD
 
   @Override
   public TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
-    log.debug("Evaluating '{} precedes {}' temporal operator.", operand1.definition().identifier().name(), operand2.definition().identifier().name());
+    log.debug("Evaluating '{} precedes {}' temporal operator.", operand1.identifier().name(), operand2.identifier().name());
     Conditions.checkNotNull(Condition.ARGUMENT, periods, "Annotated periods as input to 'precedes' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand1, "First event argument of 'precedes' operator must not be null.");
     Conditions.checkNotNull(Condition.STATE, operand2, "Second event argument of 'precedes' operator must not be null.");
@@ -49,8 +49,8 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2, TsdlD
 
       // ...we must also ensure that the previous and current periods are defined by the events represented by the operands
       //    (i.e., "operand1 = previous", "operand2 = current")...
-      var operatorConformPrecedes = previousPeriod.event().equals(operand1.definition().identifier())
-          && currentPeriod.event().equals(operand2.definition().identifier());
+      var operatorConformPrecedes = previousPeriod.event().equals(operand1.identifier())
+          && currentPeriod.event().equals(operand2.identifier());
 
       log.debug("Events defining periods do{} conform to 'precedes' operator arguments.", operatorConformPrecedes ? "" : " not");
       if (precedes && operatorConformPrecedes) {
@@ -60,8 +60,8 @@ public record PrecedesOperatorImpl(TsdlEvent operand1, TsdlEvent operand2, TsdlD
       }
     }
 
-    log.debug("Evaluation of '{} precedes {}' resulted in a period set with {} periods.", operand1.definition().identifier().name(),
-        operand2.definition().identifier().name(), chosenPeriods.size());
+    log.debug("Evaluation of '{} precedes {}' resulted in a period set with {} periods.", operand1.identifier().name(),
+        operand2.identifier().name(), chosenPeriods.size());
     return QueryResult.of(chosenPeriods.size(), chosenPeriods);
   }
 

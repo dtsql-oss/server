@@ -10,8 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.evaluation.impl.choice.AnnotatedTsdlPeriodImpl;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
-import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
-import org.tsdl.implementation.model.event.definition.TsdlEventDefinition;
+import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.strategy.SinglePointEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
@@ -31,7 +30,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 @Slf4j
 public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
   @Override
-  public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEventDefinition> events) {
+  public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     log.debug("Detecting periods using '{}' over {} data points and {} events.", SinglePointEventStrategyImpl.class.getName(), dataPoints.size(),
         events.size());
     var eventMarkers = new HashMap<TsdlIdentifier, Instant>();
@@ -50,47 +49,44 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
     return Collections.unmodifiableList(detectedPeriods);
   }
 
-  private void markEvents(List<TsdlEventDefinition> events, Map<TsdlIdentifier, Instant> eventMarkers, Map<TsdlIdentifier, DataPoint> priorDataPoints,
+  private void markEvents(List<TsdlEvent> events, Map<TsdlIdentifier, Instant> eventMarkers,
+                          Map<TsdlIdentifier, DataPoint> priorDataPoints,
                           ArrayList<AnnotatedTsdlPeriod> detectedPeriods, DataPoint currentDataPoint, DataPoint previousDataPoint,
                           DataPoint nextDataPoint) {
-    for (TsdlEventDefinition event : events) {
-      if (!(event instanceof SinglePointEventDefinition eventDef)) {
-        throw Conditions.exception(Condition.ARGUMENT, "The event strategy '%s' only supports event definitions of type '%s'. Received: '%s'",
-            getClass().getName(), SinglePointEventDefinition.class.getName(), event.getClass().getName());
-      }
-
-      markEvent(currentDataPoint, previousDataPoint, nextDataPoint, eventDef, eventMarkers, priorDataPoints, detectedPeriods);
+    for (TsdlEvent event : events) {
+      markEvent(currentDataPoint, previousDataPoint, nextDataPoint, event, eventMarkers, priorDataPoints, detectedPeriods);
     }
   }
 
 
-  private void markEvent(DataPoint currentDataPoint, DataPoint previousDataPoint, DataPoint nextDataPoint, SinglePointEventDefinition eventDefinition,
+  private void markEvent(DataPoint currentDataPoint, DataPoint previousDataPoint, DataPoint nextDataPoint,
+                         TsdlEvent event,
                          Map<TsdlIdentifier, Instant> eventMarkers, Map<TsdlIdentifier, DataPoint> priorDataPoints,
                          List<AnnotatedTsdlPeriod> detectedPeriods) {
-    if (eventDefinition.connective().isSatisfied(currentDataPoint)) {
+    if (event.connective().isSatisfied(currentDataPoint)) {
       // satisfied - either period is still going on or the period starts
 
-      if (eventMarkers.containsKey(eventDefinition.identifier())) {
+      if (eventMarkers.containsKey(event.identifier())) {
         // period is still going on
 
         if (nextDataPoint == null) {
           // if the end of the data is reached, the period must end, too
-          finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, eventDefinition.identifier(), currentDataPoint.timestamp(), null);
+          finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, event.identifier(), currentDataPoint.timestamp(), null);
         }
       } else {
         // new period starts
-        eventMarkers.put(eventDefinition.identifier(), currentDataPoint.timestamp());
-        priorDataPoints.put(eventDefinition.identifier(), previousDataPoint);
+        eventMarkers.put(event.identifier(), currentDataPoint.timestamp());
+        priorDataPoints.put(event.identifier(), previousDataPoint);
       }
 
     } else {
       // not satisfied - either period ends, or there is still no open period
 
       //noinspection StatementWithEmptyBody
-      if (eventMarkers.containsKey(eventDefinition.identifier())) {
+      if (eventMarkers.containsKey(event.identifier())) {
         // period ended
         Conditions.checkNotNull(Condition.STATE, previousDataPoint, "When closing a period, there must be a previous data point.");
-        finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, eventDefinition.identifier(), previousDataPoint.timestamp(), currentDataPoint);
+        finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, event.identifier(), previousDataPoint.timestamp(), currentDataPoint);
       } else {
         // nothing to do - still no open period
       }
