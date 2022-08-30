@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
-import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
@@ -36,8 +35,6 @@ import org.tsdl.implementation.model.common.TsdlOutputFormatter;
 import org.tsdl.implementation.model.connective.AndFilterConnective;
 import org.tsdl.implementation.model.connective.OrFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.event.TsdlEventStrategyType;
-import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.implementation.model.filter.argument.TsdlSampleScalarArgument;
@@ -653,13 +650,12 @@ class TsdlQueryParserTest {
       assertThat(query.events())
           .hasSize(2)
           .element(0, InstanceOfAssertFactories.type(TsdlEvent.class))
-          .extracting(TsdlEvent::definition)
-          .isEqualTo(
-              new SinglePointEventDefinitionImpl(
-                  ELEMENTS.getIdentifier("high"),
-                  ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
-                      List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(2d)))),
-                  null
+          .extracting(TsdlEvent::identifier, TsdlEvent::connective)
+          .containsExactly(
+              ELEMENTS.getIdentifier("high"),
+              ELEMENTS.getEventConnective(
+                  ConnectiveIdentifier.AND,
+                  List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(2d)))
               )
           );
     }
@@ -677,11 +673,10 @@ class TsdlQueryParserTest {
           .hasSize(2)
           .element(1, InstanceOfAssertFactories.type(TsdlEvent.class))
           .satisfies(event -> {
-            assertThat(event.definition().identifier()).isEqualTo(ELEMENTS.getIdentifier("sampledHigh"));
+            assertThat(event.identifier()).isEqualTo(ELEMENTS.getIdentifier("sampledHigh"));
 
-            assertThat(event.definition())
-                .asInstanceOf(InstanceOfAssertFactories.type(SinglePointEventDefinition.class))
-                .extracting(def -> def.connective().filters().get(0), InstanceOfAssertFactories.type(ThresholdFilter.class))
+            assertThat(event)
+                .extracting(ev -> ev.connective().events().get(0), InstanceOfAssertFactories.type(ThresholdFilter.class))
                 .extracting(ThresholdFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
                 .extracting(sample -> sample.sample().identifier().name())
                 .isEqualTo("s3");
@@ -736,13 +731,13 @@ class TsdlQueryParserTest {
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(TsdlEvent.class))
           .isEqualTo(ELEMENTS.getEvent(
-              ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
+              ELEMENTS.getEventConnective(ConnectiveIdentifier.AND,
                   List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(0d)))),
               ELEMENTS.getIdentifier("e1"),
               expected
           ))
-          .extracting(TsdlEvent::computationStrategy, InstanceOfAssertFactories.type(TsdlEventStrategyType.class))
-          .isEqualTo(TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION);
+          /*.extracting(TsdlEvent::computationStrategy, InstanceOfAssertFactories.type(TsdlEventStrategyType.class))
+          .isEqualTo(TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION)*/; // TODO how to assert duration?
     }
 
     @ParameterizedTest
@@ -794,8 +789,8 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().definition().identifier().name()).isEqualTo("e1");
-            assertThat(op.operand2().definition().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand1().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand2().identifier().name()).isEqualTo("e2");
             assertThat(op.tolerance()).isEmpty();
           });
     }
@@ -816,8 +811,8 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().definition().identifier().name()).isEqualTo("e1");
-            assertThat(op.operand2().definition().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand1().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand2().identifier().name()).isEqualTo("e2");
             assertThat(op.tolerance())
                 .get()
                 .isEqualTo(tolerance);
@@ -839,8 +834,8 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().definition().identifier().name()).isEqualTo("e2");
-            assertThat(op.operand2().definition().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand1().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand2().identifier().name()).isEqualTo("e1");
             assertThat(op.tolerance()).isEmpty();
           });
     }
@@ -861,8 +856,8 @@ class TsdlQueryParserTest {
           .get()
           .satisfies(op -> {
             assertThat(op.cardinality()).isEqualTo(2);
-            assertThat(op.operand1().definition().identifier().name()).isEqualTo("e2");
-            assertThat(op.operand2().definition().identifier().name()).isEqualTo("e1");
+            assertThat(op.operand1().identifier().name()).isEqualTo("e2");
+            assertThat(op.operand2().identifier().name()).isEqualTo("e1");
             assertThat(op.tolerance())
                 .get()
                 .isEqualTo(tolerance);
@@ -1201,13 +1196,13 @@ class TsdlQueryParserTest {
           .satisfies(events -> {
             assertThat(events.get(0))
                 .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
-                .extracting(TsdlEvent::definition)
-                .isEqualTo(
-                    new SinglePointEventDefinitionImpl(
-                        ELEMENTS.getIdentifier("low"),
-                        ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
-                            List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5)))
-                        ),
+                .extracting(TsdlEvent::identifier, TsdlEvent::connective, TsdlEvent::duration)
+                .containsExactly(
+                    ELEMENTS.getIdentifier("low"),
+                    ELEMENTS.getEventConnective(ConnectiveIdentifier.AND,
+                        List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5)))
+                    ),
+                    Optional.of(
                         ELEMENTS.getDuration(
                             TsdlDurationBound.of(3, false),
                             TsdlDurationBound.of(Long.MAX_VALUE, true),
@@ -1218,30 +1213,27 @@ class TsdlQueryParserTest {
 
             assertThat(events.get(1))
                 .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
-                .extracting(TsdlEvent::definition)
-                .isEqualTo(
-                    new SinglePointEventDefinitionImpl(
-                        ELEMENTS.getIdentifier("high"),
-                        ELEMENTS.getFilterConnective(ConnectiveIdentifier.OR,
-                            List.of(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(7.0))))
-                        ),
-                        null
-                    )
+                .extracting(TsdlEvent::identifier, TsdlEvent::connective, TsdlEvent::duration)
+                .containsExactly(
+                    ELEMENTS.getIdentifier("high"),
+                    ELEMENTS.getEventConnective(ConnectiveIdentifier.OR,
+                        List.of(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(7.0))))
+                    ),
+                    Optional.empty()
                 );
 
             assertThat(events.get(2))
                 .asInstanceOf(InstanceOfAssertFactories.type(TsdlEvent.class))
                 .satisfies(event -> {
-                  assertThat(event.definition())
-                      .asInstanceOf(InstanceOfAssertFactories.type(SinglePointEventDefinition.class))
-                      .extracting(def -> def.connective().filters(), InstanceOfAssertFactories.list(SinglePointFilter.class))
+                  assertThat(event)
+                      .extracting(ev -> ev.connective().events(), InstanceOfAssertFactories.list(SinglePointFilter.class))
                       .hasSize(1)
                       .element(0, InstanceOfAssertFactories.type(GreaterThanFilter.class))
                       .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
                       .extracting(arg -> arg.sample().identifier().name(), InstanceOfAssertFactories.STRING)
                       .isEqualTo("s2");
 
-                  assertThat(event.definition().identifier()).isEqualTo(ELEMENTS.getIdentifier("mid"));
+                  assertThat(event.identifier()).isEqualTo(ELEMENTS.getIdentifier("mid"));
                 });
           });
     }
@@ -1251,8 +1243,8 @@ class TsdlQueryParserTest {
     void integration_detectsChoice(String queryString) {
       var query = PARSER.parseQuery(queryString);
 
-      var low = query.events().stream().filter(event -> event.definition().identifier().name().equals("low")).findFirst().orElseThrow();
-      var high = query.events().stream().filter(event -> event.definition().identifier().name().equals("high")).findFirst().orElseThrow();
+      var low = query.events().stream().filter(event -> event.identifier().name().equals("low")).findFirst().orElseThrow();
+      var high = query.events().stream().filter(event -> event.identifier().name().equals("high")).findFirst().orElseThrow();
       assertThat(query.choice())
           .asInstanceOf(InstanceOfAssertFactories.optional(PrecedesOperator.class))
           .get()
