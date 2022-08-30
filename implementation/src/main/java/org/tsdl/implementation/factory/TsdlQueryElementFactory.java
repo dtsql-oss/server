@@ -57,9 +57,9 @@ public interface TsdlQueryElementFactory {
 
   EventConnective getEventConnective(ConnectiveIdentifier type, List<EventFunction> events);
 
-  TsdlScalarArgument getFilterArgument(double value);
+  TsdlScalarArgument getScalarArgument(double value);
 
-  TsdlScalarArgument getFilterArgument(TsdlSample sample);
+  TsdlScalarArgument getScalarArgument(TsdlSample sample);
 
   TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs);
 

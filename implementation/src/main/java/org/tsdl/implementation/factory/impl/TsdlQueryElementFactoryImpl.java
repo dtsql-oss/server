@@ -173,13 +173,13 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlScalarArgument getFilterArgument(double value) {
+  public TsdlScalarArgument getScalarArgument(double value) {
     Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
     return new TsdlLiteralScalarArgumentImpl(value);
   }
 
   @Override
-  public TsdlScalarArgument getFilterArgument(TsdlSample sample) {
+  public TsdlScalarArgument getScalarArgument(TsdlSample sample) {
     Conditions.checkNotNull(Condition.ARGUMENT, sample, "Filter argument sample must not be null.");
     return new TsdlSampleScalarArgumentImpl(sample);
   }
