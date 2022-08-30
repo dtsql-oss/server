@@ -33,8 +33,8 @@ import org.tsdl.implementation.model.common.TsdlDuration;
 import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.common.TsdlOutputFormatter;
-import org.tsdl.implementation.model.connective.AndConnective;
-import org.tsdl.implementation.model.connective.OrConnective;
+import org.tsdl.implementation.model.connective.AndFilterConnective;
+import org.tsdl.implementation.model.connective.OrFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
@@ -365,9 +365,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1);
 
       assertThat(query.filter())
@@ -387,9 +387,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(LowerThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
@@ -406,9 +406,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1);
 
       assertThat(query.filter())
@@ -428,9 +428,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
@@ -448,9 +448,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1);
 
       assertThat(query.filter())
@@ -470,9 +470,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(AfterFilter.class))
           .extracting(TemporalFilter::argument)
@@ -489,9 +489,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LowerThanFilter.class))
@@ -509,9 +509,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(BeforeFilter.class))
@@ -533,9 +533,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(OrConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(OrFilterConnective.class))
           .get()
-          .extracting(OrConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(4);
 
       assertThat(query.filter())
@@ -577,9 +577,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(GreaterThanFilter.class))
           .extracting(GreaterThanFilter::threshold, InstanceOfAssertFactories.type(TsdlSampleScalarArgument.class))
@@ -600,9 +600,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
           .extracting(
@@ -657,7 +657,7 @@ class TsdlQueryParserTest {
           .isEqualTo(
               new SinglePointEventDefinitionImpl(
                   ELEMENTS.getIdentifier("high"),
-                  ELEMENTS.getConnective(ConnectiveIdentifier.AND,
+                  ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
                       List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(2d)))),
                   null
               )
@@ -735,8 +735,8 @@ class TsdlQueryParserTest {
       assertThat(query.events())
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(TsdlEvent.class))
-          .isEqualTo(ELEMENTS.getSinglePointEvent(
-              ELEMENTS.getConnective(ConnectiveIdentifier.AND,
+          .isEqualTo(ELEMENTS.getEvent(
+              ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
                   List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(0d)))),
               ELEMENTS.getIdentifier("e1"),
               expected
@@ -1073,9 +1073,9 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       assertThat(query.filter())
-          .asInstanceOf(InstanceOfAssertFactories.optional(AndConnective.class))
+          .asInstanceOf(InstanceOfAssertFactories.optional(AndFilterConnective.class))
           .get()
-          .extracting(AndConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
+          .extracting(AndFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(6)
           .satisfies(filterArguments -> {
             assertThat(filterArguments.get(0))
@@ -1205,7 +1205,7 @@ class TsdlQueryParserTest {
                 .isEqualTo(
                     new SinglePointEventDefinitionImpl(
                         ELEMENTS.getIdentifier("low"),
-                        ELEMENTS.getConnective(ConnectiveIdentifier.AND,
+                        ELEMENTS.getFilterConnective(ConnectiveIdentifier.AND,
                             List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5)))
                         ),
                         ELEMENTS.getDuration(
@@ -1222,7 +1222,7 @@ class TsdlQueryParserTest {
                 .isEqualTo(
                     new SinglePointEventDefinitionImpl(
                         ELEMENTS.getIdentifier("high"),
-                        ELEMENTS.getConnective(ConnectiveIdentifier.OR,
+                        ELEMENTS.getFilterConnective(ConnectiveIdentifier.OR,
                             List.of(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(7.0))))
                         ),
                         null
