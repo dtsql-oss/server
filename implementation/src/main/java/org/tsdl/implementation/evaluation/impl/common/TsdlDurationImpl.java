@@ -35,11 +35,12 @@ public record TsdlDurationImpl(
 
   @Override
   public String toString() {
-    return "%s%s, %s%s".formatted(
+    return "%s%s, %s%s %s".formatted(
         lowerBound.inclusive() ? "[" : "(",
         lowerBound.value(),
         upperBound.value(),
-        upperBound.inclusive() ? "]" : ")"
+        upperBound.inclusive() ? "]" : ")",
+        unit.representation()
     );
   }
 }

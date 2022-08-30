@@ -382,15 +382,15 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
 
   private ComplexEventFunction parseIncreaseEvent(TsdlParser.IncreaseEventContext ctx) {
     var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
-    var maximumChange = parseScalarArgument(ctx.scalarArgument(1));
-    var tolerance = parseScalarArgument(ctx.scalarArgument(2));
+    var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
+    var tolerance = parseScalarArgument(ctx.scalarArgument(1));
     return elementFactory.getIncreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
   private ComplexEventFunction parseDecreaseEvent(TsdlParser.DecreaseEventContext ctx) {
     var minimumChange = parseScalarArgument(ctx.scalarArgument(0));
-    var maximumChange = parseScalarArgument(ctx.scalarArgument(1));
-    var tolerance = parseScalarArgument(ctx.scalarArgument(2));
+    var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
+    var tolerance = parseScalarArgument(ctx.scalarArgument(1));
     return elementFactory.getDecreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
@@ -444,12 +444,22 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     if (ctx.IDENTIFIER() != null) {
       var identifier = requireIdentifier(ctx.IDENTIFIER(), IdentifierType.SAMPLE);
       var referencedSample = declaredSamples.get(identifier);
-      return elementFactory.getFilterArgument(referencedSample);
+      return elementFactory.getScalarArgument(referencedSample);
     } else if (ctx.NUMBER() != null) {
       var literalValue = elementParser.parseNumber(ctx.NUMBER().getText());
-      return elementFactory.getFilterArgument(literalValue);
+      return elementFactory.getScalarArgument(literalValue);
     } else {
-      throw new TsdlParseException("Cannot parse TsdlFilterArgument, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
+      throw new TsdlParseException("Cannot parse TsdlScalarArgument, found neither 'identifier' nor 'NUMBER' as 'singlePointFilterArgument'.");
+    }
+  }
+
+  TsdlScalarArgument parseMonotonicUpperBound(TsdlParser.MonotonicUpperBoundContext ctx) {
+    if (ctx.HYPHEN() != null) {
+      return elementFactory.getScalarArgument(Double.POSITIVE_INFINITY);
+    } else if (ctx.scalarArgument() != null) {
+      return parseScalarArgument(ctx.scalarArgument());
+    } else {
+      throw new TsdlParseException("Cannot parse MonotonicUpperbound, found neither 'HYPHEN' nor 'scalarArgument'.");
     }
   }
 

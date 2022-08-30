@@ -412,7 +412,7 @@ class TsdlQueryParserTest {
           .get()
           .extracting(connective -> connective.filters().get(0), InstanceOfAssertFactories.type(RelativeAroundFilter.class))
           .extracting(RelativeAroundFilter::referenceValue, RelativeAroundFilter::maximumDeviation)
-          .containsExactly(ELEMENTS.getFilterArgument(23.0), ELEMENTS.getFilterArgument(75.45));
+          .containsExactly(ELEMENTS.getScalarArgument(23.0), ELEMENTS.getScalarArgument(75.45));
     }
 
     @Test
@@ -432,7 +432,7 @@ class TsdlQueryParserTest {
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
           .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(AbsoluteAroundFilter.class))
           .extracting(AbsoluteAroundFilter::referenceValue, AbsoluteAroundFilter::maximumDeviation)
-          .containsExactly(ELEMENTS.getFilterArgument(23.0), ELEMENTS.getFilterArgument(2345.3));
+          .containsExactly(ELEMENTS.getScalarArgument(23.0), ELEMENTS.getScalarArgument(2345.3));
     }
 
     @Test
@@ -655,9 +655,25 @@ class TsdlQueryParserTest {
               ELEMENTS.getIdentifier("high"),
               ELEMENTS.getEventConnective(
                   ConnectiveIdentifier.AND,
-                  List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(2d)))
+                  List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getScalarArgument(2d)))
               )
           );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "AND(const(3.4, 12.4))",
+        "OR(increase(2.3, 4.2, 12.3)) FOR [,] hours",
+        "OR(decrease(2.3, -, 12.3)) FOR (6,] weeks",
+        "AND(NOT(const(3.4, 12.4)), NOT(decrease(2.3, -, 12.3)), NOT(increase(2.3, -, 12.3))) FOR [3,4) minutes",
+        "AND(const(3.4, 12.4), NOT(decrease(2.3, -, 12.3)), gt(23.4), NOT(lt(50.02)))"
+    })
+    void eventDeclaration_validComplex(String eventDefinition) {
+      var queryString = "USING EVENTS: %s AS myEvent  YIELD: data points".formatted(eventDefinition);
+
+      var query = PARSER.parseQuery(queryString);
+      System.out.print("");
+      // TODO add assertions
     }
 
     @Test
@@ -681,6 +697,23 @@ class TsdlQueryParserTest {
                 .extracting(sample -> sample.sample().identifier().name())
                 .isEqualTo("s3");
           });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "AND(const(s1, 12.4))",
+        "OR(increase(2.3, s1, 12.3))",
+        "OR(decrease(2.3, -, s1))",
+        "AND(NOT(const(3.4, 12.4)), NOT(decrease(s1, -, 12.3)), NOT(increase(s2, -, 12.3)))",
+        "AND(const(s1, 12.4), NOT(decrease(s2, s3, 12.3)), gt(s2), NOT(lt(50.02)))"
+    })
+    void eventDeclaration_validWithSampleComplex(String eventDefinition) {
+      var queryString = ("WITH SAMPLES: avg() AS s1, avg()  AS s2, avg() AS s3"
+          + " USING EVENTS: %s AS myEvent  YIELD: data points").formatted(eventDefinition);
+
+      var query = PARSER.parseQuery(queryString);
+      System.out.print("");
+      // TODO add assertions
     }
 
     @Test
@@ -732,7 +765,7 @@ class TsdlQueryParserTest {
           .element(0, InstanceOfAssertFactories.type(TsdlEvent.class))
           .isEqualTo(ELEMENTS.getEvent(
               ELEMENTS.getEventConnective(ConnectiveIdentifier.AND,
-                  List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(0d)))),
+                  List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getScalarArgument(0d)))),
               ELEMENTS.getIdentifier("e1"),
               expected
           ))
@@ -1080,7 +1113,7 @@ class TsdlQueryParserTest {
                 .isEqualTo("s2");
 
             assertThat(filterArguments.get(1))
-                .isEqualTo(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5))));
+                .isEqualTo(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getScalarArgument(3.5))));
 
             assertThat(filterArguments.get(2))
                 .isEqualTo(
@@ -1200,7 +1233,7 @@ class TsdlQueryParserTest {
                 .containsExactly(
                     ELEMENTS.getIdentifier("low"),
                     ELEMENTS.getEventConnective(ConnectiveIdentifier.AND,
-                        List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getFilterArgument(3.5)))
+                        List.of(ELEMENTS.getThresholdFilter(ThresholdFilterType.LT, ELEMENTS.getScalarArgument(3.5)))
                     ),
                     Optional.of(
                         ELEMENTS.getDuration(
@@ -1217,7 +1250,7 @@ class TsdlQueryParserTest {
                 .containsExactly(
                     ELEMENTS.getIdentifier("high"),
                     ELEMENTS.getEventConnective(ConnectiveIdentifier.OR,
-                        List.of(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getFilterArgument(7.0))))
+                        List.of(ELEMENTS.getNegatedFilter(ELEMENTS.getThresholdFilter(ThresholdFilterType.GT, ELEMENTS.getScalarArgument(7.0))))
                     ),
                     Optional.empty()
                 );
