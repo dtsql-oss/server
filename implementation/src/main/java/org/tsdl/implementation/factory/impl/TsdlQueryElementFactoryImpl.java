@@ -45,12 +45,16 @@ import org.tsdl.implementation.model.common.TsdlDurationBound;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
+import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
 import org.tsdl.implementation.model.event.definition.ComplexEventFunction;
+import org.tsdl.implementation.model.event.definition.ConstantEvent;
 import org.tsdl.implementation.model.event.definition.ConstantEventImpl;
+import org.tsdl.implementation.model.event.definition.DecreaseEvent;
 import org.tsdl.implementation.model.event.definition.DecreaseEventImpl;
 import org.tsdl.implementation.model.event.definition.EventConnective;
 import org.tsdl.implementation.model.event.definition.EventFunction;
+import org.tsdl.implementation.model.event.definition.IncreaseEvent;
 import org.tsdl.implementation.model.event.definition.IncreaseEventImpl;
 import org.tsdl.implementation.model.event.definition.NegatedEventFunction;
 import org.tsdl.implementation.model.event.definition.NegatedEventFunctionImpl;
@@ -253,10 +257,27 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   public TsdlEvent getEvent(EventConnective connective, TsdlIdentifier identifier, TsdlDuration duration) {
     Conditions.checkNotNull(Condition.ARGUMENT, connective, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
+    TsdlEventStrategyType eventStrategyType;
+    if (connective.events().stream().anyMatch(e -> e instanceof SinglePointFilter)) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT;
+    } else if (connective.events().get(0) instanceof ConstantEvent ||
+        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof ConstantEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.CONSTANT_EVENT_WITH_DURATION : TsdlEventStrategyType.CONSTANT_EVENT;
+    } else if (connective.events().get(0) instanceof DecreaseEvent ||
+        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof DecreaseEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.DECREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.DECREASE_EVENT;
+    } else if (connective.events().get(0) instanceof IncreaseEvent ||
+        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof IncreaseEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.INCREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.INCREASE_EVENT;
+    } else {
+      throw Conditions.exception(Condition.STATE, "Cannot determine event computation strategy from event connective.");
+    }
+
     return new TsdlEventImpl(
         connective,
         identifier,
-        duration
+        duration,
+        eventStrategyType
     );
   }
 

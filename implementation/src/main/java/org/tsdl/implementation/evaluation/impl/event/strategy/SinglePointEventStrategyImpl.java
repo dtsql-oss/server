@@ -8,10 +8,18 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.tsdl.implementation.evaluation.impl.choice.AnnotatedTsdlPeriodImpl;
+import org.tsdl.implementation.evaluation.impl.connective.AndFilterConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.OrFilterConnectiveImpl;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
+import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
+import org.tsdl.implementation.model.event.definition.AndEventConnective;
+import org.tsdl.implementation.model.event.definition.EventConnective;
+import org.tsdl.implementation.model.event.definition.EventFunction;
+import org.tsdl.implementation.model.event.definition.OrEventConnective;
 import org.tsdl.implementation.model.event.strategy.SinglePointEventStrategy;
+import org.tsdl.implementation.model.filter.SinglePointFilter;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
@@ -54,39 +62,41 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
                           ArrayList<AnnotatedTsdlPeriod> detectedPeriods, DataPoint currentDataPoint, DataPoint previousDataPoint,
                           DataPoint nextDataPoint) {
     for (TsdlEvent event : events) {
-      markEvent(currentDataPoint, previousDataPoint, nextDataPoint, event, eventMarkers, priorDataPoints, detectedPeriods);
+      var filterConnective = requireSinglePointFilters(event.connective());
+      var identifier = event.identifier();
+      markEvent(currentDataPoint, previousDataPoint, nextDataPoint, filterConnective, identifier, eventMarkers, priorDataPoints, detectedPeriods);
     }
   }
 
 
   private void markEvent(DataPoint currentDataPoint, DataPoint previousDataPoint, DataPoint nextDataPoint,
-                         TsdlEvent event,
+                         SinglePointFilterConnective filterConnective, TsdlIdentifier eventIdentifier,
                          Map<TsdlIdentifier, Instant> eventMarkers, Map<TsdlIdentifier, DataPoint> priorDataPoints,
                          List<AnnotatedTsdlPeriod> detectedPeriods) {
-    if (event.connective().isSatisfied(currentDataPoint)) {
+    if (filterConnective.isSatisfied(currentDataPoint)) {
       // satisfied - either period is still going on or the period starts
 
-      if (eventMarkers.containsKey(event.identifier())) {
+      if (eventMarkers.containsKey(eventIdentifier)) {
         // period is still going on
 
         if (nextDataPoint == null) {
           // if the end of the data is reached, the period must end, too
-          finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, event.identifier(), currentDataPoint.timestamp(), null);
+          finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, eventIdentifier, currentDataPoint.timestamp(), null);
         }
       } else {
         // new period starts
-        eventMarkers.put(event.identifier(), currentDataPoint.timestamp());
-        priorDataPoints.put(event.identifier(), previousDataPoint);
+        eventMarkers.put(eventIdentifier, currentDataPoint.timestamp());
+        priorDataPoints.put(eventIdentifier, previousDataPoint);
       }
 
     } else {
       // not satisfied - either period ends, or there is still no open period
 
       //noinspection StatementWithEmptyBody
-      if (eventMarkers.containsKey(event.identifier())) {
+      if (eventMarkers.containsKey(eventIdentifier)) {
         // period ended
         Conditions.checkNotNull(Condition.STATE, previousDataPoint, "When closing a period, there must be a previous data point.");
-        finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, event.identifier(), previousDataPoint.timestamp(), currentDataPoint);
+        finalizePeriod(detectedPeriods, eventMarkers, priorDataPoints, eventIdentifier, previousDataPoint.timestamp(), currentDataPoint);
       } else {
         // nothing to do - still no open period
       }
@@ -100,5 +110,22 @@ public class SinglePointEventStrategyImpl implements SinglePointEventStrategy {
     periods.add(new AnnotatedTsdlPeriodImpl(finalizedPeriod, eventId, priorDataPoints.get(eventId), subsequentDataPoint));
     eventMarkers.remove(eventId);
     priorDataPoints.remove(eventId);
+  }
+
+  private SinglePointFilterConnective requireSinglePointFilters(EventConnective connective) {
+    var filters = new ArrayList<SinglePointFilter>();
+    for (EventFunction function : connective.events()) {
+      if (!(function instanceof SinglePointFilter filter)) {
+        throw Conditions.exception(Condition.STATE, "The event strategy '%s' only supports event functions of type '%s'. Received: '%s'",
+            getClass().getName(), SinglePointFilter.class.getName(), function.getClass().getName());
+      }
+      filters.add(filter);
+    }
+
+    return switch (connective) {
+      case AndEventConnective ignored -> new AndFilterConnectiveImpl(filters);
+      case OrEventConnective ignored -> new OrFilterConnectiveImpl(filters);
+      default -> throw Conditions.exception(Condition.STATE, "Cannot construct filter connective from type '%s'.", connective.getClass().getName());
+    };
   }
 }

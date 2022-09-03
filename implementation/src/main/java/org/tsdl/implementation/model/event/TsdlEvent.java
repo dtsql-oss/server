@@ -15,4 +15,6 @@ public interface TsdlEvent extends TemporalOperand {
   TsdlIdentifier identifier();
 
   Optional<TsdlDuration> duration();
+
+  TsdlEventStrategyType computationStrategy();
 }
