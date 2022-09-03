@@ -3,6 +3,9 @@ package org.tsdl.implementation.model.event.definition;
 import java.util.List;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * An event connective.
+ */
 public interface EventConnective {
   List<EventFunction> events();
 

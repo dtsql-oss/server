@@ -4,6 +4,9 @@ import java.util.Optional;
 import org.tsdl.client.api.builder.ChoiceOperand;
 import org.tsdl.client.api.builder.Range;
 
+/**
+ * Default implementation of {@link ChoiceOperand.EventChoiceOperand}.
+ */
 public class EventChoiceOperandImpl implements ChoiceOperand.EventChoiceOperand {
   private final String eventIdentifier;
   private final Range tolerance;
