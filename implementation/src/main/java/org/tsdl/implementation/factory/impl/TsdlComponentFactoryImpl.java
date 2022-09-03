@@ -1,9 +1,9 @@
 package org.tsdl.implementation.factory.impl;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.tsdl.implementation.evaluation.TsdlPeriodAssembler;
 import org.tsdl.implementation.evaluation.TsdlResultCollector;
 import org.tsdl.implementation.evaluation.TsdlSamplesCalculator;
-import org.tsdl.implementation.evaluation.impl.TsdlPeriodAssembler;
 import org.tsdl.implementation.evaluation.impl.TsdlPeriodAssemblerImpl;
 import org.tsdl.implementation.evaluation.impl.TsdlSamplesCalculatorImpl;
 import org.tsdl.implementation.evaluation.impl.result.TsdlResultCollectorImpl;

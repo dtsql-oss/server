@@ -392,6 +392,7 @@ class TsdlQueryServiceTest {
     @TsdlTestSources({
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
+    @TsdlTestVisualization(skipVisualization = true)
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithTimeTolerance_detectsPeriod(List<DataPoint> dps) {
       var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nCHOOSE:\n(low precedes high WITHIN [0,15] minutes)\nYIELD:\nall periods";
 

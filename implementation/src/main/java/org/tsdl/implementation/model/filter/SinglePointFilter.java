@@ -1,6 +1,5 @@
 package org.tsdl.implementation.model.filter;
 
-import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.EventFunction;
 import org.tsdl.infrastructure.model.DataPoint;
 
@@ -10,9 +9,4 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 public interface SinglePointFilter extends EventFunction {
   boolean evaluate(DataPoint dataPoint);
-
-  @Override
-  default TsdlEventStrategyType computationStrategy() {
-    return TsdlEventStrategyType.SINGLE_POINT_EVENT;
-  }
 }
