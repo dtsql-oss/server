@@ -4,6 +4,9 @@ import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
 
+/**
+ * Default implementation of {@link DecreaseEvent}.
+ */
 public record DecreaseEventImpl(
     TsdlScalarArgument minimumChange,
     TsdlScalarArgument maximumChange,

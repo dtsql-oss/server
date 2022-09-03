@@ -6,6 +6,9 @@ import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.strategy.IncreaseEventStrategy;
 import org.tsdl.infrastructure.model.DataPoint;
 
+/**
+ * Default implementation of {@link IncreaseEventStrategy}.
+ */
 public class IncreaseEventStrategyImpl implements IncreaseEventStrategy {
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {

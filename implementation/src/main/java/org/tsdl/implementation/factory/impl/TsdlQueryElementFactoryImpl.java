@@ -193,17 +193,11 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   public TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for sample must not be null.");
     if (!includeFormatter) {
-      Conditions.checkSizeExactly(Condition.ARGUMENT,
-          formatterArgs,
-          0,
+      Conditions.checkSizeExactly(Condition.ARGUMENT, formatterArgs, 0,
           "If no output formatter is attached to a sample, there must not be any formatting arguments.");
     }
 
-    return new TsdlSampleImpl(
-        aggregator,
-        identifier,
-        includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null
-    );
+    return new TsdlSampleImpl(aggregator, identifier, includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null);
   }
 
   @Override
@@ -260,25 +254,20 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     TsdlEventStrategyType eventStrategyType;
     if (connective.events().stream().anyMatch(e -> e instanceof SinglePointFilter)) {
       eventStrategyType = duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT;
-    } else if (connective.events().get(0) instanceof ConstantEvent ||
-        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof ConstantEvent) {
+    } else if (connective.events().get(0) instanceof ConstantEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof ConstantEvent) {
       eventStrategyType = duration != null ? TsdlEventStrategyType.CONSTANT_EVENT_WITH_DURATION : TsdlEventStrategyType.CONSTANT_EVENT;
-    } else if (connective.events().get(0) instanceof DecreaseEvent ||
-        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof DecreaseEvent) {
+    } else if (connective.events().get(0) instanceof DecreaseEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof DecreaseEvent) {
       eventStrategyType = duration != null ? TsdlEventStrategyType.DECREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.DECREASE_EVENT;
-    } else if (connective.events().get(0) instanceof IncreaseEvent ||
-        connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof IncreaseEvent) {
+    } else if (connective.events().get(0) instanceof IncreaseEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof IncreaseEvent) {
       eventStrategyType = duration != null ? TsdlEventStrategyType.INCREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.INCREASE_EVENT;
     } else {
       throw Conditions.exception(Condition.STATE, "Cannot determine event computation strategy from event connective.");
     }
 
-    return new TsdlEventImpl(
-        connective,
-        identifier,
-        duration,
-        eventStrategyType
-    );
+    return new TsdlEventImpl(connective, identifier, duration, eventStrategyType);
   }
 
   @Override
@@ -289,6 +278,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     return new TsdlDurationImpl(lowerBound, upperBound, unit);
   }
 
+  @Override
   public TemporalOperator getChoice(TemporalRelationType type, TemporalOperand operand1, TemporalOperand operand2, TsdlDuration tolerance) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of temporal relation must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First temporal operand must not be null.");
