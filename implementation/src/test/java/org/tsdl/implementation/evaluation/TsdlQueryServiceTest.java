@@ -13,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.infrastructure.api.QueryService;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.MultipleScalarResult;
 import org.tsdl.infrastructure.model.QueryResult;
@@ -361,6 +363,51 @@ class TsdlQueryServiceTest {
                 );
           });
     }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_constantEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(const(20,13.5)) FOR [3,] hours AS myConstEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+
+      /* potential for improvement:
+       * find way to set DERIVATIVE_THRESHOLD, maybe dynamically based on data?
+       * implement "wiggle room", i.e., explore left and right extensions/reductions of the heuristic intervals and pick the longest one
+       */
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_increaseEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(increase(57,-,5)) AS myIncreaseEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_decreaseEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(decrease(57,-,5)) AS myIncreaseEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+    }
+
   }
 
   @Nested
