@@ -66,7 +66,9 @@ public enum CsvStorageProperty implements StorageProperty {
    * If present, instructs CSV parser to abort when a line whose content is equivalent to one of the custom EOFs. This is useful for when
    * you know a CSV file contains additional information up from a certain point which is not relevant in this context.
    */
-  CUSTOM_EOF_MARKERS("customEndOfFileMarkers", String[].class);
+  CUSTOM_EOF_MARKERS("customEndOfFileMarkers", String[].class),
+
+  TARGET_FILE("targetFile", String.class);
 
   private final String identifier;
 

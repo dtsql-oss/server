@@ -5,6 +5,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +27,7 @@ import org.tsdl.service.exception.ServiceResolutionException;
 import org.tsdl.service.mapper.QueryResultMapper;
 import org.tsdl.service.mapper.StorageServiceConfigurationMapper;
 import org.tsdl.service.service.StorageResolverService;
+import org.tsdl.storage.csv.CsvStorageProperty;
 
 @RestController
 @RequestMapping("/query")
@@ -46,7 +55,7 @@ public class QueryController extends BaseController {
   @ApiResponse(responseCode = "400", description = "Specified storage is not supported.")
   public QueryResultDto query(@Valid @RequestBody
                               @Parameter(description = "Specification of query to execute, i.e., TSDL query and storage configuration.")
-                              QueryDto querySpecification) throws ServiceResolutionException {
+                              QueryDto querySpecification) throws ServiceResolutionException, IOException {
     log.info("Received query request for storage '{}'", querySpecification.getStorage().getName());
     log.debug("Service configuration: {}", querySpecification.getStorage().getServiceConfiguration());
     log.debug("Lookup configuration: {}", querySpecification.getStorage().getLookupConfiguration());
@@ -59,11 +68,53 @@ public class QueryController extends BaseController {
     var lookupConfig = mapConfig(storageSpec.getLookupConfiguration(), tsdlStorage);
     var transformationConfig = mapConfig(storageSpec.getTransformationConfiguration(), tsdlStorage);
 
+    var targetFile = serviceConfig.getProperty(CsvStorageProperty.TARGET_FILE, String.class);
+    if (serviceConfig.isPropertySet(CsvStorageProperty.TARGET_FILE)) {
+      log(targetFile, "QUERY:\n" + querySpecification.getTsdlQuery() + "\n");
+    }
+
     tsdlStorage.storageService().initialize(serviceConfig);
     var fetchedData = tsdlStorage.storageService().load(lookupConfig);
     var dataPoints = tsdlStorage.storageService().transform(fetchedData, transformationConfig);
 
+    var beginMillis = System.currentTimeMillis();
+    var beginNano = System.nanoTime();
+    var beginInstant = Instant.now();
     var queryResult = queryService.query(dataPoints, querySpecification.getTsdlQuery());
+    var endMillis = System.currentTimeMillis();
+    var endNano = System.nanoTime();
+    var endInstant = Instant.now();
+    var durationMillis = endMillis - beginMillis;
+    var durationNano = TimeUnit.NANOSECONDS.toMillis(endNano - beginNano);
+    var durationInstant = Duration.between(beginInstant, endInstant).toMillis();
+    var durationAveraged = (durationMillis + durationNano + durationInstant) / 3;
+
+    if (serviceConfig.isPropertySet(CsvStorageProperty.TARGET_FILE)) {
+      log(targetFile,
+          ("""
+
+              DURATIONS:
+                from millis: %s ms
+                from nanoTime: %s ms
+                from instant: %s ms
+                averaged: %s
+              -------------------------------------------------------------------------------
+              """).formatted(
+              durationMillis, durationNano,
+              durationInstant, durationAveraged));
+    }
+
     return queryResultMapper.entityToDto(queryResult);
+  }
+
+  private void log(String targetFile, String text) throws IOException {
+    var path = Path.of(targetFile);
+    Files.createDirectories(path.getParent());
+    Files.writeString(
+        path,
+        text,
+        StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE, StandardOpenOption.APPEND
+    );
   }
 }
