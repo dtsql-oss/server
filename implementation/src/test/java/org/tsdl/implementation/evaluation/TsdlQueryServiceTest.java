@@ -398,7 +398,7 @@ class TsdlQueryServiceTest {
        * the criterion for allowing temporary negative rates of change has as consequence that (near) constant intervals at the start, end or in the
        * middle of an increase/decrease period are also considered an increase/decrease - which should not be the case. one would need to add
        * additional conditions such that temporary negative/near-zero rates are tolerated, but only for a specific (small) amount of time. then, the
-       * increase starting at ~06 22:00 would also be detected (it has an increase of > 200 %)
+       * increase starting at ~06T22:00 would also be detected (it has an increase of > 200 %)
        */
     }
 
@@ -416,10 +416,10 @@ class TsdlQueryServiceTest {
 
       /*
        * potentials for improvement:
-       * see test 'queryEvent_increaseEvent'
+       * see test 'queryEvent_increaseEvent' with inverse effect that the incorrect (false positive) "decrase" from ~07T02:45 until ~08T07:45 would
+       * not be detected, but only the correct decrease from ~07T20:00 until ~08T06:00
        */
     }
-
   }
 
   @Nested
