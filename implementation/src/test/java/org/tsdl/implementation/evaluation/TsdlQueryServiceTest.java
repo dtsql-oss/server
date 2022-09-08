@@ -376,9 +376,9 @@ class TsdlQueryServiceTest {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
 
-      /* potential for improvement:
+      /* potentials for improvement:
        * find way to set DERIVATIVE_THRESHOLD, maybe dynamically based on data?
-       * implement "wiggle room", i.e., explore left and right extensions/reductions of the heuristic intervals and pick the longest one
+       * implement neighbourhood search, i.e., explore left and right extensions/reductions of the heuristic intervals and pick the longest one
        */
     }
 
@@ -388,11 +388,18 @@ class TsdlQueryServiceTest {
     )
     @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
     void queryEvent_increaseEvent(List<DataPoint> dps) {
-      var query = "USING EVENTS: AND(increase(57,-,5)) AS myIncreaseEvent YIELD: all periods";
+      var query = "USING EVENTS: AND(increase(50,-,0.5)) AS myIncreaseEvent YIELD: all periods";
       var queryResult = queryService.query(dps, query);
       for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
+
+      /* potentials for improvement:
+       * the criterion for allowing temporary negative rates of change has as consequence that (near) constant intervals at the start, end or in the
+       * middle of an increase/decrease period are also considered an increase/decrease - which should not be the case. one would need to add
+       * additional conditions such that temporary negative/near-zero rates are tolerated, but only for a specific (small) amount of time. then, the
+       * increase starting at ~06 22:00 would also be detected (it has an increase of > 200 %)
+       */
     }
 
     @ParameterizedTest
@@ -401,11 +408,16 @@ class TsdlQueryServiceTest {
     )
     @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
     void queryEvent_decreaseEvent(List<DataPoint> dps) {
-      var query = "USING EVENTS: AND(decrease(57,-,5)) AS myIncreaseEvent YIELD: all periods";
+      var query = "USING EVENTS: AND(decrease(50,-,0.5)) AS myIncreaseEvent YIELD: all periods";
       var queryResult = queryService.query(dps, query);
       for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
+
+      /*
+       * potentials for improvement:
+       * see test 'queryEvent_increaseEvent'
+       */
     }
 
   }

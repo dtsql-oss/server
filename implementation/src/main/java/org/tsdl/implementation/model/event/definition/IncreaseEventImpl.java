@@ -15,6 +15,6 @@ public record IncreaseEventImpl(
   public IncreaseEventImpl {
     Conditions.checkNotNull(Condition.ARGUMENT, minimumChange, "Minimum change must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, maximumChange, "Maximum change must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance must not be null.");
   }
 }

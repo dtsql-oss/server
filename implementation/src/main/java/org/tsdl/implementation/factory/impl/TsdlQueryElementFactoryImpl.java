@@ -18,7 +18,7 @@ import org.tsdl.implementation.evaluation.impl.filter.deviation.RelativeAroundFi
 import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.BeforeFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.threshold.GreaterThanFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.threshold.LowerThanFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.LessThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalAverageAggregatorImpl;
@@ -97,7 +97,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of threshold filter must not be null.");
     return switch (type) {
       case GT -> new GreaterThanFilterImpl(argument);
-      case LT -> new LowerThanFilterImpl(argument);
+      case LT -> new LessThanFilterImpl(argument);
     };
   }
 

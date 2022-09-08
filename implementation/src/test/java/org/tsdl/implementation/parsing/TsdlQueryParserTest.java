@@ -44,7 +44,7 @@ import org.tsdl.implementation.model.filter.temporal.AfterFilter;
 import org.tsdl.implementation.model.filter.temporal.BeforeFilter;
 import org.tsdl.implementation.model.filter.temporal.TemporalFilter;
 import org.tsdl.implementation.model.filter.threshold.GreaterThanFilter;
-import org.tsdl.implementation.model.filter.threshold.LowerThanFilter;
+import org.tsdl.implementation.model.filter.threshold.LessThanFilter;
 import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
@@ -388,7 +388,7 @@ class TsdlQueryParserTest {
           .get()
           .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
-          .element(0, InstanceOfAssertFactories.type(LowerThanFilter.class))
+          .element(0, InstanceOfAssertFactories.type(LessThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-2.3);
     }
@@ -491,7 +491,7 @@ class TsdlQueryParserTest {
           .extracting(OrFilterConnective::filters, InstanceOfAssertFactories.list(SinglePointFilter.class))
           .hasSize(1)
           .element(0, InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
-          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LowerThanFilter.class))
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LessThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(25d);
     }
@@ -538,7 +538,7 @@ class TsdlQueryParserTest {
       assertThat(query.filter())
           .get()
           .extracting(connective -> connective.filters().get(0), InstanceOfAssertFactories.type(NegatedSinglePointFilter.class))
-          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LowerThanFilter.class))
+          .extracting(NegatedSinglePointFilter::filter, InstanceOfAssertFactories.type(LessThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(25.1);
 
@@ -557,7 +557,7 @@ class TsdlQueryParserTest {
 
       assertThat(query.filter())
           .get()
-          .extracting(connective -> connective.filters().get(3), InstanceOfAssertFactories.type(LowerThanFilter.class))
+          .extracting(connective -> connective.filters().get(3), InstanceOfAssertFactories.type(LessThanFilter.class))
           .extracting(VALUE_EXTRACTOR)
           .isEqualTo(-3.4447);
     }

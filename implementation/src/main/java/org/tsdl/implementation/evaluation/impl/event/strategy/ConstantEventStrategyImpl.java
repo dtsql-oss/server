@@ -43,7 +43,7 @@ public class ConstantEventStrategyImpl implements ConstantEventStrategy {
     var constantEventFunction = (ConstantEvent) constantEvent.connective().events().get(0);
     var derivative = CALCULUS.derivative(dataPoints, TsdlTimeUnit.SECONDS);
 
-    var derivateEvent = new TsdlEventImpl(
+    var derivativeEvent = new TsdlEventImpl(
         new AndEventConnectiveImpl(
             List.of(
                 new AbsoluteAroundFilterImpl(
@@ -58,17 +58,17 @@ public class ConstantEventStrategyImpl implements ConstantEventStrategy {
     );
 
     // heuristic
-    List<AnnotatedTsdlPeriod> periodCandidates = replaceEvent(
+    var periodCandidates = replaceEvent(
         EVENT_DETECTION_HELPER
-            .detectPeriods(derivative, List.of(derivateEvent))
+            .detectPeriods(derivative, List.of(derivativeEvent))
             .stream()
             .filter(p -> !p.period().isEmpty() && !p.period().start().equals(p.period().end())),
         constantEvent.identifier()
     );
 
-    // get data points in period candidates
+    // get data points in period candidates (determine ps(p_i))
     var dpsPerPeriod = new HashMap<TsdlPeriod, List<DataPoint>>();
-    for (DataPoint dp : dataPoints) {
+    for (var dp : dataPoints) {
       var currentPeriod = periodCandidates.stream().filter(p -> p.period().contains(dp.timestamp())).findFirst();
       currentPeriod.ifPresent(p -> dpsPerPeriod.computeIfAbsent(p.period(), (k) -> new ArrayList<>()).add(dp));
     }
@@ -89,7 +89,7 @@ public class ConstantEventStrategyImpl implements ConstantEventStrategy {
 
     // devc
     var satDevc = new ArrayList<AnnotatedTsdlPeriod>();
-    for (AnnotatedTsdlPeriod annotatedTsdlPeriod : satRegc) {
+    for (var annotatedTsdlPeriod : satRegc) {
       var dps = dpsPerPeriod.get(annotatedTsdlPeriod.period());
       var stats = new SummaryStatisticsImpl();
       stats.ingest(() -> dps.stream().map(DataPoint::value).toList());
