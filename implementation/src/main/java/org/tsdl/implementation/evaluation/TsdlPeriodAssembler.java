@@ -1,4 +1,4 @@
-package org.tsdl.implementation.evaluation.impl;
+package org.tsdl.implementation.evaluation;
 
 import java.util.List;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;

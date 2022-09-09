@@ -7,19 +7,18 @@ import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorI
 import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlIdentifierImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
-import org.tsdl.implementation.evaluation.impl.connective.AndConnectiveImpl;
-import org.tsdl.implementation.evaluation.impl.connective.OrConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.AndFilterConnectiveImpl;
+import org.tsdl.implementation.evaluation.impl.connective.OrFilterConnectiveImpl;
 import org.tsdl.implementation.evaluation.impl.event.TsdlEventImpl;
-import org.tsdl.implementation.evaluation.impl.event.definition.SinglePointEventDefinitionImpl;
 import org.tsdl.implementation.evaluation.impl.filter.NegatedSinglePointFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralFilterArgumentImpl;
-import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleFilterArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlLiteralScalarArgumentImpl;
+import org.tsdl.implementation.evaluation.impl.filter.argument.TsdlSampleScalarArgumentImpl;
 import org.tsdl.implementation.evaluation.impl.filter.deviation.AbsoluteAroundFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.deviation.RelativeAroundFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.AfterFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.temporal.BeforeFilterImpl;
 import org.tsdl.implementation.evaluation.impl.filter.threshold.GreaterThanFilterImpl;
-import org.tsdl.implementation.evaluation.impl.filter.threshold.LowerThanFilterImpl;
+import org.tsdl.implementation.evaluation.impl.filter.threshold.LessThanFilterImpl;
 import org.tsdl.implementation.evaluation.impl.result.YieldStatementImpl;
 import org.tsdl.implementation.evaluation.impl.sample.TsdlSampleImpl;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TemporalAverageAggregatorImpl;
@@ -38,6 +37,7 @@ import org.tsdl.implementation.evaluation.impl.sample.aggregation.value.SumAggre
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
 import org.tsdl.implementation.math.Calculus;
 import org.tsdl.implementation.math.SummaryStatistics;
+import org.tsdl.implementation.model.choice.relation.TemporalOperand;
 import org.tsdl.implementation.model.choice.relation.TemporalOperator;
 import org.tsdl.implementation.model.common.ParsableTsdlTimeUnit;
 import org.tsdl.implementation.model.common.TsdlDuration;
@@ -46,9 +46,22 @@ import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
+import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
+import org.tsdl.implementation.model.event.definition.ComplexEventFunction;
+import org.tsdl.implementation.model.event.definition.ConstantEvent;
+import org.tsdl.implementation.model.event.definition.ConstantEventImpl;
+import org.tsdl.implementation.model.event.definition.DecreaseEvent;
+import org.tsdl.implementation.model.event.definition.DecreaseEventImpl;
+import org.tsdl.implementation.model.event.definition.EventConnective;
+import org.tsdl.implementation.model.event.definition.EventFunction;
+import org.tsdl.implementation.model.event.definition.IncreaseEvent;
+import org.tsdl.implementation.model.event.definition.IncreaseEventImpl;
+import org.tsdl.implementation.model.event.definition.NegatedEventFunction;
+import org.tsdl.implementation.model.event.definition.NegatedEventFunctionImpl;
+import org.tsdl.implementation.model.event.definition.OrEventConnectiveImpl;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.result.YieldFormat;
 import org.tsdl.implementation.model.result.YieldStatement;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -79,17 +92,17 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlFilterArgument argument) {
+  public SinglePointFilter getThresholdFilter(ThresholdFilterType type, TsdlScalarArgument argument) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of threshold filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, argument, "Argument of threshold filter must not be null.");
     return switch (type) {
       case GT -> new GreaterThanFilterImpl(argument);
-      case LT -> new LowerThanFilterImpl(argument);
+      case LT -> new LessThanFilterImpl(argument);
     };
   }
 
   @Override
-  public SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlFilterArgument reference, TsdlFilterArgument maximumDeviation) {
+  public SinglePointFilter getDeviationFilter(DeviationFilterType type, TsdlScalarArgument reference, TsdlScalarArgument maximumDeviation) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of deviation filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, reference, "Reference value of deviation filter must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, maximumDeviation, "Maximum deviation of deviation filter must not be null.");
@@ -116,42 +129,75 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public SinglePointFilterConnective getConnective(ConnectiveIdentifier identifier, List<SinglePointFilter> filters) {
-    Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for connective must not be null.");
+  public ComplexEventFunction getConstantEvent(TsdlScalarArgument maximumSlope, TsdlScalarArgument maximumRelativeDeviation) {
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumSlope, "Maximum slope must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumRelativeDeviation, "Maximum relative deviation must not be null.");
+    return new ConstantEventImpl(maximumSlope, maximumRelativeDeviation);
+  }
+
+  @Override
+  public ComplexEventFunction getIncreaseEvent(TsdlScalarArgument minimumChange, TsdlScalarArgument maximumChange, TsdlScalarArgument tolerance) {
+    Conditions.checkNotNull(Condition.ARGUMENT, minimumChange, "Minimum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumChange, "Maximum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance must not be null.");
+    return new IncreaseEventImpl(minimumChange, maximumChange, tolerance);
+  }
+
+  @Override
+  public ComplexEventFunction getDecreaseEvent(TsdlScalarArgument minimumChange, TsdlScalarArgument maximumChange, TsdlScalarArgument tolerance) {
+    Conditions.checkNotNull(Condition.ARGUMENT, minimumChange, "Minimum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, maximumChange, "Maximum change must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, tolerance, "Tolerance must not be null.");
+    return new DecreaseEventImpl(minimumChange, maximumChange, tolerance);
+  }
+
+  @Override
+  public NegatedEventFunction getNegatedEventFunction(EventFunction event) {
+    Conditions.checkNotNull(Condition.ARGUMENT, event, "Event to negate must not be null.");
+    return new NegatedEventFunctionImpl(event);
+  }
+
+  @Override
+  public SinglePointFilterConnective getFilterConnective(ConnectiveIdentifier type, List<SinglePointFilter> filters) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Identifier for filter connective must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, filters, "List of filters for connective must not be null.");
-    return switch (identifier) {
-      case AND -> new AndConnectiveImpl(filters);
-      case OR -> new OrConnectiveImpl(filters);
+    return switch (type) {
+      case AND -> new AndFilterConnectiveImpl(filters);
+      case OR -> new OrFilterConnectiveImpl(filters);
     };
   }
 
   @Override
-  public TsdlFilterArgument getFilterArgument(double value) {
-    Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
-    return new TsdlLiteralFilterArgumentImpl(value);
+  public EventConnective getEventConnective(ConnectiveIdentifier type, List<EventFunction> events) {
+    Conditions.checkNotNull(Condition.ARGUMENT, type, "Identifier for event connective must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, events, "List of events for connective must not be null.");
+    return switch (type) {
+      case AND -> new AndEventConnectiveImpl(events);
+      case OR -> new OrEventConnectiveImpl(events);
+    };
   }
 
   @Override
-  public TsdlFilterArgument getFilterArgument(TsdlSample sample) {
+  public TsdlScalarArgument getScalarArgument(double value) {
+    Conditions.checkNotNull(Condition.ARGUMENT, value, "Filter argument value must not be null.");
+    return new TsdlLiteralScalarArgumentImpl(value);
+  }
+
+  @Override
+  public TsdlScalarArgument getScalarArgument(TsdlSample sample) {
     Conditions.checkNotNull(Condition.ARGUMENT, sample, "Filter argument sample must not be null.");
-    return new TsdlSampleFilterArgumentImpl(sample);
+    return new TsdlSampleScalarArgumentImpl(sample);
   }
 
   @Override
   public TsdlSample getSample(TsdlAggregator aggregator, TsdlIdentifier identifier, boolean includeFormatter, String... formatterArgs) {
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for sample must not be null.");
     if (!includeFormatter) {
-      Conditions.checkSizeExactly(Condition.ARGUMENT,
-          formatterArgs,
-          0,
+      Conditions.checkSizeExactly(Condition.ARGUMENT, formatterArgs, 0,
           "If no output formatter is attached to a sample, there must not be any formatting arguments.");
     }
 
-    return new TsdlSampleImpl(
-        aggregator,
-        identifier,
-        includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null
-    );
+    return new TsdlSampleImpl(aggregator, identifier, includeFormatter ? new TsdlSampleOutputFormatter(formatterArgs) : null);
   }
 
   @Override
@@ -202,13 +248,26 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TsdlEvent getSinglePointEvent(SinglePointFilterConnective definition, TsdlIdentifier identifier, TsdlDuration duration) {
-    Conditions.checkNotNull(Condition.ARGUMENT, definition, "Filter connective for event must not be null.");
+  public TsdlEvent getEvent(EventConnective connective, TsdlIdentifier identifier, TsdlDuration duration) {
+    Conditions.checkNotNull(Condition.ARGUMENT, connective, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
-    return new TsdlEventImpl(
-        new SinglePointEventDefinitionImpl(identifier, definition, duration),
-        duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT
-    );
+    TsdlEventStrategyType eventStrategyType;
+    if (connective.events().stream().anyMatch(e -> e instanceof SinglePointFilter)) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT;
+    } else if (connective.events().get(0) instanceof ConstantEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof ConstantEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.CONSTANT_EVENT_WITH_DURATION : TsdlEventStrategyType.CONSTANT_EVENT;
+    } else if (connective.events().get(0) instanceof DecreaseEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof DecreaseEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.DECREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.DECREASE_EVENT;
+    } else if (connective.events().get(0) instanceof IncreaseEvent
+        || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof IncreaseEvent) {
+      eventStrategyType = duration != null ? TsdlEventStrategyType.INCREASE_EVENT_WITH_DURATION : TsdlEventStrategyType.INCREASE_EVENT;
+    } else {
+      throw Conditions.exception(Condition.STATE, "Cannot determine event computation strategy from event connective.");
+    }
+
+    return new TsdlEventImpl(connective, identifier, duration, eventStrategyType);
   }
 
   @Override
@@ -220,14 +279,14 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
   }
 
   @Override
-  public TemporalOperator getChoice(TemporalRelationType type, List<TsdlEvent> operands, TsdlDuration tolerance) {
+  public TemporalOperator getChoice(TemporalRelationType type, TemporalOperand operand1, TemporalOperand operand2, TsdlDuration tolerance) {
     Conditions.checkNotNull(Condition.ARGUMENT, type, "Type of temporal relation must not be null.");
-    Conditions.checkNotNull(Condition.ARGUMENT, operands, "Operands of temporal relation must not be null.");
-    Conditions.checkSizeExactly(Condition.ARGUMENT, operands, 2, "Only binary temporal operators are supported at the moment.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand1, "First temporal operand must not be null.");
+    Conditions.checkNotNull(Condition.ARGUMENT, operand2, "Second temporal operand must not be null.");
 
     return switch (type) {
-      case FOLLOWS -> new FollowsOperatorImpl(operands.get(0), operands.get(1), tolerance);
-      case PRECEDES -> new PrecedesOperatorImpl(operands.get(0), operands.get(1), tolerance);
+      case FOLLOWS -> new FollowsOperatorImpl(operand1, operand2, tolerance);
+      case PRECEDES -> new PrecedesOperatorImpl(operand1, operand2, tolerance);
     };
   }
 

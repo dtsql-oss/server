@@ -41,11 +41,11 @@ public final class ThresholdFilterSpecificationImpl implements ThresholdFilterSp
     return lt(threshold, false);
   }
 
-  public static ThresholdFilterSpecification lt(Double threshold) {
+  public static ThresholdFilterSpecification lt(double threshold) {
     return lt(String.valueOf(threshold), false);
   }
 
-  public static ThresholdFilterSpecification lt(Double threshold, boolean negated) {
+  public static ThresholdFilterSpecification lt(double threshold, boolean negated) {
     return lt(String.valueOf(threshold), negated);
   }
 
@@ -57,11 +57,11 @@ public final class ThresholdFilterSpecificationImpl implements ThresholdFilterSp
     return gt(threshold, false);
   }
 
-  public static ThresholdFilterSpecification gt(Double threshold) {
+  public static ThresholdFilterSpecification gt(double threshold) {
     return gt(String.valueOf(threshold), false);
   }
 
-  public static ThresholdFilterSpecification gt(Double threshold, boolean negated) {
+  public static ThresholdFilterSpecification gt(double threshold, boolean negated) {
     return gt(String.valueOf(threshold), negated);
   }
 

@@ -2,6 +2,7 @@ package org.tsdl.client.impl.builder;
 
 import java.util.Arrays;
 import java.util.List;
+import org.tsdl.client.api.builder.EventFunctionSpecification;
 import org.tsdl.client.api.builder.FilterConnectiveSpecification;
 import org.tsdl.client.api.builder.FilterSpecification;
 
@@ -23,23 +24,28 @@ public final class FilterConnectiveSpecificationImpl implements FilterConnective
   }
 
   @Override
+  public List<? extends EventFunctionSpecification> events() {
+    return filters;
+  }
+
+  @Override
   public ConnectiveType type() {
     return type;
   }
 
-  public static FilterConnectiveSpecification and(List<FilterSpecification> filters) {
+  static FilterConnectiveSpecification and(List<FilterSpecification> filters) {
     return new FilterConnectiveSpecificationImpl(filters, ConnectiveType.AND);
   }
 
-  public static FilterConnectiveSpecification and(FilterSpecification... filters) {
-    return new FilterConnectiveSpecificationImpl(Arrays.stream(filters).toList(), ConnectiveType.AND);
+  static FilterConnectiveSpecification and(FilterSpecification... filters) {
+    return and(Arrays.stream(filters).toList());
   }
 
-  public static FilterConnectiveSpecification or(List<FilterSpecification> filters) {
+  static FilterConnectiveSpecification or(List<FilterSpecification> filters) {
     return new FilterConnectiveSpecificationImpl(filters, ConnectiveType.OR);
   }
 
-  public static FilterConnectiveSpecification or(FilterSpecification... filters) {
-    return new FilterConnectiveSpecificationImpl(Arrays.stream(filters).toList(), ConnectiveType.OR);
+  static FilterConnectiveSpecification or(FilterSpecification... filters) {
+    return or(Arrays.stream(filters).toList());
   }
 }

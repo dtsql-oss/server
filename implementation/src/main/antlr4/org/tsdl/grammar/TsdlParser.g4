@@ -37,7 +37,62 @@ events
   ;
 
 eventDeclaration
-  :  filterConnective WHITESPACE? (durationSpecification WHITESPACE?)? identifierDeclaration
+  :  eventConnective WHITESPACE? (durationSpecification WHITESPACE?)? identifierDeclaration
+  ;
+
+eventConnective
+  :  CONNECTIVE_IDENTIFIER PARENTHESIS_OPEN WHITESPACE? eventFunctionList WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+eventFunctionList
+  :  eventFunctions LIST_SEPARATOR eventFunctionDeclaration     // either two or more parameters
+  |  eventFunctionDeclaration                                        // or exactly one
+  ;
+
+eventFunctions
+  :  eventFunctionDeclaration (LIST_SEPARATOR eventFunctionDeclaration)* // one parameter plus [0..n] additional parameters
+  ;
+
+eventFunctionDeclaration
+  :  singlePointFilterDeclaration
+  |  complexEventDeclaration
+  ;
+
+complexEventDeclaration
+  :  complexEvent
+  |  negatedComplexEvent
+  ;
+
+complexEvent
+  :  constantEvent
+  |  increaseEvent
+  |  decreaseEvent
+  ;
+
+negatedComplexEvent
+  :  CONNECTIVE_NOT PARENTHESIS_OPEN WHITESPACE? complexEvent WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number
+constantEvent
+  :  EVENT_CONSTANT PARENTHESIS_OPEN WHITESPACE? slope=scalarArgument LIST_SEPARATOR deviation=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
+// additionally: first scalar <= second scalar
+increaseEvent
+  :  EVENT_INCREASE PARENTHESIS_OPEN WHITESPACE? minChange=scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR tolerance=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+// first scalar: non-negative real number, second scalar: non-negative real number, third scalar: real number
+// additionally: first scalar <= second scalar
+decreaseEvent
+  :  EVENT_DECREASE PARENTHESIS_OPEN WHITESPACE? minChange=scalarArgument LIST_SEPARATOR monotonicUpperBound LIST_SEPARATOR tolerance=scalarArgument WHITESPACE? PARENTHESIS_CLOSE
+  ;
+
+monotonicUpperBound
+  :  scalarArgument
+  |  HYPHEN
   ;
 
 durationSpecification
@@ -49,10 +104,10 @@ choiceDeclaration
   ;
 
 temporalRelation
-  :  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventEvent
-  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventRecursive
-  |  PARENTHESIS_OPEN IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveEvent
-  |  PARENTHESIS_OPEN temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveRecursive
+  :  PARENTHESIS_OPEN op1=IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE op2=IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventEvent
+  |  PARENTHESIS_OPEN op1=IDENTIFIER WHITESPACE TEMPORAL_RELATION WHITESPACE op2=temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #EventRecursive
+  |  PARENTHESIS_OPEN op1=temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE op2=IDENTIFIER WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveEvent
+  |  PARENTHESIS_OPEN op1=temporalRelation WHITESPACE TEMPORAL_RELATION WHITESPACE op2=temporalRelation WHITESPACE? timeToleranceSpecification? PARENTHESIS_CLOSE  #RecursiveRecursive
   ;
 
 timeToleranceSpecification
@@ -141,13 +196,13 @@ temporalAggregatorDeclaration
 
 // filter argument (STRING_LITERAL): ISO-8601 UTC timestamp, e.g. '2011-12-03T10:15:30+04:00' (to be validated by application)
 intervalList
-:  intervals LIST_SEPARATOR STRING_LITERAL     // either two or more events
-|  STRING_LITERAL                              // or exactly one
-;
+  :  intervals LIST_SEPARATOR STRING_LITERAL     // either two or more events
+  |  STRING_LITERAL                              // or exactly one
+  ;
 
 intervals
-:  STRING_LITERAL (LIST_SEPARATOR STRING_LITERAL)*   // one interval plus [0..n] additional intervals
-;
+  :  STRING_LITERAL (LIST_SEPARATOR STRING_LITERAL)*   // one interval plus [0..n] additional intervals
+  ;
 
 identifierDeclaration
   :  AS WHITESPACE IDENTIFIER
@@ -189,10 +244,10 @@ temporalFilter
   ;
 
 thresholdFilter
-  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? filterArgument WHITESPACE? PARENTHESIS_CLOSE
+  :  THRESHOLD_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? scalarArgument WHITESPACE? PARENTHESIS_CLOSE
   ;
 
-filterArgument
+scalarArgument
   :  NUMBER
   |  IDENTIFIER
   ;
@@ -203,5 +258,5 @@ deviationFilter
 
 // NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
 deviationFilterArguments
-  :  AROUND_FILTER_TYPE LIST_SEPARATOR filterArgument LIST_SEPARATOR filterArgument
+  :  AROUND_FILTER_TYPE LIST_SEPARATOR reference=scalarArgument LIST_SEPARATOR deviation=scalarArgument
   ;

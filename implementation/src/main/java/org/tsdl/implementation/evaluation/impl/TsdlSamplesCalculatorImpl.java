@@ -9,11 +9,10 @@ import org.tsdl.implementation.evaluation.TsdlSamplesCalculator;
 import org.tsdl.implementation.model.common.TsdlIdentifier;
 import org.tsdl.implementation.model.connective.SinglePointFilterConnective;
 import org.tsdl.implementation.model.event.TsdlEvent;
-import org.tsdl.implementation.model.event.definition.SinglePointEventDefinition;
 import org.tsdl.implementation.model.filter.NegatedSinglePointFilter;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.implementation.model.filter.argument.TsdlFilterArgument;
-import org.tsdl.implementation.model.filter.argument.TsdlSampleFilterArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlSampleScalarArgument;
+import org.tsdl.implementation.model.filter.argument.TsdlScalarArgument;
 import org.tsdl.implementation.model.filter.deviation.AroundFilter;
 import org.tsdl.implementation.model.filter.threshold.ThresholdFilter;
 import org.tsdl.implementation.model.sample.TsdlSample;
@@ -44,9 +43,9 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
     }
 
     var singlePointEventFilters = events.stream()
-        .filter(event -> event.definition() instanceof SinglePointEventDefinition)
-        .map(event -> (SinglePointEventDefinition) event.definition())
-        .flatMap(eventDefinition -> eventDefinition.connective().filters().stream())
+        .flatMap(event -> event.connective().events().stream())
+        .filter(event -> event instanceof SinglePointFilter)
+        .map(event -> (SinglePointFilter) event)
         .toList();
 
     setSampleFilterArgumentValues(
@@ -68,14 +67,14 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
     }
   }
 
-  private Stream<TsdlSampleFilterArgument> createSampleFilterArgumentStream(List<SinglePointFilter> filters) {
+  private Stream<TsdlSampleScalarArgument> createSampleFilterArgumentStream(List<SinglePointFilter> filters) {
     return filters.stream()
         .flatMap(filter -> extractFilterArguments(filter).stream())
-        .filter(TsdlSampleFilterArgument.class::isInstance)
-        .map(TsdlSampleFilterArgument.class::cast);
+        .filter(TsdlSampleScalarArgument.class::isInstance)
+        .map(TsdlSampleScalarArgument.class::cast);
   }
 
-  private List<TsdlFilterArgument> extractFilterArguments(SinglePointFilter filter) {
+  private List<TsdlScalarArgument> extractFilterArguments(SinglePointFilter filter) {
     return switch (filter) {
       case AroundFilter aroundFilter -> List.of(aroundFilter.referenceValue(), aroundFilter.maximumDeviation());
       case ThresholdFilter thresholdFilter -> List.of(thresholdFilter.threshold());
@@ -84,7 +83,7 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
     };
   }
 
-  private void setSampleFilterArgumentValues(Stream<TsdlSampleFilterArgument> arguments, Map<TsdlIdentifier, Double> sampleValues) {
+  private void setSampleFilterArgumentValues(Stream<TsdlSampleScalarArgument> arguments, Map<TsdlIdentifier, Double> sampleValues) {
     arguments.forEach(argument -> {
       var argumentIdentifier = argument.sample().identifier();
       if (!sampleValues.containsKey(argumentIdentifier)) {

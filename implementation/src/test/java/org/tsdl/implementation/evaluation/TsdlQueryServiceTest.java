@@ -13,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.tsdl.infrastructure.api.QueryService;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.MultipleScalarResult;
 import org.tsdl.infrastructure.model.QueryResult;
@@ -361,6 +363,63 @@ class TsdlQueryServiceTest {
                 );
           });
     }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_constantEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(const(20,13.5)) FOR [3,] hours AS myConstEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+
+      /* potentials for improvement:
+       * find way to set DERIVATIVE_THRESHOLD, maybe dynamically based on data?
+       * implement neighbourhood search, i.e., explore left and right extensions/reductions of the heuristic intervals and pick the longest one
+       */
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_increaseEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(increase(50,-,0.5)) AS myIncreaseEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+
+      /* potentials for improvement:
+       * the criterion for allowing temporary negative rates of change has as consequence that (near) constant intervals at the start, end or in the
+       * middle of an increase/decrease period are also considered an increase/decrease - which should not be the case. one would need to add
+       * additional conditions such that temporary negative/near-zero rates are tolerated, but only for a specific (small) amount of time. then, the
+       * increase starting at ~06T22:00 would also be detected (it has an increase of > 200 %)
+       */
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources(
+        @TsdlTestSource(value = DATA_ROOT + "series12.csv", skipHeaders = 5)
+    )
+    @TsdlTestVisualization(renderPointShape = false, dateAxisFormat = "dd HH:mm")
+    void queryEvent_decreaseEvent(List<DataPoint> dps) {
+      var query = "USING EVENTS: AND(decrease(50,-,0.5)) AS myIncreaseEvent YIELD: all periods";
+      var queryResult = queryService.query(dps, query);
+      for (TsdlPeriod p : ((TsdlPeriodSet) queryResult).periods()) {
+        System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
+      }
+
+      /*
+       * potentials for improvement:
+       * see test 'queryEvent_increaseEvent' with inverse effect that the incorrect (false positive) "decrase" from ~07T02:45 until ~08T07:45 would
+       * not be detected, but only the correct decrease from ~07T20:00 until ~08T06:00
+       */
+    }
   }
 
   @Nested
@@ -392,6 +451,7 @@ class TsdlQueryServiceTest {
     @TsdlTestSources({
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
+    @TsdlTestVisualization(skipVisualization = true)
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithTimeTolerance_detectsPeriod(List<DataPoint> dps) {
       var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nCHOOSE:\n(low precedes high WITHIN [0,15] minutes)\nYIELD:\nall periods";
 

@@ -3,9 +3,9 @@ package org.tsdl.implementation.model.filter.argument;
 import org.tsdl.implementation.model.sample.TsdlSample;
 
 /**
- * An argument to a TSDL filter which is a {@link TsdlSample}.
+ * A scalar argument which is a {@link TsdlSample}.
  */
-public interface TsdlSampleFilterArgument extends TsdlFilterArgument {
+public interface TsdlSampleScalarArgument extends TsdlScalarArgument {
   TsdlSample sample();
 
   void setValue(double value);

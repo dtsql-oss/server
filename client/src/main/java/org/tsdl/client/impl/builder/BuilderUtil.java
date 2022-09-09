@@ -18,4 +18,8 @@ final class BuilderUtil {
       throw new TsdlQueryBuildException("Could not parse '%s' as Instant.".formatted(str), e);
     }
   }
+
+  public static String monotonicUpperBound(double dbl) {
+    return Double.isInfinite(dbl) ? "-" : String.valueOf(dbl);
+  }
 }

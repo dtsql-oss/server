@@ -6,7 +6,7 @@ import java.util.Optional;
  * Represents the "USING EVENTS" section of a TSDL query.
  */
 public interface EventSpecification {
-  FilterConnectiveSpecification definition();
+  EventConnectiveSpecification definition();
 
   Optional<Range> duration();
 
