@@ -7,8 +7,7 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "thursday"
+      interval: "monthly"
     assignees:
       - "raffaelfoidl"
     reviewers:
