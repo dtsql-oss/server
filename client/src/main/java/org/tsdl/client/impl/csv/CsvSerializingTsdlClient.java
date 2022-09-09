@@ -3,6 +3,7 @@ package org.tsdl.client.impl.csv;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.tsdl.client.api.QueryClientResult;
 import org.tsdl.client.api.QueryClientSpecification;
 import org.tsdl.client.api.TsdlClient;
@@ -19,6 +20,14 @@ import org.tsdl.infrastructure.model.QueryResultType;
  * A {@link TsdlClient} which serializes responses obtained from the TSDL service into CSV files, to be used later on again.
  */
 public class CsvSerializingTsdlClient extends BaseTsdlClient<CsvSerializingQueryClientSpecification> {
+  public CsvSerializingTsdlClient() {
+    super();
+  }
+
+  public CsvSerializingTsdlClient(long timeout, TimeUnit unit) {
+    super(timeout, unit);
+  }
+
   @Override
   protected QueryClientResult query(CsvSerializingQueryClientSpecification querySpecification, QueryResultDto serverResponse, File targetCacheFile)
       throws IOException {

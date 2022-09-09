@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,7 +31,17 @@ import org.tsdl.infrastructure.dto.QueryResultDto;
 public abstract class BaseTsdlClient<T extends QueryClientSpecification> implements TsdlClient {
   private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-  private final OkHttpClient client = new OkHttpClient();
+  private final OkHttpClient client;
+
+  public BaseTsdlClient() {
+    this(10, TimeUnit.SECONDS);
+  }
+
+  public BaseTsdlClient(long timeout, TimeUnit unit) {
+    client = new OkHttpClient.Builder()
+        .readTimeout(timeout, unit)
+        .build();
+  }
 
   abstract Class<T> configClass();
 
