@@ -16,13 +16,14 @@ import org.tsdl.infrastructure.model.DataPoint;
  */
 public class ContinuousRegressionImpl implements ContinuousRegression {
   @Override
-  public LinearModel linearLeastSquares(List<DataPoint> dataPoints) {
+  public LinearModel linearLeastSquares(List<DataPoint> dataPoints, TsdlTimeUnit timeResolution) {
     Conditions.checkIsGreaterThanOrEqual(Condition.ARGUMENT, dataPoints.size(), 2, "The time series must exhibit at least two data points.");
     var zeroDate = dataPoints.get(0).timestamp();
+
     var x = new ArrayList<Double>(dataPoints.size());
     var y = new ArrayList<Double>(dataPoints.size());
     for (var dataPoint : dataPoints) {
-      x.add(TsdlUtil.getTimespan(zeroDate, dataPoint.timestamp(), TsdlTimeUnit.MILLISECONDS));
+      x.add(TsdlUtil.getTimespan(zeroDate, dataPoint.timestamp(), timeResolution));
       y.add(dataPoint.value());
     }
 

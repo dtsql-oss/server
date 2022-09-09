@@ -22,8 +22,8 @@ abstract class MonotonicEventStrategy extends ComplexEventStrategy {
     var monotonicEvent = events.get(0);
     var monotonicEventFunction = ((MonotonicEvent) monotonicEvent.connective().events().get(0));
 
-    var derivativeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
-    var derivative = CALCULUS.derivative(dataPoints, derivativeResolution);
+    var timeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
+    var derivative = CALCULUS.derivative(dataPoints, timeResolution);
 
     // ratc
     var derivateEvent = new TsdlEventImpl(

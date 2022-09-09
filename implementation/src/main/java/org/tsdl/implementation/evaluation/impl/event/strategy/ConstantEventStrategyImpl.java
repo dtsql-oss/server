@@ -19,22 +19,24 @@ import org.tsdl.infrastructure.model.DataPoint;
  * Default implementation of {@link ConstantEventStrategy}.
  */
 public class ConstantEventStrategyImpl extends ComplexEventStrategy implements ConstantEventStrategy {
-  private static final double DERIVATIVE_THRESHOLD = 0.1; // maximal instantaneous rate of change: 10 %
+
+  // BIG TODO: derivative threshold should be determined based on data since heavily depends on its structure !!!!
+  private static final double SLOPE_THRESHOLD = 15; // 0.1; // maximal instantaneous rate of change: 10 %
 
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     var constantEvent = events.get(0);
     var constantEventFunction = (ConstantEvent) constantEvent.connective().events().get(0);
 
-    var derivativeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
-    var derivative = CALCULUS.derivative(dataPoints, derivativeResolution);
+    var timeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
+    var derivative = CALCULUS.derivative(dataPoints, timeResolution);
 
     var derivativeEvent = new TsdlEventImpl(
         new AndEventConnectiveImpl(
             List.of(
                 new AbsoluteAroundFilterImpl(
                     new TsdlLiteralScalarArgumentImpl(0.0),
-                    new TsdlLiteralScalarArgumentImpl(DERIVATIVE_THRESHOLD)
+                    new TsdlLiteralScalarArgumentImpl(SLOPE_THRESHOLD)
                 )
             )
         ),
@@ -52,7 +54,7 @@ public class ConstantEventStrategyImpl extends ComplexEventStrategy implements C
     var satRegc = new ArrayList<AnnotatedTsdlPeriod>();
     for (var candidate : periodCandidates) {
       var dps = dpsPerPeriod.get(candidate.period());
-      var regressionLine = CONTINUOUS_REGRESSION.linearLeastSquares(dps);
+      var regressionLine = CONTINUOUS_REGRESSION.linearLeastSquares(dps, timeResolution);
       if (Math.abs(regressionLine.slope()) * 100 <= constantEventFunction.maximumSlope().value()) {
         satRegc.add(candidate);
       }
