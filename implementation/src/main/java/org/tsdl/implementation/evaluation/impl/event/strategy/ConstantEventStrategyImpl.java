@@ -13,20 +13,21 @@ import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
 import org.tsdl.implementation.model.event.definition.ConstantEvent;
 import org.tsdl.implementation.model.event.strategy.ConstantEventStrategy;
-import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
  * Default implementation of {@link ConstantEventStrategy}.
  */
 public class ConstantEventStrategyImpl extends ComplexEventStrategy implements ConstantEventStrategy {
-  private static final double DERIVATIVE_THRESHOLD = 0.002; // maximal instantaneous rate of change: 0.2 %
+  private static final double DERIVATIVE_THRESHOLD = 0.1; // maximal instantaneous rate of change: 10 %
 
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     var constantEvent = events.get(0);
     var constantEventFunction = (ConstantEvent) constantEvent.connective().events().get(0);
-    var derivative = CALCULUS.derivative(dataPoints, TsdlTimeUnit.SECONDS);
+
+    var derivativeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
+    var derivative = CALCULUS.derivative(dataPoints, derivativeResolution);
 
     var derivativeEvent = new TsdlEventImpl(
         new AndEventConnectiveImpl(

@@ -1,5 +1,6 @@
 package org.tsdl.implementation.evaluation.impl.event.strategy;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.tsdl.implementation.model.event.strategy.SinglePointEventStrategy;
 import org.tsdl.implementation.model.event.strategy.TsdlEventStrategy;
 import org.tsdl.infrastructure.common.Condition;
 import org.tsdl.infrastructure.common.Conditions;
+import org.tsdl.infrastructure.common.TsdlTimeUnit;
+import org.tsdl.infrastructure.common.TsdlUtil;
 import org.tsdl.infrastructure.model.DataPoint;
 import org.tsdl.infrastructure.model.TsdlPeriod;
 
@@ -48,6 +51,23 @@ abstract class ComplexEventStrategy implements TsdlEventStrategy {
 
     Conditions.checkEquals(Condition.ARGUMENT, dpsPerPeriod.size(), periods.size(), "Could find data points of every data period.");
     return dpsPerPeriod;
+  }
+
+  protected TsdlTimeUnit inferDerivativeUnit(Instant i0, Instant i1) {
+    // order is important (descending "size")
+    var timeUnits = new TsdlTimeUnit[] {TsdlTimeUnit.WEEKS, TsdlTimeUnit.DAYS, TsdlTimeUnit.HOURS, TsdlTimeUnit.MINUTES, TsdlTimeUnit.SECONDS,
+        TsdlTimeUnit.MILLISECONDS};
+    Conditions.checkSizeExactly(Condition.STATE, timeUnits, TsdlTimeUnit.values().length,
+        "Method to infer time unit for derivative does not include all supported time units. Update implementation.");
+
+    for (var unit : timeUnits) {
+      var unitAdjustedSamplingRate = Math.abs(TsdlUtil.getTimespan(i0, i1, unit));
+      if (unitAdjustedSamplingRate >= 0.85) {
+        return unit;
+      }
+    }
+
+    return TsdlTimeUnit.MILLISECONDS;
   }
 
   private List<AnnotatedTsdlPeriod> replaceEventIdentifier(Stream<AnnotatedTsdlPeriod> periods, TsdlIdentifier newEventIdentifier) {

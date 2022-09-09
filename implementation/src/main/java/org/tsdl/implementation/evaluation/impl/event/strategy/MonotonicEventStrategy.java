@@ -10,7 +10,6 @@ import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
 import org.tsdl.implementation.model.event.definition.MonotonicEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
-import org.tsdl.infrastructure.common.TsdlTimeUnit;
 import org.tsdl.infrastructure.model.DataPoint;
 
 abstract class MonotonicEventStrategy extends ComplexEventStrategy {
@@ -22,7 +21,9 @@ abstract class MonotonicEventStrategy extends ComplexEventStrategy {
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     var monotonicEvent = events.get(0);
     var monotonicEventFunction = ((MonotonicEvent) monotonicEvent.connective().events().get(0));
-    var derivative = CALCULUS.derivative(dataPoints, TsdlTimeUnit.SECONDS);
+
+    var derivativeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
+    var derivative = CALCULUS.derivative(dataPoints, derivativeResolution);
 
     // ratc
     var derivateEvent = new TsdlEventImpl(
