@@ -977,6 +977,68 @@ class TsdlQueryServiceTest {
           });
     }
 
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series13.csv", skipHeaders = 5)
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryChooseEvents_choiceWithOneRecursiveOperand(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(gt(60), lt(120)) AS low,
+            AND(NOT(lt(120)), lt(250)) AS med,
+            AND(NOT(lt(250))) AS high
+          CHOOSE:
+            (low precedes (med precedes high))
+          YIELD:
+            all periods
+          """;
+
+      var queryResult = queryService.query(dps, query);
+      System.out.println();
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series13.csv", skipHeaders = 5)
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryChooseEvents_choiceWithTwoRecursiveOperands(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(gt(60), lt(120)) AS low,
+            AND(NOT(lt(120)), lt(250)) AS med,
+            AND(NOT(lt(250))) AS high
+          CHOOSE:
+            ((low follows med) precedes (med precedes high))
+          YIELD:
+            all periods
+          """;
+
+      var queryResult = queryService.query(dps, query);
+      System.out.println();
+    }
+
+    @ParameterizedTest
+    @TsdlTestSources({
+        @TsdlTestSource(value = DATA_ROOT + "series13.csv", skipHeaders = 5)
+    })
+    @TsdlTestVisualization(renderPointShape = false)
+    void queryChooseEvents_choiceWithTwoRecursiveOperandsOneDoublyRecursive(List<DataPoint> dps) {
+      var query = """
+          USING EVENTS:
+            AND(gt(60), lt(120)) AS low,
+            AND(NOT(lt(120)), lt(250)) AS med,
+            AND(NOT(lt(250))) AS high
+          CHOOSE:
+            ((low precedes (low follows med)) precedes (med precedes high))
+          YIELD:
+            all periods
+          """;
+
+      var queryResult = queryService.query(dps, query);
+      System.out.println();
+    }
   }
 
   @Nested

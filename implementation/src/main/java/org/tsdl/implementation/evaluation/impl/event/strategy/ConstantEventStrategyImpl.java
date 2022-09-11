@@ -67,6 +67,9 @@ public class ConstantEventStrategyImpl extends ComplexEventStrategy implements C
       var stats = new SummaryStatisticsImpl();
       stats.ingest(() -> dps.stream().map(DataPoint::value).toList());
       var avg = stats.average();
+      // TODO only scan data once - similar to SinglePointEventStrategy, we should not be iterating over all data points (per period) for every period
+      //  but rather iterate once over all values which are contained in one period and then mark (in Map, ...) which periods satisfy aroundRel
+      //  (maybe even possible with a reduction to an EventImpl)
       var sat = dps.stream().allMatch(x -> {
         var absoluteDifference = Math.abs(x.value() - avg);
         var percentageDifference = (absoluteDifference / Math.abs(avg)) * 100;

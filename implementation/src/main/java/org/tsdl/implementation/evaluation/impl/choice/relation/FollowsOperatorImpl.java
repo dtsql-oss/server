@@ -25,6 +25,11 @@ public record FollowsOperatorImpl(TemporalOperand operand1, TemporalOperand oper
   }
 
   @Override
+  public String representation() {
+    return "(%s-precedes-%s)".formatted(operand2.representation(), operand1.representation());
+  }
+
+  @Override
   public Optional<TsdlDuration> tolerance() {
     return Optional.ofNullable(toleranceValue);
   }

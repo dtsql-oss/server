@@ -25,6 +25,11 @@ public record TsdlEventImpl(
   }
 
   @Override
+  public String representation() {
+    return identifier.representation();
+  }
+
+  @Override
   public Optional<TsdlDuration> duration() {
     return Optional.ofNullable(durationValue);
   }

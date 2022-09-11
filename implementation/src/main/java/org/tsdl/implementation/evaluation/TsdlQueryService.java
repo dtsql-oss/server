@@ -53,7 +53,8 @@ public class TsdlQueryService implements QueryService {
       TsdlPeriodSet periodSet;
       boolean noPeriodDefinitions;
       if (parsedQuery.choice().isPresent()) {
-        periodSet = parsedQuery.choice().get().evaluate(detectedPeriods);
+        var chosenPeriods = parsedQuery.choice().get().evaluate(detectedPeriods);
+        periodSet = periodSetFromAnnotatedPeriods(chosenPeriods);
         noPeriodDefinitions = false;
       } else if (!detectedPeriods.isEmpty()) {
         periodSet = QueryResult.of(detectedPeriods.size(), detectedPeriods.stream().map(AnnotatedTsdlPeriod::period).toList());
@@ -79,6 +80,15 @@ public class TsdlQueryService implements QueryService {
     } catch (Exception e) {
       throw new TsdlEvaluationException("Query evaluation failed.", e);
     }
+  }
+
+  private TsdlPeriodSet periodSetFromAnnotatedPeriods(List<AnnotatedTsdlPeriod> annotatedPeriods) {
+    if (annotatedPeriods.isEmpty()) {
+      return TsdlPeriodSet.EMPTY;
+    }
+
+    var periods = annotatedPeriods.stream().map(AnnotatedTsdlPeriod::period).toList();
+    return QueryResult.of(periods.size(), periods);
   }
 
   private String getResultLogRepresentation(QueryResult result) {

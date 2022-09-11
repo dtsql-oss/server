@@ -2,7 +2,6 @@ package org.tsdl.implementation.model.choice.relation;
 
 import java.util.List;
 import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
-import org.tsdl.infrastructure.model.TsdlPeriodSet;
 
 /**
  * A binary temporal operator that represents the inverse relation to another binary temporal operator. More precisely, if two events (A, B) satisfy
@@ -12,7 +11,7 @@ public interface InverseBinaryTemporalOperator extends BinaryTemporalOperator {
   BinaryTemporalOperatorConstructor baseOperator();
 
   @Override
-  default TsdlPeriodSet evaluate(List<AnnotatedTsdlPeriod> periods) {
+  default List<AnnotatedTsdlPeriod> evaluate(List<AnnotatedTsdlPeriod> periods) {
     var baseOperatorInstance = baseOperator().instantiate(operand2(), operand1(), tolerance().orElse(null));
     return baseOperatorInstance.evaluate(periods);
   }
