@@ -46,7 +46,7 @@ abstract class ComplexEventStrategy implements TsdlEventStrategy {
     var dpsPerPeriod = new HashMap<TsdlPeriod, List<DataPoint>>();
     for (var dp : dataPoints) {
       var currentPeriod = periods.stream().filter(p -> p.period().contains(dp.timestamp())).findFirst();
-      currentPeriod.ifPresent(p -> dpsPerPeriod.computeIfAbsent(p.period(), (k) -> new ArrayList<>()).add(dp));
+      currentPeriod.ifPresent(p -> dpsPerPeriod.computeIfAbsent(p.period(), k -> new ArrayList<>()).add(dp));
     }
 
     Conditions.checkEquals(Condition.ARGUMENT, dpsPerPeriod.size(), periods.size(), "Could find data points of every data period.");

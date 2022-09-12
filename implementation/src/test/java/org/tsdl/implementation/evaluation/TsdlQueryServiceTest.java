@@ -376,6 +376,7 @@ class TsdlQueryServiceTest {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
 
+      // TODO add assertions
       /* potentials for improvement:
        * find way to set DERIVATIVE_THRESHOLD, maybe dynamically based on data?
        * implement neighbourhood search, i.e., explore left and right extensions/reductions of the heuristic intervals and pick the longest one
@@ -394,6 +395,7 @@ class TsdlQueryServiceTest {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
 
+      // TODO add assertions
       /* potentials for improvement:
        * the criterion for allowing temporary negative rates of change has as consequence that (near) constant intervals at the start, end or in the
        * middle of an increase/decrease period are also considered an increase/decrease - which should not be the case. one would need to add
@@ -414,6 +416,7 @@ class TsdlQueryServiceTest {
         System.out.printf("%s--%s (%s hours)%n", p.start(), p.end(), TsdlUtil.getTimespan(p.start(), p.end(), TsdlTimeUnit.HOURS));
       }
 
+      // TODO add assertions
       /*
        * potentials for improvement:
        * see test 'queryEvent_increaseEvent' with inverse effect that the incorrect (false positive) "decrase" from ~07T02:45 until ~08T07:45 would
@@ -996,6 +999,7 @@ class TsdlQueryServiceTest {
 
       var queryResult = queryService.query(dps, query);
       System.out.println();
+      // TODO add assertions
     }
 
     @ParameterizedTest
@@ -1017,6 +1021,7 @@ class TsdlQueryServiceTest {
 
       var queryResult = queryService.query(dps, query);
       System.out.println();
+      // TODO add assertions
     }
 
     @ParameterizedTest
@@ -1038,6 +1043,7 @@ class TsdlQueryServiceTest {
 
       var queryResult = queryService.query(dps, query);
       System.out.println();
+      // TODO add assertions
     }
   }
 

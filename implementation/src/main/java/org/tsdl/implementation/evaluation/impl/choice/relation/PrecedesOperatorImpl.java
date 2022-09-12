@@ -50,7 +50,8 @@ public record PrecedesOperatorImpl(TemporalOperand operand1, TemporalOperand ope
       return List.of();
     }
 
-    // TODO possible to solve without quadratic behaviour?
+    // TODO possible to solve without quadratic behaviour? e.g. sort periodsToExamine by start date and, like before, iterate pairwise, considering
+    //  periods with same start date at the same time
     var chosenPeriods = new ArrayList<AnnotatedTsdlPeriod>();
     for (var currentPeriod : periodsToExamine) {
       for (var otherPeriod : periodsToExamine) {
@@ -62,7 +63,6 @@ public record PrecedesOperatorImpl(TemporalOperand operand1, TemporalOperand ope
         var operatorConformPrecedes = otherPeriod.event().representation().equals(operand1.representation())
             && currentPeriod.event().representation().equals(operand2.representation());
 
-        //System.out.printf("i = %s: precedes=%s; conform=%s%n", i, precedes, operatorConformPrecedes);
         log.debug("Events defining periods do{} conform to '{}' operator arguments.", operatorConformPrecedes ? "" : " not", representation());
         if (precedes && operatorConformPrecedes) {
           log.debug("Merging period boundaries '{}' and '{}' to a chosen period.", otherPeriod.period().start(), currentPeriod.period().end());

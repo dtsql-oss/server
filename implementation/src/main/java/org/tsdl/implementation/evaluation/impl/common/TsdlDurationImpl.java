@@ -23,12 +23,13 @@ public record TsdlDurationImpl(
 
   @Override
   public boolean isSatisfiedBy(double unitAdjustedValue) {
+    var absoluteValue = Math.abs(unitAdjustedValue);
     var satisfiesLowerBound = lowerBound.inclusive()
-        ? unitAdjustedValue >= lowerBound.value()
-        : unitAdjustedValue > lowerBound.value();
+        ? absoluteValue >= lowerBound.value()
+        : absoluteValue > lowerBound.value();
     var satisfiesUpperBound = upperBound().inclusive()
-        ? unitAdjustedValue <= upperBound.value()
-        : unitAdjustedValue < upperBound.value();
+        ? absoluteValue <= upperBound.value()
+        : absoluteValue < upperBound.value();
 
     return satisfiesLowerBound && satisfiesUpperBound;
   }

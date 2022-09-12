@@ -44,8 +44,8 @@ public class TsdlSamplesCalculatorImpl implements TsdlSamplesCalculator {
 
     var singlePointEventFilters = events.stream()
         .flatMap(event -> event.connective().events().stream())
-        .filter(event -> event instanceof SinglePointFilter)
-        .map(event -> (SinglePointFilter) event)
+        .filter(SinglePointFilter.class::isInstance)
+        .map(SinglePointFilter.class::cast)
         .toList();
 
     setSampleFilterArgumentValues(

@@ -472,10 +472,8 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     var reference = parseScalarArgument(ctx.deviationFilterArguments().reference);
     var deviation = parseScalarArgument(ctx.deviationFilterArguments().deviation);
 
-    if (deviation instanceof TsdlLiteralScalarArgument deviationArg) {
-      if (deviationArg.value() < 0) {
-        throw new TsdlParseException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
-      }
+    if (deviation instanceof TsdlLiteralScalarArgument deviationArg && deviationArg.value() < 0) {
+      throw new TsdlParseException("For 'around' filters, the maximum deviation must not be less than 0 because it is an absolute value.");
     }
 
     return elementFactory.getDeviationFilter(filterType, reference, deviation);

@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.tsdl.implementation.evaluation.impl.choice.relation.PrecedesOperatorImpl;
 import org.tsdl.implementation.evaluation.impl.common.TsdlDurationImpl;
 import org.tsdl.implementation.evaluation.impl.common.formatting.TsdlSampleOutputFormatter;
 import org.tsdl.implementation.evaluation.impl.sample.aggregation.temporal.TimePeriodImpl;
@@ -1131,7 +1132,7 @@ class TsdlQueryParserTest {
           AND(gt(s2)) AS mid
 
         CHOOSE:
-          (low precedes high WITHIN [23,26] minutes)
+          (low precedes (mid precedes high) WITHIN [23,26] minutes)
 
         YIELD:
           all periods""";
@@ -1329,7 +1330,11 @@ class TsdlQueryParserTest {
       var query = PARSER.parseQuery(queryString);
 
       var low = query.events().stream().filter(event -> event.identifier().name().equals("low")).findFirst().orElseThrow();
-      var high = query.events().stream().filter(event -> event.identifier().name().equals("high")).findFirst().orElseThrow();
+      var high = new PrecedesOperatorImpl(
+          query.events().stream().filter(event -> event.identifier().name().equals("mid")).findFirst().orElseThrow(),
+          query.events().stream().filter(event -> event.identifier().name().equals("high")).findFirst().orElseThrow(),
+          null
+      );
       assertThat(query.choice())
           .asInstanceOf(InstanceOfAssertFactories.optional(PrecedesOperator.class))
           .get()

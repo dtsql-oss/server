@@ -31,7 +31,6 @@ public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
   public List<AnnotatedTsdlPeriod> assemble(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     requirePureEventConnectives(events);
 
-    // TODO FIIIIX
     var detectedPeriods = new ArrayList<AnnotatedTsdlPeriod>();
     var eventsByStrategy = events
         .stream()
@@ -83,12 +82,12 @@ public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
    */
   private void requirePureEventConnectives(List<TsdlEvent> events) {
     for (TsdlEvent event : events) {
-      var allFilterEvents = event.connective().events().stream().allMatch(e -> e instanceof SinglePointFilter);
+      var allFilterEvents = event.connective().events().stream().allMatch(SinglePointFilter.class::isInstance);
       if (allFilterEvents) {
         continue;
       }
 
-      var allComplexEvents = event.connective().events().stream().allMatch(e -> e instanceof ComplexEventFunction);
+      var allComplexEvents = event.connective().events().stream().allMatch(ComplexEventFunction.class::isInstance);
       if (allComplexEvents && event.connective().events().size() == 1) {
         continue;
       }

@@ -252,7 +252,7 @@ public class TsdlQueryElementFactoryImpl implements TsdlQueryElementFactory {
     Conditions.checkNotNull(Condition.ARGUMENT, connective, "Filter connective for event must not be null.");
     Conditions.checkNotNull(Condition.ARGUMENT, identifier, "Identifier for event must not be null.");
     TsdlEventStrategyType eventStrategyType;
-    if (connective.events().stream().anyMatch(e -> e instanceof SinglePointFilter)) {
+    if (connective.events().stream().anyMatch(SinglePointFilter.class::isInstance)) {
       eventStrategyType = duration != null ? TsdlEventStrategyType.SINGLE_POINT_EVENT_WITH_DURATION : TsdlEventStrategyType.SINGLE_POINT_EVENT;
     } else if (connective.events().get(0) instanceof ConstantEvent
         || connective.events().get(0) instanceof NegatedEventFunction n && n.eventFunction() instanceof ConstantEvent) {

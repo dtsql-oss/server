@@ -33,11 +33,11 @@ public abstract class BaseTsdlClient<T extends QueryClientSpecification> impleme
 
   private final OkHttpClient client;
 
-  public BaseTsdlClient() {
+  protected BaseTsdlClient() {
     this(10, TimeUnit.SECONDS);
   }
 
-  public BaseTsdlClient(long timeout, TimeUnit unit) {
+  protected BaseTsdlClient(long timeout, TimeUnit unit) {
     client = new OkHttpClient.Builder()
         .readTimeout(timeout, unit)
         .build();
