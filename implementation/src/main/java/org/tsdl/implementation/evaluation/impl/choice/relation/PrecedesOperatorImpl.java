@@ -53,8 +53,10 @@ public record PrecedesOperatorImpl(TemporalOperand operand1, TemporalOperand ope
     // TODO possible to solve without quadratic behaviour? e.g. sort periodsToExamine by start date and, like before, iterate pairwise, considering
     //  periods with same start date at the same time
     var chosenPeriods = new ArrayList<AnnotatedTsdlPeriod>();
-    for (var currentPeriod : periodsToExamine) {
-      for (var otherPeriod : periodsToExamine) {
+    for (var i = 0; i < periodsToExamine.size(); i++) {
+      var currentPeriod = periodsToExamine.get(i);
+      for (var j = 0; j < i; j++) {
+        var otherPeriod = periodsToExamine.get(j);
         // ensures "previous (period) precedes current (period) [WITHIN ...]"...
         var precedes = otherPeriod.subsequentDataPoint().isPresent() && satisfiesDurationConstraint(otherPeriod, currentPeriod);
 

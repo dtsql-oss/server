@@ -72,7 +72,7 @@ public class TsdlPeriodAssemblerImpl implements TsdlPeriodAssembler {
     return periods.stream()
         .collect(
             Collectors.groupingBy(period -> period.event().name(),
-                Collectors.mapping(period -> "%s-%s".formatted(period.period().start(), period.period().end()), Collectors.toList()))
+                Collectors.mapping(period -> "%s--%s".formatted(period.period().start(), period.period().end()), Collectors.toList()))
         );
   }
 
