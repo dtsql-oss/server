@@ -8,8 +8,11 @@ import org.tsdl.implementation.model.choice.AnnotatedTsdlPeriod;
 import org.tsdl.implementation.model.event.TsdlEvent;
 import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
+import org.tsdl.implementation.model.event.definition.ConstantEvent;
 import org.tsdl.implementation.model.event.definition.MonotonicEvent;
 import org.tsdl.implementation.model.filter.SinglePointFilter;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 abstract class MonotonicEventStrategy extends ComplexEventStrategy {
@@ -20,6 +23,8 @@ abstract class MonotonicEventStrategy extends ComplexEventStrategy {
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     var monotonicEvent = events.get(0);
+    Conditions.checkIsTrue(Condition.ARGUMENT, monotonicEvent.connective().events().get(0) instanceof ConstantEvent,
+        "Currently, only positive (non-negated) constant events are supported.");
     var monotonicEventFunction = ((MonotonicEvent) monotonicEvent.connective().events().get(0));
 
     var timeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());

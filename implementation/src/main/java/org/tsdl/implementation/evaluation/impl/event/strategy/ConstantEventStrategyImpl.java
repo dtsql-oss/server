@@ -13,6 +13,8 @@ import org.tsdl.implementation.model.event.TsdlEventStrategyType;
 import org.tsdl.implementation.model.event.definition.AndEventConnectiveImpl;
 import org.tsdl.implementation.model.event.definition.ConstantEvent;
 import org.tsdl.implementation.model.event.strategy.ConstantEventStrategy;
+import org.tsdl.infrastructure.common.Condition;
+import org.tsdl.infrastructure.common.Conditions;
 import org.tsdl.infrastructure.model.DataPoint;
 
 /**
@@ -26,6 +28,8 @@ public class ConstantEventStrategyImpl extends ComplexEventStrategy implements C
   @Override
   public List<AnnotatedTsdlPeriod> detectPeriods(List<DataPoint> dataPoints, List<TsdlEvent> events) {
     var constantEvent = events.get(0);
+    Conditions.checkIsTrue(Condition.ARGUMENT, constantEvent.connective().events().get(0) instanceof ConstantEvent,
+        "Currently, only positive (non-negated) constant events are supported.");
     var constantEventFunction = (ConstantEvent) constantEvent.connective().events().get(0);
 
     var timeResolution = inferDerivativeUnit(dataPoints.get(0).timestamp(), dataPoints.get(1).timestamp());
