@@ -256,7 +256,6 @@ deviationFilter
   :  DEVIATION_FILTER_TYPE PARENTHESIS_OPEN WHITESPACE? deviationFilterArguments WHITESPACE? PARENTHESIS_CLOSE
   ;
 
-// NUMBER argument is in [0, 100] for type 'rel', otherwise unconstrained
 deviationFilterArguments
   :  AROUND_FILTER_TYPE LIST_SEPARATOR reference=scalarArgument LIST_SEPARATOR deviation=scalarArgument
   ;
