@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+      Logback prints status information about the logging initialization to the console during application
+      startup if there is at least one status message with log level WARNING or above. This is quite desirable
+      behavior. However, if you want to suppress all status messages under all circumstances, comment-in the
+      line below. Doing so is not necessarily recommended because it essentially hides configuration errors.
+    -->
+    <!--<statusListener class="ch.qos.logback.core.status.NopStatusListener"/>-->
+
+    <springProperty name="LOGDIR" source="logging.directory"/>
+    <springProperty name="LOGNAME" source="logging.file-name"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGDIR}/${LOGNAME}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>${FILE_LOG_PATTERN}</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${LOGDIR}/archived/${LOGNAME}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <!-- each file should be at most 5 MB, keep 30 days worth of history, but at most 1 GB -->
+            <maxFileSize>5MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+
+    <root level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <!-- Fine-Tune Log Level of Dependencies -->
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.orm.jpa.JpaTransactionManager" level="DEBUG"/>
+    <logger name="com.zaxxer.hikari" level="INFO"/>
+    <logger name="io.swagger.v3" level="INFO"/>
+</configuration>

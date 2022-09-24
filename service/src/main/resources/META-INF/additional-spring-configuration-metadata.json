@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "logging.directory",
+      "type": "java.lang.String",
+      "description": "Specifies the directory within which log files are created."
+    },
+    {
+      "name": "logging.file-name",
+      "type": "java.lang.String",
+      "description": "Description for logging.file-name."
+    },
+    {
+      "name": "application.version",
+      "type": "java.lang.String",
+      "description": "The current version of the application, as specified in the corresponding pom.xml."
+    }
+  ]
+}

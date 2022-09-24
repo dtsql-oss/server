@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  influxdb:
+    image: influxdb:2.2
+    ports:
+      - "${INFLUXDB_PORT_HOST}:${INFLUXDB_PORT_CONTAINER}"
+
+  service:
+    build:
+      context: .
+      dockerfile: ./service/Dockerfile
+    ports:
+      - "${SERVICE_PORT_HOST}:${SERVICE_PORT_CONTAINER}"

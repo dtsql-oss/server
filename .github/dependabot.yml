@@ -1,0 +1,17 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    assignees:
+      - "raffaelfoidl"
+    reviewers:
+      - "raffaelfoidl"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    target-branch: "main"

@@ -1,0 +1,4 @@
+version: "1.0"
+profile:
+  name: qodana.recommended
+failThreshold: 10000 # 1 # make CI step when more problems than this threshold are detected (# TODO choose threshold 1 as soon as report is deployed to GH pages)

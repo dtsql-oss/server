@@ -1,0 +1,106 @@
+name: CI (Ubuntu)
+
+env:
+  # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
+  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+
+  FAIL_END: "--fail-at-end"
+
+  FAIL_NEVER: "--fail-never"
+
+  # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
+  # when running from the command line.
+  # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
+  MAVEN_CLI_OPTS: "--batch-mode --errors --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+
+  # Test visualization should be disabled in CI (headless) mode.
+  TSDL_SKIP_TEST_VISUALIZATION: true
+
+
+# run CI builds on main branch as well as on pull requests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Run Build
+        run: |
+          make all-build
+
+  checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: 18
+          distribution: 'adopt'
+          cache: 'maven' # see also https://github.com/actions/setup-java#caching-packages-dependencies
+      
+      # Even though setup-java already offers the ability to run maven builds, using the included
+      # Maven wrapper with fixed version ensures a uniform build process across multiple tools
+      - name: Make Maven Wrapper Executable
+        run: |
+          chmod +x mvnw
+      - name: Execute Maven checkstyle Plugin
+        run: |
+          ./mvnw $MAVEN_CLI_OPTS $FAIL_NEVER checkstyle:check | perl -pe 'END { exit $status } $status=1 if /BUILD FAILURE/;'
+
+  test:
+    if: ${{ always() }}
+    needs: [ checkstyle ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: 18
+          distribution: 'adopt'
+          cache: 'maven' # see also https://github.com/actions/setup-java#caching-packages-dependencies
+
+      # Even though setup-java already offers the ability to run maven builds, using the included
+      # Maven wrapper with fixed version ensures a uniform build process across multiple tools
+      - name: Make Maven Wrapper Executable
+        run: |
+          chmod +x mvnw
+
+      - name: Run Java Unit and Integration Tests
+        run: |
+          ./mvnw $MAVEN_CLI_OPTS $FAIL_END clean verify
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: ${{ always() }}
+        with:
+          report_paths: '**/surefire-reports/*.xml'
+
+      - name: Upload Build Artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-artifacts
+          # Filename of service_api.(json|yaml) of API artifacts has to be kept in sync with the value of the LOCAL_FILE_NAME
+          # constant in the "service/src/test/java/com/tsdl/service/ApiGenerationTest.java" file.
+          path: |
+            **/logs/**
+            !.git/**
+            **/surefire-reports/** 
+            **/target/site/jacoco/**
+            ./service/service_api.json
+            ./service/service_api.yaml
