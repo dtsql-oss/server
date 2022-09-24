@@ -1,4 +1,4 @@
-lexer grammar TsdlLexer;
+lexer grammar DtsqlLexer;
 
 WHITESPACE  :  WHITESPACE_CHARACTER+  ;
 fragment WHITESPACE_CHARACTER  :  ' '  |  '\r'  |  '\n'  |  '\r\n'  |  '\t'  ;

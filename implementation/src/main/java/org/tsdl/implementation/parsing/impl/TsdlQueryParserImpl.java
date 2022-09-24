@@ -5,7 +5,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.tsdl.grammar.TsdlLexer;
+import org.tsdl.grammar.DtsqlLexer;
+import org.tsdl.grammar.DtsqlParser;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.model.TsdlQuery;
 import org.tsdl.implementation.parsing.TsdlQueryParser;
@@ -24,18 +25,18 @@ public class TsdlQueryParserImpl implements TsdlQueryParser {
     try {
       Conditions.checkNotNull(Condition.ARGUMENT, query, "Query to parse must not be null.");
 
-      var lexer = new TsdlLexer(CharStreams.fromString(query));
+      var lexer = new DtsqlLexer(CharStreams.fromString(query));
       lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
       lexer.addErrorListener(errorListener);
 
       var tokens = new CommonTokenStream(lexer);
-      var parser = new org.tsdl.grammar.TsdlParser(tokens);
+      var parser = new DtsqlParser(tokens);
       parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
       parser.addErrorListener(errorListener);
 
       var walker = new ParseTreeWalker();
       var tsdlListener = new TsdlListenerImpl();
-      walker.walk(tsdlListener, parser.tsdlQuery());
+      walker.walk(tsdlListener, parser.dtsqlQuery());
 
       return tsdlListener.getQuery();
     } catch (TsdlParseException e) {

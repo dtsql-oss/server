@@ -12,9 +12,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.tsdl.grammar.TsdlParser;
-import org.tsdl.grammar.TsdlParserBaseListener;
-import org.tsdl.grammar.TsdlParserBaseVisitor;
+import org.tsdl.grammar.DtsqlParser;
+import org.tsdl.grammar.DtsqlParserBaseListener;
+import org.tsdl.grammar.DtsqlParserBaseVisitor;
 import org.tsdl.implementation.evaluation.impl.TsdlQueryImpl;
 import org.tsdl.implementation.factory.TsdlComponentFactory;
 import org.tsdl.implementation.factory.TsdlQueryElementFactory;
@@ -49,9 +49,9 @@ import org.tsdl.infrastructure.common.Conditions;
 // TODO: Pattern for parsing lists of any sort could be generified so that it is defined only once
 
 /**
- * A derivation of {@link TsdlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
+ * A derivation of {@link DtsqlParserBaseListener} used to parse a {@link TsdlQuery} instance from a given string.
  */
-public class TsdlListenerImpl extends TsdlParserBaseListener {
+public class TsdlListenerImpl extends DtsqlParserBaseListener {
   private enum IdentifierType {
     EVENT, SAMPLE
   }
@@ -70,9 +70,9 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private record AggregatorBounds(Instant lowerBound, Instant upperBound) {
   }
 
-  class TemporalRelationVisitor extends TsdlParserBaseVisitor<TemporalOperator> {
+  class TemporalRelationVisitor extends DtsqlParserBaseVisitor<TemporalOperator> {
     @Override
-    public TemporalOperator visitEventEvent(TsdlParser.EventEventContext ctx) {
+    public TemporalOperator visitEventEvent(DtsqlParser.EventEventContext ctx) {
       var op1 = parseAtomicOperand(ctx.op1);
       var op2 = parseAtomicOperand(ctx.op2);
       var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
@@ -82,7 +82,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
 
     @Override
-    public TemporalOperator visitEventRecursive(TsdlParser.EventRecursiveContext ctx) {
+    public TemporalOperator visitEventRecursive(DtsqlParser.EventRecursiveContext ctx) {
       var op1 = parseAtomicOperand(ctx.op1);
       var op2 = visit(ctx.op2);
       var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
@@ -92,7 +92,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
 
     @Override
-    public TemporalOperator visitRecursiveEvent(TsdlParser.RecursiveEventContext ctx) {
+    public TemporalOperator visitRecursiveEvent(DtsqlParser.RecursiveEventContext ctx) {
       var op1 = visit(ctx.op1);
       var op2 = parseAtomicOperand(ctx.op2);
       var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
@@ -102,7 +102,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
 
     @Override
-    public TemporalOperator visitRecursiveRecursive(TsdlParser.RecursiveRecursiveContext ctx) {
+    public TemporalOperator visitRecursiveRecursive(DtsqlParser.RecursiveRecursiveContext ctx) {
       var op1 = visit(ctx.op1);
       var op2 = visit(ctx.op2);
       var relationType = elementParser.parseTemporalRelationType(ctx.TEMPORAL_RELATION().getText());
@@ -130,7 +130,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   private final Map<List<TimePeriod>, SummaryStatistics> summaryStatisticsByPeriods = new HashMap<>();
 
   @Override
-  public void enterIdentifierDeclaration(TsdlParser.IdentifierDeclarationContext ctx) {
+  public void enterIdentifierDeclaration(DtsqlParser.IdentifierDeclarationContext ctx) {
     var identifier = parseIdentifier(ctx.IDENTIFIER());
 
     if (!declaredIdentifiers.contains(identifier)) {
@@ -141,13 +141,13 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterFiltersDeclaration(TsdlParser.FiltersDeclarationContext ctx) {
+  public void enterFiltersDeclaration(DtsqlParser.FiltersDeclarationContext ctx) {
     var connective = parseSinglePointFilterConnective(ctx.filterConnective());
     queryBuilder.filterValue(connective);
   }
 
   @Override
-  public void enterSamplesDeclaration(TsdlParser.SamplesDeclarationContext ctx) {
+  public void enterSamplesDeclaration(DtsqlParser.SamplesDeclarationContext ctx) {
     var aggregatorList = ctx.aggregatorsDeclarationStatement().aggregatorList();
     var parsedSamples = new ArrayList<TsdlSample>(); // not reusing declaredSamples.values() because that does not preserve insertion order
 
@@ -169,7 +169,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterEventsDeclaration(TsdlParser.EventsDeclarationContext ctx) {
+  public void enterEventsDeclaration(DtsqlParser.EventsDeclarationContext ctx) {
     var eventList = ctx.eventsDeclarationStatement().eventList();
     var parsedEvents = new ArrayList<TsdlEvent>(); // not reusing declaredEvents.values() because that does not preserve insertion order
 
@@ -191,18 +191,18 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
   }
 
   @Override
-  public void enterChoiceDeclaration(TsdlParser.ChoiceDeclarationContext ctx) {
+  public void enterChoiceDeclaration(DtsqlParser.ChoiceDeclarationContext ctx) {
     var temporalOperator = new TemporalRelationVisitor().visit(ctx.temporalRelation());
     queryBuilder.choiceValue(temporalOperator);
   }
 
   @Override
-  public void enterYieldDeclaration(TsdlParser.YieldDeclarationContext ctx) {
+  public void enterYieldDeclaration(DtsqlParser.YieldDeclarationContext ctx) {
     var resultFormat = parseResult(ctx.yieldType());
     queryBuilder.result(resultFormat);
   }
 
-  private YieldStatement parseResult(TsdlParser.YieldTypeContext ctx) {
+  private YieldStatement parseResult(DtsqlParser.YieldTypeContext ctx) {
     var format = elementParser.parseResultFormat(ctx.getText());
     if (format != YieldFormat.SAMPLE && format != YieldFormat.SAMPLE_SET) {
       return elementFactory.getResult(format, null);
@@ -230,7 +230,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private TsdlSample parseSample(TsdlParser.AggregatorDeclarationContext ctx) {
+  private TsdlSample parseSample(DtsqlParser.AggregatorDeclarationContext ctx) {
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var includeEcho = ctx.echoStatement() != null;
     var echoArguments = includeEcho && ctx.echoStatement().echoArgumentList() != null
@@ -249,7 +249,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getSample(aggregator, identifier, includeEcho, echoArguments);
   }
 
-  private TsdlAggregator parseValueAggregator(TsdlParser.ValueAggregatorDeclarationContext ctx) {
+  private TsdlAggregator parseValueAggregator(DtsqlParser.ValueAggregatorDeclarationContext ctx) {
     var aggregatorType = elementParser.parseAggregatorType(ctx.VALUE_AGGREGATOR_FUNCTION().getText());
 
     Instant lowerBound = null;
@@ -278,7 +278,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     };
   }
 
-  private TsdlAggregator parseTemporalAggregator(TsdlParser.TemporalAggregatorDeclarationContext ctx) {
+  private TsdlAggregator parseTemporalAggregator(DtsqlParser.TemporalAggregatorDeclarationContext ctx) {
     var aggregatorWithUnit = ctx.TEMPORAL_AGGREGATOR_FUNCTION() != null;
 
     var aggregatorFunction = aggregatorWithUnit
@@ -300,7 +300,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     };
   }
 
-  private List<TimePeriod> parseIntervalList(TsdlParser.IntervalListContext ctx) {
+  private List<TimePeriod> parseIntervalList(DtsqlParser.IntervalListContext ctx) {
     var intervalList = new ArrayList<TimePeriod>();
 
     if (ctx.intervals() != null) {
@@ -316,14 +316,14 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return Collections.unmodifiableList(intervalList);
   }
 
-  private Instant[] parseTimeRange(TsdlParser.TimeRangeContext ctx) {
+  private Instant[] parseTimeRange(DtsqlParser.TimeRangeContext ctx) {
     // the empty string literal '""' stands for a non-existing bound, e.g., so that only a lower bound may be specified
     return ctx.STRING_LITERAL().stream()
         .map(literal -> "\"\"".equals(literal.getText()) ? null : elementParser.parseDate(literal.getText(), true))
         .toArray(Instant[]::new);
   }
 
-  private String[] parseEchoArguments(TsdlParser.EchoArgumentListContext ctx) {
+  private String[] parseEchoArguments(DtsqlParser.EchoArgumentListContext ctx) {
     var arguments = new ArrayList<String>();
 
     if (ctx.echoArguments() != null) {
@@ -339,14 +339,14 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return arguments.toArray(String[]::new);
   }
 
-  private TsdlEvent parseEvent(TsdlParser.EventDeclarationContext ctx) {
+  private TsdlEvent parseEvent(DtsqlParser.EventDeclarationContext ctx) {
     var connective = parseEventConnective(ctx.eventConnective());
     var identifier = parseIdentifier(ctx.identifierDeclaration().IDENTIFIER());
     var duration = parseDuration(ctx.durationSpecification());
     return elementFactory.getEvent(connective, identifier, duration);
   }
 
-  private EventConnective parseEventConnective(TsdlParser.EventConnectiveContext ctx) {
+  private EventConnective parseEventConnective(DtsqlParser.EventConnectiveContext ctx) {
     var connectiveIdentifier = elementParser.parseConnectiveIdentifier(ctx.CONNECTIVE_IDENTIFIER().getText());
     var eventFunctionList = ctx.eventFunctionList();
 
@@ -364,7 +364,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getEventConnective(connectiveIdentifier, parsedEventFunctions);
   }
 
-  private SinglePointFilterConnective parseSinglePointFilterConnective(TsdlParser.FilterConnectiveContext ctx) {
+  private SinglePointFilterConnective parseSinglePointFilterConnective(DtsqlParser.FilterConnectiveContext ctx) {
     var connectiveIdentifier = elementParser.parseConnectiveIdentifier(ctx.CONNECTIVE_IDENTIFIER().getText());
     var filterList = ctx.singlePointFilterList();
 
@@ -382,7 +382,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getFilterConnective(connectiveIdentifier, parsedFilters);
   }
 
-  private EventFunction parseEventFunction(TsdlParser.EventFunctionDeclarationContext ctx) {
+  private EventFunction parseEventFunction(DtsqlParser.EventFunctionDeclarationContext ctx) {
     if (ctx.singlePointFilterDeclaration() != null) {
       return parseSinglePointFilter(ctx.singlePointFilterDeclaration());
     } else if (ctx.complexEventDeclaration() != null) {
@@ -392,7 +392,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private EventFunction parseComplexEventFunction(TsdlParser.ComplexEventDeclarationContext ctx) {
+  private EventFunction parseComplexEventFunction(DtsqlParser.ComplexEventDeclarationContext ctx) {
     EventFunction event;
     if (ctx.negatedComplexEvent() == null) {
       event = parseComplexEventFunction(ctx.complexEvent());
@@ -403,7 +403,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return event;
   }
 
-  private ComplexEventFunction parseComplexEventFunction(TsdlParser.ComplexEventContext ctx) {
+  private ComplexEventFunction parseComplexEventFunction(DtsqlParser.ComplexEventContext ctx) {
     if (ctx.constantEvent() != null) {
       return parseConstantEvent(ctx.constantEvent());
     } else if (ctx.increaseEvent() != null) {
@@ -415,27 +415,27 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private ComplexEventFunction parseConstantEvent(TsdlParser.ConstantEventContext ctx) {
+  private ComplexEventFunction parseConstantEvent(DtsqlParser.ConstantEventContext ctx) {
     var maximumSlope = parseScalarArgument(ctx.slope);
     var maximumRelativeDeviation = parseScalarArgument(ctx.deviation);
     return elementFactory.getConstantEvent(maximumSlope, maximumRelativeDeviation);
   }
 
-  private ComplexEventFunction parseIncreaseEvent(TsdlParser.IncreaseEventContext ctx) {
+  private ComplexEventFunction parseIncreaseEvent(DtsqlParser.IncreaseEventContext ctx) {
     var minimumChange = parseScalarArgument(ctx.minChange);
     var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
     var tolerance = parseScalarArgument(ctx.tolerance);
     return elementFactory.getIncreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
-  private ComplexEventFunction parseDecreaseEvent(TsdlParser.DecreaseEventContext ctx) {
+  private ComplexEventFunction parseDecreaseEvent(DtsqlParser.DecreaseEventContext ctx) {
     var minimumChange = parseScalarArgument(ctx.minChange);
     var maximumChange = parseMonotonicUpperBound(ctx.monotonicUpperBound());
     var tolerance = parseScalarArgument(ctx.tolerance);
     return elementFactory.getDecreaseEvent(minimumChange, maximumChange, tolerance);
   }
 
-  private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterDeclarationContext ctx) {
+  private SinglePointFilter parseSinglePointFilter(DtsqlParser.SinglePointFilterDeclarationContext ctx) {
     SinglePointFilter filter;
     if (ctx.negatedSinglePointFilter() == null) {
       filter = parseSinglePointFilter(ctx.singlePointFilter());
@@ -446,7 +446,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return filter;
   }
 
-  private SinglePointFilter parseSinglePointFilter(TsdlParser.SinglePointFilterContext ctx) {
+  private SinglePointFilter parseSinglePointFilter(DtsqlParser.SinglePointFilterContext ctx) {
     if (ctx.thresholdFilter() != null) {
       return parseThresholdFilter(ctx.thresholdFilter());
     } else if (ctx.temporalFilter() != null) {
@@ -458,13 +458,13 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private SinglePointFilter parseThresholdFilter(TsdlParser.ThresholdFilterContext ctx) {
+  private SinglePointFilter parseThresholdFilter(DtsqlParser.ThresholdFilterContext ctx) {
     var filterType = elementParser.parseThresholdFilterType(ctx.THRESHOLD_FILTER_TYPE().getText());
     var filterArgument = parseScalarArgument(ctx.scalarArgument());
     return elementFactory.getThresholdFilter(filterType, filterArgument);
   }
 
-  private SinglePointFilter parseDeviationFilter(TsdlParser.DeviationFilterContext ctx) {
+  private SinglePointFilter parseDeviationFilter(DtsqlParser.DeviationFilterContext ctx) {
     var filterType = elementParser.parseDeviationFilterType(
         ctx.DEVIATION_FILTER_TYPE().getText(),
         ctx.deviationFilterArguments().AROUND_FILTER_TYPE().getText()
@@ -479,7 +479,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return elementFactory.getDeviationFilter(filterType, reference, deviation);
   }
 
-  TsdlScalarArgument parseScalarArgument(TsdlParser.ScalarArgumentContext ctx) {
+  TsdlScalarArgument parseScalarArgument(DtsqlParser.ScalarArgumentContext ctx) {
     if (ctx.IDENTIFIER() != null) {
       var identifier = requireIdentifier(ctx.IDENTIFIER(), IdentifierType.SAMPLE);
       var referencedSample = declaredSamples.get(identifier);
@@ -492,7 +492,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  TsdlScalarArgument parseMonotonicUpperBound(TsdlParser.MonotonicUpperBoundContext ctx) {
+  TsdlScalarArgument parseMonotonicUpperBound(DtsqlParser.MonotonicUpperBoundContext ctx) {
     if (ctx.HYPHEN() != null) {
       return elementFactory.getScalarArgument(Double.POSITIVE_INFINITY);
     } else if (ctx.scalarArgument() != null) {
@@ -502,7 +502,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     }
   }
 
-  private SinglePointFilter parseTemporalFilter(TsdlParser.TemporalFilterContext ctx) {
+  private SinglePointFilter parseTemporalFilter(DtsqlParser.TemporalFilterContext ctx) {
     var filterType = elementParser.parseTemporalFilterType(ctx.TEMPORAL_FILTER_TYPE().getText());
     var filterArgument = elementParser.parseDate(ctx.STRING_LITERAL().getText(), true);
     return elementFactory.getTemporalFilter(filterType, filterArgument);
@@ -528,7 +528,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return requireIdentifier(node.getSymbol(), type);
   }
 
-  private TsdlDuration parseDuration(TsdlParser.TimeToleranceSpecificationContext ctx) {
+  private TsdlDuration parseDuration(DtsqlParser.TimeToleranceSpecificationContext ctx) {
     if (ctx == null) {
       return null;
     }
@@ -536,7 +536,7 @@ public class TsdlListenerImpl extends TsdlParserBaseListener {
     return parseDuration(ctx.TIME_TOLERANCE().getText().substring("WITHIN".length()), ctx.TIME_UNIT().getText());
   }
 
-  private TsdlDuration parseDuration(TsdlParser.DurationSpecificationContext ctx) {
+  private TsdlDuration parseDuration(DtsqlParser.DurationSpecificationContext ctx) {
     if (ctx == null) {
       return null;
     }

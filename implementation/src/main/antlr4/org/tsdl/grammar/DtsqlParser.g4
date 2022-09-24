@@ -1,11 +1,11 @@
-parser grammar TsdlParser;
+parser grammar DtsqlParser;
 
 options
 {
-  tokenVocab = TsdlLexer;
+  tokenVocab = DtsqlLexer;
 }
 
-tsdlQuery
+dtsqlQuery
   :  WHITESPACE?
        (samplesDeclaration WHITESPACE)?
        (filtersDeclaration WHITESPACE)?
