@@ -1,0 +1,4 @@
+logging:
+  config: "./logback-test.xml"
+  directory: "./logs/test"
+  file-name: "server-test"

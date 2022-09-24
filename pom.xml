@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.tsdl</groupId>
+    <artifactId>root</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+    <name>root</name>
+    <description>Parent module of all TSDL-related modules.</description>
+
+    <properties>
+        <revision>0.1-SNAPSHOT</revision>   <!-- MUST be called "revision" -->
+        <java.version>18</java.version>
+        <project.fileEncoding>UTF-8</project.fileEncoding>
+        <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
+        <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
+        <assertj.version>3.23.1</assertj.version>
+        <junit.version>5.8.2</junit.version>
+        <mockito.version>4.8.0</mockito.version>
+        <antlr.version>4.11.1</antlr.version>
+        <mojo.version>3.3.0</mojo.version>
+        <jfreechart.version>1.5.3</jfreechart.version>
+        <logback.version>1.4.1</logback.version>
+        <lombok.version>1.18.24</lombok.version>
+        <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
+        <checkstyle.version>10.3.4</checkstyle.version>
+        <jackson.version>2.13.4</jackson.version>
+        <fastcsv.version>2.2.0</fastcsv.version>
+        <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
+    </properties>
+
+    <modules>
+        <module>infrastructure</module>
+        <module>service</module>
+        <module>implementation</module>
+        <module>storage</module>
+        <module>test-util</module>
+        <module>client</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!--
+                Required to create flattened POMs (.flattened-pom.xml); they are deployed and installed instead of the
+                original ones. The flattened POMs contain information relevant for build, e.g., version attributes
+                resolved from ${revision} variable references, parent relationships are resolved and so on. This makes
+                it possible to use the Maven 3.5 §{revision} placeholder and still execute individual lifecycle phases
+                and plugins of child modules separately, i.e., not only implicitly triggering them through a build of
+                the root module with unnecessary builds of other child modules. Effectively, this means that we are not
+                forced to duplicate the current version across child modules and parent declarations, and we are also
+                not required to update versions via external scripts or commands that ensure version consistency across
+                the project like "mvn versions:set -DnewVersion=$(version)". With flattened POMs, the only thing that
+                needs to be done when updating versions is modifying the value of the ${revision} property.
+
+                idea from: https://stackoverflow.com/a/52173650
+                official source for plugin requirement: https://maven.apache.org/maven-ci-friendly.html#install-deploy
+                plugin documentation: https://www.mojohaus.org/flatten-maven-plugin/flatten-mojo.html
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <failsOnError>true</failsOnError>
+                    <failOnViolation>true</failOnViolation>
+                    <violationSeverity>warning</violationSeverity>
+                    <consoleOutput>true</consoleOutput>
+                    <configLocation>${checkstyle.config}</configLocation>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>infrastructure</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>storage</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>implementation</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>test-util</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tsdl</groupId>
+                <artifactId>client</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
