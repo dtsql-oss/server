@@ -5,19 +5,19 @@ import java.util.Optional;
 /**
  * Represents the "SELECT" section of a TSDL query.
  */
-public interface ChoiceSpecification extends ChoiceOperand {
+public interface SelectSpecification extends SelectOperand {
   /**
    * Temporal relation.
    */
-  enum ChoiceOperator {
+  enum SelectOperator {
     PRECEDES, FOLLOWS
   }
 
-  ChoiceOperand operand1();
+  SelectOperand operand1();
 
-  ChoiceOperand operand2();
+  SelectOperand operand2();
 
   Optional<Range> tolerance();
 
-  ChoiceOperator type();
+  SelectOperator type();
 }

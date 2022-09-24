@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.tsdl.client.api.builder.ChoiceSpecification;
 import org.tsdl.client.api.builder.ComplexEventFunctionSpecification;
 import org.tsdl.client.api.builder.EchoSpecification;
 import org.tsdl.client.api.builder.EventConnectiveSpecification;
@@ -13,6 +12,7 @@ import org.tsdl.client.api.builder.EventSpecification;
 import org.tsdl.client.api.builder.FilterConnectiveSpecification;
 import org.tsdl.client.api.builder.FilterSpecification;
 import org.tsdl.client.api.builder.Range;
+import org.tsdl.client.api.builder.SelectSpecification;
 import org.tsdl.client.api.builder.TemporalSampleSpecification;
 import org.tsdl.client.api.builder.TsdlQueryBuilder;
 import org.tsdl.client.api.builder.ValueSampleSpecification;
@@ -30,7 +30,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
   private final List<String> samples;
   private String filter;
   private final List<String> events;
-  private String choice;
+  private String selection;
   private String yield;
 
   public TsdlQueryBuilderImpl() {
@@ -94,12 +94,12 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
   }
 
   @Override
-  public TsdlQueryBuilder choice(ChoiceSpecification choiceSpec) {
-    choice = choiceString(choiceSpec);
+  public TsdlQueryBuilder selection(SelectSpecification choiceSpec) {
+    selection = selectionString(choiceSpec);
     return this;
   }
 
-  private static String choiceString(ChoiceSpecification choiceSpec) {
+  private static String selectionString(SelectSpecification choiceSpec) {
     var durationConstraint = choiceSpec.tolerance().isPresent() ? intervalString(choiceSpec.tolerance().get(), "WITHIN") : "";
     var operator = switch (choiceSpec.type()) {
       case PRECEDES -> "precedes";
@@ -107,14 +107,14 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     };
 
     var operand1 = switch (choiceSpec.operand1()) {
-      case ChoiceSpecificationImpl recursive -> choiceString(recursive);
-      case EventChoiceOperandImpl event -> event.eventIdentifier();
+      case SelectSpecificationImpl recursive -> selectionString(recursive);
+      case EventSelectOperandImpl event -> event.eventIdentifier();
       default -> throw new TsdlQueryBuildException("Unknown choice operand type '%s'.".formatted(choiceSpec.operand1().getClass().getSimpleName()));
     };
 
     var operand2 = switch (choiceSpec.operand2()) {
-      case ChoiceSpecificationImpl recursive -> choiceString(recursive);
-      case EventChoiceOperandImpl event -> event.eventIdentifier();
+      case SelectSpecificationImpl recursive -> selectionString(recursive);
+      case EventSelectOperandImpl event -> event.eventIdentifier();
       default -> throw new TsdlQueryBuildException("Unknown choice operand type '%s'.".formatted(choiceSpec.operand2().getClass().getSimpleName()));
     };
 
@@ -144,7 +144,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     appendSection(finalQuery, "WITH SAMPLES", samples);
     appendSection(finalQuery, "APPLY FILTER", filter != null ? List.of(filter) : List.of());
     appendSection(finalQuery, "USING EVENTS", events);
-    appendSection(finalQuery, "SELECT", choice != null ? List.of(choice) : List.of());
+    appendSection(finalQuery, "SELECT", selection != null ? List.of(selection) : List.of());
     appendSection(finalQuery, "YIELD", List.of(yield));
 
     // keep one consecutive section separator, but not more

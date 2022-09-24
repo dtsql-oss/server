@@ -43,7 +43,7 @@ public interface TsdlQueryBuilder {
     return events(Arrays.stream(eventSpecs).toList());
   }
 
-  TsdlQueryBuilder choice(ChoiceSpecification choiceSpec);
+  TsdlQueryBuilder selection(SelectSpecification choiceSpec);
 
   TsdlQueryBuilder yield(YieldSpecification yieldSpec);
 

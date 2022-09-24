@@ -5,13 +5,13 @@ import java.util.Optional;
 /**
  * Represents operands to a "SELECT" component.
  */
-public interface ChoiceOperand {
+public interface SelectOperand {
   Optional<Range> tolerance();
 
   /**
    * Represents an operand that references an event.
    */
-  interface EventChoiceOperand extends ChoiceOperand {
+  interface EventSelectOperand extends SelectOperand {
     String eventIdentifier();
   }
 }

@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.tsdl.client.api.builder.ChoiceSpecification;
 import org.tsdl.client.api.builder.EventSpecification;
 import org.tsdl.client.api.builder.FilterConnectiveSpecification;
+import org.tsdl.client.api.builder.SelectSpecification;
 import org.tsdl.client.api.builder.TemporalSampleSpecification;
 import org.tsdl.client.api.builder.TsdlQueryBuilder;
 import org.tsdl.client.api.builder.ValueSampleSpecification;
@@ -133,24 +133,24 @@ class TsdlQueryBuilderTest {
 
 
   @ParameterizedTest
-  @MethodSource("org.tsdl.client.impl.builder.stub.TsdlQueryBuilderTestDataFactory#choiceInput")
-  void choice(ChoiceSpecification choiceSpecification, String expectedChoice) {
+  @MethodSource("org.tsdl.client.impl.builder.stub.TsdlQueryBuilderTestDataFactory#selectionInput")
+  void selection(SelectSpecification choiceSpecification, String expectedSelection) {
     var query = TsdlQueryBuilder.instance()
-        .choice(choiceSpecification)
+        .selection(choiceSpecification)
         .yield(dataPoints());
 
     var expectedQuery = """
         SELECT:
           %s
         YIELD:
-          data points""".formatted(expectedChoice);
+          data points""".formatted(expectedSelection);
 
     assertThat(query.build()).isEqualToNormalizingNewlines(expectedQuery);
   }
 
   @ParameterizedTest
   @MethodSource("org.tsdl.client.impl.builder.stub.TsdlQueryBuilderTestDataFactory#yieldInput")
-  void choice(YieldSpecification yieldSpecification, String expectedChoice) {
+  void yield(YieldSpecification yieldSpecification, String expectedChoice) {
     var query = TsdlQueryBuilder.instance()
         .yield(yieldSpecification);
 

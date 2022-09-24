@@ -6,20 +6,20 @@ import static org.tsdl.client.api.builder.Range.IntervalType.OPEN;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_END;
 import static org.tsdl.client.api.builder.Range.IntervalType.OPEN_START;
 import static org.tsdl.client.api.builder.TsdlQueryBuilder.as;
-import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.follows;
-import static org.tsdl.client.impl.builder.ChoiceSpecificationImpl.precedes;
 import static org.tsdl.client.impl.builder.ConstantEventSpecificationImpl.constant;
 import static org.tsdl.client.impl.builder.DecreaseEventSpecificationImpl.decrease;
 import static org.tsdl.client.impl.builder.DeviationFilterSpecificationImpl.aroundAbsolute;
 import static org.tsdl.client.impl.builder.EchoSpecificationImpl.echo;
-import static org.tsdl.client.impl.builder.EventChoiceOperandImpl.eventOperand;
 import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.and;
 import static org.tsdl.client.impl.builder.EventConnectiveSpecificationImpl.or;
+import static org.tsdl.client.impl.builder.EventSelectOperandImpl.eventOperand;
 import static org.tsdl.client.impl.builder.EventSpecificationImpl.event;
 import static org.tsdl.client.impl.builder.IncreaseEventSpecificationImpl.increase;
 import static org.tsdl.client.impl.builder.QueryPeriodImpl.period;
 import static org.tsdl.client.impl.builder.RangeImpl.for_;
 import static org.tsdl.client.impl.builder.RangeImpl.within;
+import static org.tsdl.client.impl.builder.SelectSpecificationImpl.follows;
+import static org.tsdl.client.impl.builder.SelectSpecificationImpl.precedes;
 import static org.tsdl.client.impl.builder.TemporalFilterSpecificationImpl.after;
 import static org.tsdl.client.impl.builder.TemporalFilterSpecificationImpl.before;
 import static org.tsdl.client.impl.builder.TemporalSampleSpecificationImpl.averageTemporal;
@@ -223,7 +223,7 @@ public final class TsdlQueryBuilderTestDataFactory {
     return TsdlQueryBuilderTestDataFactory.<EventSpecification>wrapArguments(eventInput());
   }
 
-  public static Stream<Arguments> choiceInput() {
+  public static Stream<Arguments> selectionInput() {
     return Stream.of(
         Arguments.of(
             precedes(eventOperand("low"), eventOperand("high"), within(23L, 26L, TsdlTimeUnit.MINUTES, OPEN_START)),
