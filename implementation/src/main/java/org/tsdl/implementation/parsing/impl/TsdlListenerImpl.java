@@ -191,7 +191,7 @@ public class TsdlListenerImpl extends DtsqlParserBaseListener {
   }
 
   @Override
-  public void enterChoiceDeclaration(DtsqlParser.ChoiceDeclarationContext ctx) {
+  public void enterSelectDeclaration(DtsqlParser.SelectDeclarationContext ctx) {
     var temporalOperator = new TemporalRelationVisitor().visit(ctx.temporalRelation());
     queryBuilder.choiceValue(temporalOperator);
   }

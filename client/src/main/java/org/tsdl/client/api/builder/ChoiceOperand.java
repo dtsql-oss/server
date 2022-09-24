@@ -3,7 +3,7 @@ package org.tsdl.client.api.builder;
 import java.util.Optional;
 
 /**
- * Represents operands to a "CHOOSE" component.
+ * Represents operands to a "SELECT" component.
  */
 public interface ChoiceOperand {
   Optional<Range> tolerance();
