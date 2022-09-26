@@ -3,7 +3,7 @@ package org.tsdl.client.api.builder;
 import java.util.Optional;
 
 /**
- * Represents the "SELECT" section of a TSDL query.
+ * Represents the "SELECT PERIODS" section of a TSDL query.
  */
 public interface SelectSpecification extends SelectOperand {
   /**

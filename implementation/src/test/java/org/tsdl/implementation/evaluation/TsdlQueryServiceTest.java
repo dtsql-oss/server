@@ -433,7 +433,7 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinition_detectsPeriod(List<DataPoint> dps) {
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high)\nYIELD:\nall periods";
+      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -456,7 +456,8 @@ class TsdlQueryServiceTest {
     })
     @TsdlTestVisualization(skipVisualization = true)
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithTimeTolerance_detectsPeriod(List<DataPoint> dps) {
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high WITHIN [0,15] minutes)\nYIELD:\nall periods";
+      var query =
+          "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high WITHIN [0,15] minutes)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -478,7 +479,8 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithTooLongGap_doesNotDetectPeriod(List<DataPoint> dps) {
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high WITHIN [0,15) minutes)\nYIELD:\nall periods";
+      var query =
+          "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high WITHIN [0,15) minutes)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -497,7 +499,8 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithTooShortGap_doesNotDetectPeriod(List<DataPoint> dps) {
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high WITHIN (15,] minutes)\nYIELD:\nall periods";
+      var query =
+          "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high WITHIN (15,] minutes)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -517,7 +520,7 @@ class TsdlQueryServiceTest {
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithGap_doesNotDetectPeriod(List<DataPoint> dps) {
       // gap is constituted by data point with value of exactly 80.0 right between "low" and "high"
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high)\nYIELD:\nall periods";
+      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -537,7 +540,8 @@ class TsdlQueryServiceTest {
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithGapAndTimeTolerance_detectsPeriod(List<DataPoint> dps) {
       // gap is constituted by data point with value of exactly 80.0 right between "low" and "high"
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high WITHIN [,15] minutes)\nYIELD:\nall periods";
+      var query =
+          "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high WITHIN [,15] minutes)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -559,7 +563,7 @@ class TsdlQueryServiceTest {
         @TsdlTestSource(value = DATA_ROOT + "series2.csv")
     })
     void queryChooseEvents_highFollowsLowLiteralEventDefinition_detectsPeriod(List<DataPoint> dps) {
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(high follows low)\nYIELD:\nall periods";
+      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(high follows low)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -582,7 +586,7 @@ class TsdlQueryServiceTest {
     })
     void queryChooseEvents_highFollowsLowLiteralEventDefinitionWithGap_doesNotDetectPeriod(List<DataPoint> dps) {
       // gap is constituted by data point with value of exactly 80.0 right between "low" and "high"
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(high follows low)\nYIELD:\nall periods";
+      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(high follows low)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -602,7 +606,8 @@ class TsdlQueryServiceTest {
     })
     void queryChooseEvents_lowPrecedesHighLiteralEventDefinitionWithGapAndUniversalTimeTolerance_detectsPeriod(List<DataPoint> dps) {
       // gap is constituted by data point with value of exactly 80.0 right between "low" and "high"
-      var query = "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT:\n(low precedes high WITHIN [,] seconds)\nYIELD:\nall periods";
+      var query =
+          "USING EVENTS:\nAND(lt(80)) AS low,\nOR(gt(80.0)) AS high\nSELECT PERIODS:\n(low precedes high WITHIN [,] seconds)\nYIELD:\nall periods";
 
       var result = queryService.query(dps, query);
 
@@ -630,7 +635,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       AND(gt(myAvg)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high)
                     YIELD:
                       all periods""";
@@ -664,7 +669,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       AND(gt(myAvg)) FOR [2,] hours AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high)
                     YIELD:
                       all periods""";
@@ -696,7 +701,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       AND(gt(myAvg)) FOR [2,] hours AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high WITHIN [0,900000] millis)
                     YIELD:
                       all periods""";
@@ -728,7 +733,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       AND(gt(myAvg)) FOR [2,] hours AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high WITHIN [0,900000) millis)
                     YIELD:
                       all periods""";
@@ -757,7 +762,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) FOR [3,] days AS low,
                       AND(gt(myAvg)) FOR [20,] weeks AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high)
                     YIELD:
                       all periods""";
@@ -784,7 +789,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(60)) AS low,
                       OR(gt(60)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low precedes high)
                     YIELD:
                       shortest period""";
@@ -811,7 +816,7 @@ class TsdlQueryServiceTest {
                     USING EVENTS:
                       AND(lt(myAvg)) AS low,
                       OR(gt(myAvg)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (low follows high)
                     YIELD:
                       longest period""";
@@ -835,7 +840,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(80)) AS low,
                       OR(gt(80)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       data points""";
@@ -863,7 +868,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(-1000)) AS low,
                       OR(gt(2000)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       all periods""";
@@ -886,7 +891,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(-1000)) AS low,
                       OR(gt(2000)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       longest period""";
@@ -910,7 +915,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(-1000)) AS low,
                       OR(gt(2000)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       shortest period""";
@@ -933,7 +938,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(lt(-1000)) AS low,
                       OR(gt(2000)) AS high
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       data points""";
@@ -957,7 +962,7 @@ class TsdlQueryServiceTest {
           USING EVENTS:
                       AND(gt(220)) AS high,
                       AND(lt(-20)) AS low
-                    SELECT:
+                    SELECT PERIODS:
                       (high precedes low)
                     YIELD:
                       all periods""";
@@ -991,7 +996,7 @@ class TsdlQueryServiceTest {
             AND(gt(60), lt(120)) AS low,
             AND(NOT(lt(120)), lt(250)) AS med,
             AND(NOT(lt(250))) AS high
-          SELECT:
+          SELECT PERIODS:
             (low precedes (med precedes high))
           YIELD:
             all periods
@@ -1013,7 +1018,7 @@ class TsdlQueryServiceTest {
             AND(gt(60), lt(120)) AS low,
             AND(NOT(lt(120)), lt(250)) AS med,
             AND(NOT(lt(250))) AS high
-          SELECT:
+          SELECT PERIODS:
             ((low follows med) precedes (med precedes high))
           YIELD:
             all periods
@@ -1035,7 +1040,7 @@ class TsdlQueryServiceTest {
             AND(gt(60), lt(120)) AS low,
             AND(NOT(lt(120)), lt(250)) AS med,
             AND(NOT(lt(250))) AS high
-          SELECT:
+          SELECT PERIODS:
             ((low precedes (low follows med)) precedes (med precedes high))
           YIELD:
             all periods
@@ -1360,7 +1365,7 @@ class TsdlQueryServiceTest {
     void queryIntegration_filterBeforeEventChoiceCutsOffPeriodCorrectly(List<DataPoint> dps) {
       var queryWithoutFilter = """
           USING EVENTS: AND(lt(170)) AS low, AND(gt(170)) AS high
-                    SELECT: (low follows high)
+                    SELECT PERIODS: (low follows high)
                     YIELD: all periods""";
       var queryWithFilter = "APPLY FILTER: AND(NOT(lt(130)))\n" + queryWithoutFilter;
 
@@ -1398,7 +1403,7 @@ class TsdlQueryServiceTest {
       var query = """
           WITH SAMPLES: avg() AS m1 -> echo(3), max() AS m2 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
-                    SELECT: (low precedes high)
+                    SELECT PERIODS: (low precedes high)
                     YIELD: %s""".formatted(yield);
 
       var input = List.of(
@@ -1426,7 +1431,7 @@ class TsdlQueryServiceTest {
                         avg_t(days, "2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m3 -> echo(3),
                         count_t("2022-07-31T08:12:59.123Z/2022-07-31T09:12:59.123Z") AS m4 -> echo(0)
                     USING EVENTS: AND(lt(m1)) AS low, OR(gt(m1)) AS high
-                    SELECT: (low precedes high)
+                    SELECT PERIODS: (low precedes high)
                     YIELD: %s""".formatted(yield);
 
       var input = List.of(

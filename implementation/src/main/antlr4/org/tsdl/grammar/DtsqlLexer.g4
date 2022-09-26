@@ -6,7 +6,7 @@ fragment WHITESPACE_CHARACTER  :  ' '  |  '\r'  |  '\n'  |  '\r\n'  |  '\t'  ;
 SAMPLES_CLAUSE  :  'WITH SAMPLES'  ;
 EVENTS_CLAUSE  :  'USING EVENTS'  ;
 FILTER_CLAUSE  :  'APPLY FILTER'  ;
-SELECT_CLAUSE  :  'SELECT'  ;
+SELECT_CLAUSE  :  'SELECT PERIODS'  ;
 
 YIELD  :  'YIELD'  ;
 YIELD_ALL_PERIODS  :  'all periods'  ;

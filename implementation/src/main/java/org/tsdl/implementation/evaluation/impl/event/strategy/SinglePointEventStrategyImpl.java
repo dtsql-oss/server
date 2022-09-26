@@ -27,7 +27,7 @@ import org.tsdl.infrastructure.model.QueryResult;
 
 // TODO test strategies, e.g.:
 //  WITH SAMPLES: avg() AS myAvg -> echo(2), avg(\"2022-07-05T23:55:00Z\", \"2022-11-12T23:59:00Z\") AS myLocalAvg -> echo(5)
-//  USING EVENTS: AND(lt(myAvg)) FOR (45,) minutes AS low, AND(gt(myAvg)) FOR (100,) minutes AS high  SELECT: high follows low    YIELD: all periods
+//  USING EVENTS: AND(lt(myAvg)) FOR (45,) minutes AS low, AND(gt(myAvg)) FOR (100,) minutes AS high  SELECT PERIODS: high follows low    YIELD: all periods
 //  results in AnnotatedPeriods: {high=[2022-12-15T04:51:48Z-2022-12-15T07:51:48Z],
 //                                low=[2022-12-15T01:21:48Z-2022-12-15T02:36:48Z, 2022-12-15T08:06:48Z-2022-12-15T09:21:48Z]}
 //  => assert period boundaries as well as prior and subsequent data points

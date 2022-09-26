@@ -742,7 +742,7 @@ class TsdlQueryParserTest {
       Assertions.setMaxStackTraceElementsDisplayed(10);
       var queryString = """
           USING EVENTS: AND(lt(3.5)) AS low, OR(gt(low)) AS high
-                    SELECT: (low precedes high)
+                    SELECT PERIODS: (low precedes high)
                     YIELD: all periods""";
 
       // depending on whether identifier 'low' is parsed before filter argument 'lt(3.5)' or after,
@@ -813,7 +813,7 @@ class TsdlQueryParserTest {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1,
                                   OR(gt(5)) AS e2
-                    SELECT: (e1 precedes e2)
+                    SELECT PERIODS: (e1 precedes e2)
                     YIELD: data points""";
 
       var query = PARSER.parseQuery(queryString);
@@ -841,7 +841,7 @@ class TsdlQueryParserTest {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1,
                                   OR(gt(5)) AS e2
-                    SELECT: (e1 precedes e2 WITHIN %s)
+                    SELECT PERIODS: (e1 precedes e2 WITHIN %s)
                     YIELD: data points""".formatted(toleranceSpec);
 
       var query = PARSER.parseQuery(queryString);
@@ -870,7 +870,7 @@ class TsdlQueryParserTest {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1,
                                   OR(gt(5)) AS e2
-                    SELECT: (e2 follows e1)
+                    SELECT PERIODS: (e2 follows e1)
                     YIELD: data points""";
 
       var query = PARSER.parseQuery(queryString);
@@ -909,7 +909,7 @@ class TsdlQueryParserTest {
             OR(lt(2)) AS e4,
             AND(lt(3)) AS e5,
             OR(lt(3)) AS e6
-          SELECT:
+          SELECT PERIODS:
             %s
           YIELD:
             data points
@@ -926,7 +926,7 @@ class TsdlQueryParserTest {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1,
                                   OR(gt(5)) AS e2
-                    SELECT: (e2 follows e1 WITHIN %s)
+                    SELECT PERIODS: (e2 follows e1 WITHIN %s)
                     YIELD: data points""".formatted(toleranceSpec);
 
       var query = PARSER.parseQuery(queryString);
@@ -954,7 +954,7 @@ class TsdlQueryParserTest {
     void chooseDeclaration_unknownEvent_throws() {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1
-                    SELECT: (e1 follows e2)
+                    SELECT PERIODS: (e1 follows e2)
                     YIELD: data points""";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
@@ -968,7 +968,7 @@ class TsdlQueryParserTest {
     void chooseDeclaration_invalidEventReference_throws() {
       var queryString = """
           WITH SAMPLES: min() AS low, max() AS high
-                    SELECT: (low precedes high)
+                    SELECT PERIODS: (low precedes high)
                     YIELD: all periods""";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString))
@@ -983,7 +983,7 @@ class TsdlQueryParserTest {
       var queryString = """
           USING EVENTS: AND(lt(3)) AS e1,
                                   OR(gt(5)) AS e2
-                    SELECT: e1 precedes e2, e2 follows e1
+                    SELECT PERIODS: e1 precedes e2, e2 follows e1
                     YIELD: data points""";
 
       assertThatThrownBy(() -> PARSER.parseQuery(queryString)).isInstanceOf(TsdlParseException.class);
@@ -1131,7 +1131,7 @@ class TsdlQueryParserTest {
           OR(NOT(gt(7))) AS high,
           AND(gt(s2)) AS mid
 
-        SELECT:
+        SELECT PERIODS:
           (low precedes (mid precedes high) WITHIN [23,26] minutes)
 
         YIELD:

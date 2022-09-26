@@ -144,7 +144,7 @@ public class TsdlQueryBuilderImpl implements TsdlQueryBuilder {
     appendSection(finalQuery, "WITH SAMPLES", samples);
     appendSection(finalQuery, "APPLY FILTER", filter != null ? List.of(filter) : List.of());
     appendSection(finalQuery, "USING EVENTS", events);
-    appendSection(finalQuery, "SELECT", selection != null ? List.of(selection) : List.of());
+    appendSection(finalQuery, "SELECT PERIODS", selection != null ? List.of(selection) : List.of());
     appendSection(finalQuery, "YIELD", List.of(yield));
 
     // keep one consecutive section separator, but not more

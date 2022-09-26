@@ -140,7 +140,7 @@ class TsdlQueryBuilderTest {
         .yield(dataPoints());
 
     var expectedQuery = """
-        SELECT:
+        SELECT PERIODS:
           %s
         YIELD:
           data points""".formatted(expectedSelection);
