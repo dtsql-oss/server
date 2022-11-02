@@ -18,8 +18,8 @@
 
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
-        <spring.version>2.7.4</spring.version>
-        <org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
+        <spring.version>2.7.5</spring.version>
+        <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <kotlin.version>1.7.20</kotlin.version>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
 
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.11</version>
+            <version>1.6.12</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
