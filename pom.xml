@@ -29,7 +29,7 @@
         <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
         <checkstyle.version>10.4</checkstyle.version>
         <jackson.version>2.13.4</jackson.version>
-        <fastcsv.version>2.2.0</fastcsv.version>
+        <fastcsv.version>2.2.1</fastcsv.version>
         <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
 
