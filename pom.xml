@@ -20,16 +20,16 @@
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
         <assertj.version>3.23.1</assertj.version>
         <junit.version>5.8.2</junit.version>
-        <mockito.version>4.8.1</mockito.version>
+        <mockito.version>4.9.0</mockito.version>
         <antlr.version>4.11.1</antlr.version>
         <mojo.version>3.3.0</mojo.version>
         <jfreechart.version>1.5.3</jfreechart.version>
-        <logback.version>1.4.4</logback.version>
+        <logback.version>1.4.5</logback.version>
         <lombok.version>1.18.24</lombok.version>
         <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
-        <checkstyle.version>10.4</checkstyle.version>
-        <jackson.version>2.13.4</jackson.version>
-        <fastcsv.version>2.2.0</fastcsv.version>
+        <checkstyle.version>10.5.0</checkstyle.version>
+        <jackson.version>2.14.1</jackson.version>
+        <fastcsv.version>2.2.1</fastcsv.version>
         <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
 
@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.0</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
