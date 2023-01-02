@@ -1,8 +1,8 @@
 package org.tsdl.infrastructure.dto;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.tsdl.infrastructure.model.DataPoint;

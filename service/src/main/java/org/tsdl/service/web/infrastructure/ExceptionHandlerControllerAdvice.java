@@ -1,6 +1,9 @@
 package org.tsdl.service.web.infrastructure;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -9,10 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -69,7 +71,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
   @NotNull
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(@NotNull MethodArgumentNotValidException ex, @NotNull HttpHeaders headers,
-                                                                @NotNull HttpStatus status, @NotNull WebRequest request) {
+                                                                @NotNull HttpStatusCode status, @NotNull WebRequest request) {
     var errorHolder = buildValidationFailureResponse(() -> ex.getBindingResult().getFieldErrors().stream()
             .map(fieldError -> {
               var errorMessage = messageSource.getMessage(fieldError, Locale.ROOT);
@@ -82,7 +84,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
             .toList(),
         getPath(request));
 
-    return handleExceptionInternal(ex, errorHolder, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    return Objects.requireNonNull(handleExceptionInternal(ex, errorHolder, new HttpHeaders(), HttpStatus.BAD_REQUEST, request));
   }
 
   /**
