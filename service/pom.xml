@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
-        <spring.version>2.7.5</spring.version>
+        <spring.version>3.0.1</spring.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <kotlin.version>1.7.22</kotlin.version>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
@@ -53,8 +53,8 @@
 
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.13</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -125,6 +125,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.2.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
