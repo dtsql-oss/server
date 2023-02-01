@@ -28,7 +28,7 @@
         <lombok.version>1.18.24</lombok.version>
         <checkstyle.plugin.version>3.2.0</checkstyle.plugin.version>
         <checkstyle.version>10.6.0</checkstyle.version>
-        <jackson.version>2.14.1</jackson.version>
+        <jackson.version>2.14.2</jackson.version>
         <fastcsv.version>2.2.1</fastcsv.version>
         <checkstyle.config>${project.basedir}/checkstyle.xml</checkstyle.config>
     </properties>
