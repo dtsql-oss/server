@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
-        <assertj.version>3.23.1</assertj.version>
+        <assertj.version>3.24.2</assertj.version>
         <junit.version>5.9.0</junit.version>
         <mockito.version>4.11.0</mockito.version>
         <antlr.version>4.11.1</antlr.version>
