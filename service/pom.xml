@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
-        <spring.version>3.0.1</spring.version>
+        <spring.version>3.0.2</spring.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <kotlin.version>1.8.0</kotlin.version>
         <checkstyle.config>${project.basedir}/../checkstyle.xml</checkstyle.config>
