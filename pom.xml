@@ -21,7 +21,7 @@
         <assertj.version>3.24.2</assertj.version>
         <junit.version>5.9.2</junit.version>
         <mockito.version>5.1.1</mockito.version>
-        <antlr.version>4.11.1</antlr.version>
+        <antlr.version>4.12.0</antlr.version>
         <mojo.version>3.3.0</mojo.version>
         <jfreechart.version>1.5.4</jfreechart.version>
         <logback.version>1.4.5</logback.version>
