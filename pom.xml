@@ -16,7 +16,7 @@
         <java.version>18</java.version>
         <project.fileEncoding>UTF-8</project.fileEncoding>
         <project.build.sourceEncoding>${project.fileEncoding}</project.build.sourceEncoding>
-        <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M8</maven.surefire.plugin.version>
         <assertj.version>3.24.2</assertj.version>
         <junit.version>5.9.2</junit.version>
